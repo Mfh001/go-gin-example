@@ -23,8 +23,6 @@ paths:
         name: session_key
         schema:
           type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
@@ -68,8 +66,6 @@ paths:
         name: city
         schema:
           type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: OK

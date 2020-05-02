@@ -14,7 +14,6 @@ import (
 )
 
 // @Summary 微信登陆接口 发送code获取session_key
-// @Produce  json
 // @Param code body string false "code"
 // @Param nickname body string false "nickname"
 // @Param avatar_url body string false "avatar_url"
@@ -50,7 +49,6 @@ type login struct {
 }
 
 // @Summary 微信登陆接口 发送code获取session_key
-// @Produce  json
 // @Param session_key body string false "sessionKey"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
