@@ -38,34 +38,33 @@ func (info *WxLoginUserInfo) WXLogin() (string, bool) {
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	var dat map[string]interface{}
-	var dat2 = make(map[string]interface{})
 	if err := json.Unmarshal([]byte(string(body)), &dat); err == nil {
-		dat2["session_key"] = "wwwwwww"
-		dat2["openid"] = "sssssss"
-		_, ok := dat2["session_key"]
+		dat["session_key"] = "wwwwwww"
+		dat["openid"] = "sssssss"
+		_, ok := dat["session_key"]
 
 		if !ok {
 			return "", false
 		} else {
-			str := dat2["session_key"]
+			str := dat["session_key"]
 			v, ok := str.(string)
 			if ok {
 				//openid要与userid对应 没有对应的userid要立即生成
 				userExist := false
-				userId, err := models.GetUserIdByOpenId(dat2["openid"].(string))
+				userId, err := models.GetUserIdByOpenId(dat["openid"].(string))
 				if err == nil {
 					if userId == 0 {
 						//创建user
-						userId, userExist = CreateUserInfo(dat2["openid"].(string))
+						userId, userExist = CreateUserInfo(dat["openid"].(string))
 						if userExist == false || userId == 0 {
 							return "", false
 						}
 					}
-					dat2["userid"] = userId
+					dat["userid"] = userId
 					userExist = true
 				}
 				if userExist {
-					sessionKey, err := cache_service.SetWXCode(v, dat2)
+					sessionKey, err := cache_service.SetWXCode(v, dat)
 					if sessionKey == "" || err != nil {
 						return "", false
 					}
