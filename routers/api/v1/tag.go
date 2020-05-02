@@ -3,9 +3,9 @@ package v1
 import (
 	"net/http"
 
-	"github.com/unknwon/com"
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
+	"github.com/unknwon/com"
 
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
@@ -16,13 +16,6 @@ import (
 	"github.com/EDDYCJY/go-gin-example/service/tag_service"
 )
 
-// @Summary Get multiple article tags
-// @Produce  json
-// @Param name query string false "Name"
-// @Param state query int false "State"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/tags [get]
 func GetTags(c *gin.Context) {
 	appG := app.Gin{C: c}
 	name := c.Query("name")
@@ -61,14 +54,6 @@ type AddTagForm struct {
 	State     int    `form:"state" valid:"Range(0,1)"`
 }
 
-// @Summary Add article tag
-// @Produce  json
-// @Param name body string true "Name"
-// @Param state body int false "State"
-// @Param created_by body int false "CreatedBy"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/tags [post]
 func AddTag(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -112,15 +97,6 @@ type EditTagForm struct {
 	State      int    `form:"state" valid:"Range(0,1)"`
 }
 
-// @Summary Update article tag
-// @Produce  json
-// @Param id path int true "ID"
-// @Param name body string true "Name"
-// @Param state body int false "State"
-// @Param modified_by body string true "ModifiedBy"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/tags/{id} [put]
 func EditTag(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -160,12 +136,6 @@ func EditTag(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }
 
-// @Summary Delete article tag
-// @Produce  json
-// @Param id path int true "ID"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/tags/{id} [delete]
 func DeleteTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 	valid := validation.Validation{}
@@ -197,13 +167,6 @@ func DeleteTag(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }
 
-// @Summary Export article tag
-// @Produce  json
-// @Param name body string false "Name"
-// @Param state body int false "State"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/tags/export [post]
 func ExportTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 	name := c.PostForm("name")
@@ -229,12 +192,6 @@ func ExportTag(c *gin.Context) {
 	})
 }
 
-// @Summary Import article tag
-// @Produce  json
-// @Param file body file true "Excel File"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/tags/import [post]
 func ImportTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 

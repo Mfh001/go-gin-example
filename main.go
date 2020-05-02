@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -11,8 +17,8 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
-	"github.com/EDDYCJY/go-gin-example/routers"
 	"github.com/EDDYCJY/go-gin-example/pkg/util"
+	"github.com/EDDYCJY/go-gin-example/routers"
 )
 
 func init() {
@@ -25,10 +31,7 @@ func init() {
 
 // @title Golang Gin API
 // @version 1.0
-// @description An example of gin
-// @termsOfService https://github.com/EDDYCJY/go-gin-example
-// @license.name MIT
-// @license.url https://github.com/EDDYCJY/go-gin-example/blob/master/LICENSE
+// @description A web of gin
 func main() {
 	gin.SetMode(setting.ServerSetting.RunMode)
 
@@ -38,6 +41,15 @@ func main() {
 	endPoint := fmt.Sprintf(":%d", setting.ServerSetting.HttpPort)
 	maxHeaderBytes := 1 << 20
 
+	crtPath, err := filepath.Abs(setting.ServerSetting.CrtPath) //.crt文件路径
+	if err != nil {
+		log.Fatal("server.crt未找到：", err)
+	}
+	keyPath, err := filepath.Abs(setting.ServerSetting.KeyPath) //.key文件路径
+	if err != nil {
+		log.Fatal("server.key未找到：", err)
+	}
+
 	server := &http.Server{
 		Addr:           endPoint,
 		Handler:        routersInit,
@@ -45,10 +57,47 @@ func main() {
 		WriteTimeout:   writeTimeout,
 		MaxHeaderBytes: maxHeaderBytes,
 	}
+	if setting.ServerSetting.SSLOpen {
+		server = &http.Server{
+			Addr:           ":https",
+			Handler:        routersInit,
+			ReadTimeout:    readTimeout,
+			WriteTimeout:   writeTimeout,
+			MaxHeaderBytes: maxHeaderBytes,
+		}
+	}
 
-	log.Printf("[info] start http server listening %s", endPoint)
+	go func() {
+		// service connections
+		if setting.ServerSetting.SSLOpen {
+			if err := server.ListenAndServeTLS(crtPath, keyPath); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("listen: %s\n", err)
+			}
+		} else {
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("listen: %s\n", err)
+			}
+		}
 
-	server.ListenAndServe()
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal, 1)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown: ", err)
+	}
+
+	log.Println("Server exiting")
 
 	// If you want Graceful Restart, you need a Unix system and download github.com/fvbock/endless
 	//endless.DefaultReadTimeOut = readTimeout

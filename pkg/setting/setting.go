@@ -26,15 +26,21 @@ type App struct {
 	LogSaveName string
 	LogFileExt  string
 	TimeFormat  string
+	WXAppID     string
+	WXSecret    string
 }
 
 var AppSetting = &App{}
 
 type Server struct {
-	RunMode      string
-	HttpPort     int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+	RunMode          string
+	HttpPort         int
+	ReadTimeout      time.Duration
+	WriteTimeout     time.Duration
+	SSLOpen          bool
+	CrtPath          string
+	KeyPath          string
+	WXCodeExpireTime int
 }
 
 var ServerSetting = &Server{}

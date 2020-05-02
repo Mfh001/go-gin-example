@@ -17,6 +17,7 @@ func Setup() error {
 		MaxIdle:     setting.RedisSetting.MaxIdle,
 		MaxActive:   setting.RedisSetting.MaxActive,
 		IdleTimeout: setting.RedisSetting.IdleTimeout,
+		Wait:        true,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", setting.RedisSetting.Host)
 			if err != nil {
@@ -88,6 +89,18 @@ func Get(key string) ([]byte, error) {
 	return reply, nil
 }
 
+func HMGet(key string, fields ...string) ([]interface{}, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	reply, err := redis.Values(conn.Do("HMGET", key, fields))
+	if err != nil {
+		return nil, err
+	}
+
+	return reply, nil
+}
+
 // Delete delete a kye
 func Delete(key string) (bool, error) {
 	conn := RedisConn.Get()
@@ -114,4 +127,22 @@ func LikeDeletes(key string) error {
 	}
 
 	return nil
+}
+
+// Incr a key
+func Incr(key string) (int, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	incr, err := redis.Int(conn.Do("INCR", key))
+	if err != nil {
+		return incr, err
+	}
+	if incr == 0 {
+		incr, err = redis.Int(conn.Do("INCR", key))
+		if err != nil {
+			return incr, err
+		}
+	}
+	return incr, nil
 }

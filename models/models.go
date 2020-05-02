@@ -43,6 +43,15 @@ func Setup() {
 	db.Callback().Delete().Replace("gorm:delete", deleteCallback)
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxOpenConns(100)
+
+	initTable()
+}
+
+func initTable() {
+	table := db.HasTable(User{})
+	if !table {
+		db.CreateTable(User{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)
