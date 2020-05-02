@@ -23,6 +23,7 @@ import (
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /wxlogin [post]
+// @Tags 登陆
 func WXLogin(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -53,6 +54,7 @@ type login struct {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /login [post]
+// @Tags 登陆
 func Login(c *gin.Context) {
 	appG := app.Gin{C: c}
 	valid := validation.Validation{}

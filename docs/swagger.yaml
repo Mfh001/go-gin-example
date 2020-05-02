@@ -33,6 +33,8 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 微信登陆接口 发送code获取session_key
+      tags:
+      - 登陆
   /wxlogin:
     post:
       parameters:
@@ -76,4 +78,6 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 微信登陆接口 发送code获取session_key
+      tags:
+      - 登陆
 swagger: "2.0"

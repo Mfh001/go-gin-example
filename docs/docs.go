@@ -27,6 +27,9 @@ var doc = `{
     "paths": {
         "/login": {
             "post": {
+                "tags": [
+                    "登陆"
+                ],
                 "summary": "微信登陆接口 发送code获取session_key",
                 "parameters": [
                     {
@@ -56,6 +59,9 @@ var doc = `{
         },
         "/wxlogin": {
             "post": {
+                "tags": [
+                    "登陆"
+                ],
                 "summary": "微信登陆接口 发送code获取session_key",
                 "parameters": [
                     {
