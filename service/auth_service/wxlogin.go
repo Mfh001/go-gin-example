@@ -39,8 +39,8 @@ func (info *WxLoginUserInfo) WXLogin() (string, bool) {
 
 	var dat map[string]interface{}
 	if err := json.Unmarshal([]byte(string(body)), &dat); err == nil {
-		dat["session_key"] = "wwwwwww"
-		dat["openid"] = "sssssss"
+		//dat["session_key"] = "wwwwwww"
+		//dat["openid"] = "sssssss"
 		_, ok := dat["session_key"]
 
 		if !ok {
