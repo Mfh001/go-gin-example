@@ -52,6 +52,10 @@ func initTable() {
 	if !table {
 		db.CreateTable(User{})
 	}
+	tableCheck := db.HasTable(Check{})
+	if !tableCheck {
+		db.CreateTable(Check{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)

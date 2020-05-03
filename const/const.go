@@ -5,6 +5,7 @@ const (
 	UserTypeNormal    = 1 //普通用户
 	UserTypeInstead   = 2 //代练用户
 	UserTypeAccompany = 3 //陪练用户
+	UserTypeAdmin     = 4 //管理员
 	//订单状态
 	OrderStatusWaitPay  = 0  //订单 未支付 状态
 	OrderStatusPaidPay  = 1  //订单 已支付 状态

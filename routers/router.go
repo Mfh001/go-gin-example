@@ -29,13 +29,21 @@ func InitRouter() *gin.Engine {
 
 	r.POST("/wxlogin", api.WXLogin)
 	r.POST("/login", api.Login)
-	r.POST("/auth", api.GetAuth)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.POST("/upload", api.UploadImage)
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())
 	{
+		//代练提交段位审核
+		apiV1.POST("/check", v1.AddCheck)
+		//代练更新段位审核
+		apiV1.PUT("/check/:id", v1.EditCheck)
+		//管理员获取审核列表
+		apiV1.GET("/admin/check", v1.GetAdminChecks)
+		//管理员进行审核
+		apiV1.PUT("/admin/check/:id", v1.AdminCheck)
+
 		//获取标签列表
 		apiV1.GET("/tags", v1.GetTags)
 		//新建标签
@@ -47,7 +55,7 @@ func InitRouter() *gin.Engine {
 		//导出标签
 		r.POST("/tags/export", v1.ExportTag)
 		//导入标签
-		r.POST("/tags/import", v1.ImportTag)
+		r.POST("/check/import", v1.ImportTag)
 
 		//获取文章列表
 		apiV1.GET("/articles", v1.GetArticles)

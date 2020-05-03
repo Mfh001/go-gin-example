@@ -11,6 +11,12 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/upload"
 )
 
+// @Summary 上传段位审核截图
+// @Produce  json
+// @Param image formData file true "Image File"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /upload [post]
 func UploadImage(c *gin.Context) {
 	appG := app.Gin{C: c}
 	file, image, err := c.Request.FormFile("image")
@@ -27,7 +33,6 @@ func UploadImage(c *gin.Context) {
 
 	imageName := upload.GetImageName(image.Filename)
 	fullPath := upload.GetImageFullPath()
-	savePath := upload.GetImagePath()
 	src := fullPath + imageName
 
 	if !upload.CheckImageExt(imageName) || !upload.CheckImageSize(file) {
@@ -49,7 +54,6 @@ func UploadImage(c *gin.Context) {
 	}
 
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]string{
-		"image_url":      upload.GetImageFullUrl(imageName),
-		"image_save_url": savePath + imageName,
+		"image_url": upload.GetImageFullUrl(imageName),
 	})
 }
