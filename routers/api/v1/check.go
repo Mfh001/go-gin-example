@@ -25,6 +25,7 @@ import (
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/check [post]
+// @Tags 审核
 func AddCheck(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -54,6 +55,7 @@ func AddCheck(c *gin.Context) {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/check/{user_id} [put]
+// @Tags 审核
 func EditCheck(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -99,6 +101,7 @@ func EditCheck(c *gin.Context) {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/admin/check [get]
+// @Tags 审核
 func GetAdminChecks(c *gin.Context) {
 	appG := app.Gin{C: c}
 	name := c.Query("name")
@@ -140,6 +143,7 @@ func GetAdminChecks(c *gin.Context) {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/admin/check/{user_id} [put]
+// @Tags 审核
 func AdminCheck(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}

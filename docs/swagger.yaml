@@ -34,6 +34,8 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: Get 管理员获取审核列表
+      tags:
+      - 审核
   /api/v1/admin/check/{user_id}:
     put:
       parameters:
@@ -71,6 +73,8 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 管理员进行审核
+      tags:
+      - 审核
   /api/v1/check:
     post:
       parameters:
@@ -116,6 +120,8 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 代练提交段位审核
+      tags:
+      - 审核
   /api/v1/check/{user_id}:
     put:
       parameters:
@@ -153,43 +159,8 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 代练更新段位审核
-  /api/v1/tags/{id}:
-    put:
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Name
-        in: body
-        name: name
-        required: true
-        schema:
-          type: string
-      - description: State
-        in: body
-        name: state
-        schema:
-          type: integer
-      - description: ModifiedBy
-        in: body
-        name: modified_by
-        required: true
-        schema:
-          type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: Update article tag
+      tags:
+      - 审核
   /login:
     post:
       parameters:
@@ -230,6 +201,8 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 上传段位审核截图
+      tags:
+      - 审核
   /wxlogin:
     post:
       parameters:

@@ -30,6 +30,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "审核"
+                ],
                 "summary": "Get 管理员获取审核列表",
                 "parameters": [
                     {
@@ -59,6 +62,9 @@ var doc = `{
             "put": {
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "审核"
                 ],
                 "summary": "管理员进行审核",
                 "parameters": [
@@ -116,6 +122,9 @@ var doc = `{
             "post": {
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "审核"
                 ],
                 "summary": "代练提交段位审核",
                 "parameters": [
@@ -189,69 +198,15 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "审核"
+                ],
                 "summary": "代练更新段位审核",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "user_id",
                         "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Name",
-                        "name": "name",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "State",
-                        "name": "state",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "ModifiedBy",
-                        "name": "modified_by",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tags/{id}": {
-            "put": {
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Update article tag",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID",
-                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -334,6 +289,9 @@ var doc = `{
             "post": {
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "审核"
                 ],
                 "summary": "上传段位审核截图",
                 "parameters": [
