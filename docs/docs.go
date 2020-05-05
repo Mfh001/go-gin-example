@@ -76,29 +76,11 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "Name",
-                        "name": "name",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "State",
+                        "description": "State -1/1",
                         "name": "state",
                         "in": "body",
                         "schema": {
                             "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "ModifiedBy",
-                        "name": "modified_by",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],
@@ -126,7 +108,7 @@ var doc = `{
                 "tags": [
                     "审核"
                 ],
-                "summary": "代练提交段位审核",
+                "summary": "代练提交或更新段位审核",
                 "parameters": [
                     {
                         "description": "user_id",
@@ -172,66 +154,6 @@ var doc = `{
                         "description": "img_url",
                         "name": "img_url",
                         "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/check/{user_id}": {
-            "put": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "审核"
-                ],
-                "summary": "代练更新段位审核",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Name",
-                        "name": "name",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "State",
-                        "name": "state",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "ModifiedBy",
-                        "name": "modified_by",
-                        "in": "body",
-                        "required": true,
                         "schema": {
                             "type": "string"
                         }

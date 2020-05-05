@@ -44,23 +44,11 @@ paths:
         name: user_id
         required: true
         type: integer
-      - description: Name
-        in: body
-        name: name
-        required: true
-        schema:
-          type: string
-      - description: State
+      - description: State -1/1
         in: body
         name: state
         schema:
           type: integer
-      - description: ModifiedBy
-        in: body
-        name: modified_by
-        required: true
-        schema:
-          type: string
       produces:
       - application/json
       responses:
@@ -119,46 +107,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 代练提交段位审核
-      tags:
-      - 审核
-  /api/v1/check/{user_id}:
-    put:
-      parameters:
-      - description: user_id
-        in: path
-        name: user_id
-        required: true
-        type: integer
-      - description: Name
-        in: body
-        name: name
-        required: true
-        schema:
-          type: string
-      - description: State
-        in: body
-        name: state
-        schema:
-          type: integer
-      - description: ModifiedBy
-        in: body
-        name: modified_by
-        required: true
-        schema:
-          type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: 代练更新段位审核
+      summary: 代练提交或更新段位审核
       tags:
       - 审核
   /login:
