@@ -37,10 +37,12 @@ func InitRouter() *gin.Engine {
 	{
 		//代练提交段位审核
 		apiV1.POST("/check", v1.AddCheck)
+		//用户获取提交的审核信息
+		apiV1.GET("/check", v1.GetCheckInfo)
 		//管理员获取审核列表
-		apiV1.GET("/admin/check", v1.GetAdminChecks)
+		apiV1.GET("/check/admin", v1.GetAdminChecks)
 		//管理员进行审核
-		apiV1.PUT("/admin/check/:id", v1.AdminCheck)
+		apiV1.PUT("/check/admin/:id", v1.AdminCheck)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

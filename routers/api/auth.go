@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/EDDYCJY/go-gin-example/middleware/bloom_filter"
+	"github.com/EDDYCJY/go-gin-example/pkg/setting"
 	"net/http"
 
 	"github.com/astaxie/beego/validation"
@@ -88,11 +89,16 @@ func Login(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if data, err := auth_service.GetUserInfo(info.UserId); err == nil {
-		data["token"] = token
-		appG.Response(http.StatusOK, e.SUCCESS, data)
+	data := gin.H{}
+	userInfo, err := auth_service.GetUserInfo(info.UserId)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
+
 	}
-	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	data["token"] = token
+	data["user_info"] = userInfo
+	data["platform"] = setting.Platform
+	appG.Response(http.StatusOK, e.SUCCESS, data)
 	return
 }

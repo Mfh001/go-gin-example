@@ -62,12 +62,35 @@ func AddCheck(c *gin.Context) {
 	return
 }
 
-// @Summary Get 管理员获取审核列表
+// @Summary 用户获取提交的审核信息
 // @Produce  json
-// @Param token query string false "token"
+// @Param user_id body int false "user_id"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/admin/check [get]
+// @Router /api/v1/check [get]
+// @Tags 审核
+func GetCheckInfo(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.Query("user_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) || !check_service.ExistUserCheck(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	data, err := check_service.GetUserCheckInfo(userId)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, data)
+}
+
+// @Summary Get 管理员获取审核列表
+// @Produce  json
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/check/admin [get]
 // @Tags 审核
 func GetAdminChecks(c *gin.Context) {
 	appG := app.Gin{C: c}
@@ -82,7 +105,7 @@ func GetAdminChecks(c *gin.Context) {
 // @Param state body int false "State -1/1"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/admin/check/{user_id} [put]
+// @Router /api/v1/check/admin/{user_id} [put]
 // @Tags 审核
 func AdminCheck(c *gin.Context) {
 	var (

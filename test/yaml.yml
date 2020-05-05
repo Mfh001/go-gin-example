@@ -1,0 +1,55 @@
+serverzones:
+  - name: 安卓QQ
+    idx: 0
+    num: 50
+  - name: 安卓微信
+    idx: 1
+    num: 50
+  - name: 苹果QQ
+    idx: 2
+    num: 50
+  - name: 苹果微信
+    idx: 3
+    num: 50
+
+insteadtypes:
+  - name: 排位赛
+    idx: 0
+  - name: 巅峰赛
+    idx: 1
+  - name: 赏金/战力/自定义标题等
+    idx: 2
+
+levels:
+  - name: 青铜3
+    idx: 0
+    stars:
+    - name: 0星
+      idx: 0
+      price: 3
+    - name: 1星
+      idx: 1
+      price: 3
+  - name: 青铜2
+    idx: 1
+    stars:
+    - name: 0星
+      idx: 0
+      price: 3
+    - name: 1星
+      idx: 1
+      price: 3
+#  - name: 青铜1
+#    idx: 2
+#  - name: 白银3
+#    idx: 3
+#  - name: 白银2
+#    idx: 4
+#  - name: 白银1
+#    idx: 5
+#  - name: 黄金4
+#    idx: 6
+#  - name: 黄金3
+#    idx: 7
+#  - name: 黄金2
+#    idx: 8

@@ -25,7 +25,7 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/admin/check": {
+        "/api/v1/check": {
             "get": {
                 "produces": [
                     "application/json"
@@ -33,51 +33,11 @@ var doc = `{
                 "tags": [
                     "审核"
                 ],
-                "summary": "Get 管理员获取审核列表",
+                "summary": "用户获取提交的审核信息",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "token",
-                        "name": "token",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/admin/check/{user_id}": {
-            "put": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "审核"
-                ],
-                "summary": "管理员进行审核",
-                "parameters": [
-                    {
-                        "type": "integer",
                         "description": "user_id",
                         "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "State -1/1",
-                        "name": "state",
                         "in": "body",
                         "schema": {
                             "type": "integer"
@@ -98,9 +58,7 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/v1/check": {
+            },
             "post": {
                 "produces": [
                     "application/json"
@@ -156,6 +114,73 @@ var doc = `{
                         "in": "body",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/check/admin": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "审核"
+                ],
+                "summary": "Get 管理员获取审核列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/check/admin/{user_id}": {
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "审核"
+                ],
+                "summary": "管理员进行审核",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "State -1/1",
+                        "name": "state",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
                         }
                     }
                 ],

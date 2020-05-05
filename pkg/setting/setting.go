@@ -1,6 +1,7 @@
 package setting
 
 import (
+	"github.com/jinzhu/configor"
 	"log"
 	"time"
 
@@ -67,6 +68,29 @@ type Redis struct {
 
 var RedisSetting = &Redis{}
 
+var Platform = struct {
+	OrderTypes []struct {
+		Name   string
+		Idx    int
+		IsOpen bool
+	}
+	ServerZones []struct {
+		Name string
+		Idx  int
+		Num  int
+	}
+	InsteadTypes []struct {
+		Name string
+		Idx  int
+	}
+	Levels []struct {
+		Name  string
+		Idx   int
+		Stars int
+		Price int
+	}
+}{}
+
 var cfg *ini.File
 
 // Setup initialize the configuration instance
@@ -86,6 +110,9 @@ func Setup() {
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
 	RedisSetting.IdleTimeout = RedisSetting.IdleTimeout * time.Second
+
+	configor.Load(&Platform, "conf/platform.yaml")
+	//fmt.Printf("config: %#v", Platform)
 }
 
 // mapTo map section
