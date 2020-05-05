@@ -64,7 +64,7 @@ func (a *Article) Get() (*models.Article, error) {
 		if err != nil {
 			logging.Info(err)
 		} else {
-			json.Unmarshal(data, &cacheArticle)
+			json.Unmarshal([]byte(data), &cacheArticle)
 			return cacheArticle, nil
 		}
 	}
@@ -96,7 +96,7 @@ func (a *Article) GetAll() ([]*models.Article, error) {
 		if err != nil {
 			logging.Info(err)
 		} else {
-			json.Unmarshal(data, &cacheArticles)
+			json.Unmarshal([]byte(data), &cacheArticles)
 			return cacheArticles, nil
 		}
 	}

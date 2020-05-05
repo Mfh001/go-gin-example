@@ -6,7 +6,6 @@ import (
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
-	"github.com/EDDYCJY/go-gin-example/service/cache_service"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,11 +15,11 @@ import (
 
 type WxLoginUserInfo struct {
 	Code      string `form:"code" valid:"Required;MinSize(30);MaxSize(32)"`
-	NickName  string `form:"nickname" valid:"Required;MaxSize(50)"`
-	AvatarUrl string `form:"avatar_url" valid:"Required;MaxSize(100)"`
-	Gender    int    `form:"gender" valid:"Required;Range(1,2)"`
-	Province  string `form:"province" valid:"Required;MaxSize(30)"`
-	City      string `form:"city" valid:"Required;MaxSize(30)"`
+	NickName  string `json:"nick_name" form:"nickname" valid:"Required;MaxSize(50)"`
+	AvatarUrl string `json:"avatar_url" form:"avatar_url" valid:"Required;MaxSize(100)"`
+	Gender    int    `json:"gender" form:"gender" valid:"Required;Range(1,2)"`
+	Province  string `json:"province" form:"province" valid:"Required;MaxSize(30)"`
+	City      string `json:"city" form:"city" valid:"Required;MaxSize(30)"`
 }
 
 func (info *WxLoginUserInfo) WXLogin() (string, bool) {
@@ -39,8 +38,8 @@ func (info *WxLoginUserInfo) WXLogin() (string, bool) {
 
 	var dat map[string]interface{}
 	if err := json.Unmarshal([]byte(string(body)), &dat); err == nil {
-		//dat["session_key"] = "wwwwwww"
-		//dat["openid"] = "sssssss"
+		dat["session_key"] = "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"
+		dat["openid"] = "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"
 		_, ok := dat["session_key"]
 
 		if !ok {
@@ -64,7 +63,7 @@ func (info *WxLoginUserInfo) WXLogin() (string, bool) {
 					userExist = true
 				}
 				if userExist {
-					sessionKey, err := cache_service.SetWXCode(v, dat)
+					sessionKey, err := SetWXCode(v, dat)
 					if sessionKey == "" || err != nil {
 						return "", false
 					}
@@ -93,7 +92,7 @@ func (info *WxLoginUserInfo) WXLogin() (string, bool) {
 }
 
 func CreateUserInfo(openId string) (int, bool) {
-	newUserId, err := cache_service.IncrUserId()
+	newUserId, err := IncrUserId()
 	if err != nil || newUserId == 0 {
 		return 0, false
 	}

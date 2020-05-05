@@ -62,6 +62,7 @@ type Redis struct {
 	MaxIdle     int
 	MaxActive   int
 	IdleTimeout time.Duration
+	LockTimeout int
 }
 
 var RedisSetting = &Redis{}

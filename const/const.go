@@ -18,8 +18,6 @@ const (
 	OrderOrdinary     = 2 //一般
 	OrderDissatisfied = 3 //不满意
 
-	//审核状态 TODO
-
 	//预定的时间段设置
 	ShopBookPeriodIdxBegin = 1 //
 	ShopBookPeriodIdxEnd   = 5 //
@@ -39,7 +37,7 @@ const (
 	//订单自动评论时间
 	OrderCommentTime = 2 * 60 * 60
 
-	//审核
+	//审核状态
 	CheckRefuse = -1
 	CheckNeed   = 0
 	CheckPass   = 1

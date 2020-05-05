@@ -1,5 +1,7 @@
 package models
 
+import "github.com/jinzhu/gorm"
+
 type Check struct {
 	UserId     int    `gorm:"primary_key;type:int(12);not null" form:"user_id" json:"user_id" valid:"Required;Range(1, 1000000000)"`
 	GameId     string `gorm:"type:varchar(20);not null;default:''" form:"game_id" json:"game_id"  valid:"Required;MaxSize(20)"`
@@ -25,4 +27,37 @@ func (info Check) Updates(m map[string]interface{}) bool {
 		return false
 	}
 	return true
+}
+
+//insert and update
+func (info Check) Save() bool {
+	create := db.Save(&info)
+	if create.Error != nil {
+		return false
+	}
+	return true
+}
+
+//select
+func (info *Check) First() (int, error) {
+	err := db.First(&info).Error
+	if gorm.IsRecordNotFoundError(err) {
+		return 0, nil
+	} else if err != nil {
+		return -1, err
+	}
+	return 1, nil
+}
+
+//select all
+func FindChecks(infos *[]Check) (bool, error) {
+	err := db.Find(infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Check{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Check{}
+		return false, err
+	}
+	return true, nil
 }

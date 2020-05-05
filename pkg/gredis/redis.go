@@ -1,7 +1,6 @@
 package gredis
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -41,16 +40,16 @@ func Setup() error {
 }
 
 // Set a key/value
-func Set(key string, data interface{}, time int) error {
+func Set(key string, value interface{}, time int) error {
 	conn := RedisConn.Get()
 	defer conn.Close()
 
-	value, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
+	//value, err := json.Marshal(data)
+	//if err != nil {
+	//	return err
+	//}
 
-	_, err = conn.Do("SET", key, value)
+	_, err := conn.Do("SET", key, value)
 	if err != nil {
 		return err
 	}
@@ -61,6 +60,34 @@ func Set(key string, data interface{}, time int) error {
 	}
 
 	return nil
+}
+
+// Get get a key
+func Get(key string) (string, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	reply, err := redis.String(conn.Do("GET", key))
+	if err != nil {
+		return "", err
+	}
+
+	return reply, nil
+}
+
+// SetNX a key/value
+func SetNX(key string, value interface{}, time int) (bool, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+	//value, err := json.Marshal(data)
+	//if err != nil {
+	//	return false, err
+	//}
+	res, err := redis.String(conn.Do("SET", key, value, "EX", time, "NX"))
+	if err != nil || res != "OK" {
+		return false, err
+	}
+	return true, nil
 }
 
 // Exists check a key
@@ -76,14 +103,13 @@ func Exists(key string) bool {
 	return exists
 }
 
-// Get get a key
-func Get(key string) ([]byte, error) {
+func GetString(key string) (string, error) {
 	conn := RedisConn.Get()
 	defer conn.Close()
 
-	reply, err := redis.Bytes(conn.Do("GET", key))
+	reply, err := redis.String(conn.Do("GET", key))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return reply, nil
@@ -93,12 +119,25 @@ func HMGet(key string, fields ...string) ([]interface{}, error) {
 	conn := RedisConn.Get()
 	defer conn.Close()
 
-	reply, err := redis.Values(conn.Do("HMGET", key, fields))
+	reply, err := redis.Values(conn.Do("HMGET", redis.Args{}.Add(key).AddFlat(fields)...))
 	if err != nil {
 		return nil, err
 	}
 
 	return reply, nil
+}
+
+func HMSet(key string, fields map[string]interface{}) (bool, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	res, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(fields)...))
+
+	if err != nil || res != "OK" {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // Delete delete a kye
@@ -145,4 +184,36 @@ func Incr(key string) (int, error) {
 		}
 	}
 	return incr, nil
+}
+
+func SetBit(key string, offset uint, value int) error {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("SETBIT", key, offset, value)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetBit(key string, offset uint) (int, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	reply, err := redis.Int(conn.Do("GETBIT", key, offset))
+	if err != nil {
+		return 0, err
+	}
+
+	return reply, nil
+}
+
+// Delete delete a kye
+func GetTTL(key string) (int, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	return redis.Int(conn.Do("TTL", key))
 }

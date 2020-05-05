@@ -76,7 +76,7 @@ func (t *Tag) GetAll() ([]models.Tag, error) {
 		if err != nil {
 			logging.Info(err)
 		} else {
-			json.Unmarshal(data, &cacheTags)
+			json.Unmarshal([]byte(data), &cacheTags)
 			return cacheTags, nil
 		}
 	}
