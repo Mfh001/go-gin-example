@@ -102,11 +102,6 @@ paths:
   /api/v1/check/admin/{user_id}:
     put:
       parameters:
-      - description: user_id
-        in: path
-        name: user_id
-        required: true
-        type: integer
       - description: State -1/1
         in: body
         name: state
@@ -126,6 +121,68 @@ paths:
       summary: 管理员进行审核
       tags:
       - 审核
+  /api/v1/order:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: 游戏
+        in: body
+        name: game_type
+        schema:
+          type: integer
+      - description: 订单类型
+        in: body
+        name: order_type
+        schema:
+          type: integer
+      - description: 代练类型
+        in: body
+        name: instead_type
+        schema:
+          type: integer
+      - description: 游戏区服
+        in: body
+        name: game_zone
+        schema:
+          type: integer
+      - description: 铭文等级
+        in: body
+        name: runes_level
+        schema:
+          type: integer
+      - description: 英雄数量
+        in: body
+        name: hero_num
+        schema:
+          type: integer
+      - description: 当前段位
+        in: body
+        name: cur_level
+        schema:
+          type: integer
+      - description: 目标段位
+        in: body
+        name: target_level
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 代练提交或更新段位审核
+      tags:
+      - 下单
   /login:
     post:
       parameters:

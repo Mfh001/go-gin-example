@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
@@ -110,7 +111,10 @@ func ExistUserInfo(userId int) bool {
 }
 
 func GetUserInfo(userId int) (map[string]interface{}, error) {
-	fields := []string{"user_id", "nick_name", "avatar_url", "phone", "check_pass",
+	if !ExistUserInfo(userId) {
+		return nil, fmt.Errorf("GetUserInfo:userIdnoExist")
+	}
+	fields := []string{"user_id", "nick_name", "avatar_url", "phone", "type", "check_pass",
 		"game_id", "game_server", "game_pos", "game_level", "img_url"}
 	data, err := gredis.HMGet(GetRedisKeyUserInfo(userId), fields...)
 	if err != nil {
@@ -123,4 +127,32 @@ func GetUserInfo(userId int) (map[string]interface{}, error) {
 		m[fields[i]] = string(key)
 	}
 	return m, nil
+}
+
+func GetUserCheckPassState(userId int) (int, error) {
+	if !ExistUserInfo(userId) {
+		return 0, fmt.Errorf("GetUserCheckPassState:userIdnoExist")
+	}
+	strState, err := gredis.HGet(GetRedisKeyUserInfo(userId), "check_pass")
+	if err != nil {
+		logging.Error("GetUserCheckPassState:" + strconv.Itoa(userId))
+		return 0, err
+	}
+	state, err := strconv.Atoi(strState)
+	if err != nil {
+		return 0, err
+	}
+	return state, nil
+}
+
+func GetUserNickName(userId int) (string, error) {
+	if !ExistUserInfo(userId) {
+		return "", fmt.Errorf("GetUserNickName:userIdnoExist")
+	}
+	nickName, err := gredis.HGet(GetRedisKeyUserInfo(userId), "nick_name")
+	if err != nil {
+		logging.Error("GetUserNickName:" + strconv.Itoa(userId))
+		return "", err
+	}
+	return nickName, nil
 }

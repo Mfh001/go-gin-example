@@ -75,6 +75,18 @@ func Get(key string) (string, error) {
 	return reply, nil
 }
 
+func HGet(key string, field string) (string, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	reply, err := redis.String(conn.Do("HGET", key, field))
+	if err != nil {
+		return "", err
+	}
+
+	return reply, nil
+}
+
 // SetNX a key/value
 func SetNX(key string, value interface{}, time int) (bool, error) {
 	conn := RedisConn.Get()

@@ -56,6 +56,10 @@ func initTable() {
 	if !tableCheck {
 		db.CreateTable(Check{})
 	}
+	tableOrder := db.HasTable(Order{})
+	if !tableOrder {
+		db.CreateTable(Order{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)

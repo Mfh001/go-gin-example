@@ -69,6 +69,11 @@ type Redis struct {
 var RedisSetting = &Redis{}
 
 var Platform = struct {
+	Games []struct {
+		Name   string
+		Idx    int
+		IsOpen bool
+	}
 	OrderTypes []struct {
 		Name   string
 		Idx    int
@@ -91,6 +96,13 @@ var Platform = struct {
 	}
 }{}
 
+type LevelCell struct {
+	Idx   int
+	Price int
+}
+
+var PlatFormLevelAll []LevelCell
+
 var cfg *ini.File
 
 // Setup initialize the configuration instance
@@ -112,7 +124,21 @@ func Setup() {
 	RedisSetting.IdleTimeout = RedisSetting.IdleTimeout * time.Second
 
 	configor.Load(&Platform, "conf/platform.yaml")
+	levelInit()
 	//fmt.Printf("config: %#v", Platform)
+}
+
+func levelInit() {
+	for i := 0; i < len(Platform.Levels); i++ {
+		for j := 0; j <= Platform.Levels[i].Stars; j++ {
+			idx := Platform.Levels[i].Idx*1000 + j
+			l := LevelCell{
+				Idx:   idx,
+				Price: Platform.Levels[i].Price,
+			}
+			PlatFormLevelAll = append(PlatFormLevelAll, l)
+		}
+	}
 }
 
 // mapTo map section

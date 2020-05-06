@@ -169,15 +169,107 @@ var doc = `{
                 "summary": "管理员进行审核",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "State -1/1",
                         "name": "state",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/order": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "下单"
+                ],
+                "summary": "代练提交或更新段位审核",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "游戏",
+                        "name": "game_type",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "订单类型",
+                        "name": "order_type",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "代练类型",
+                        "name": "instead_type",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "游戏区服",
+                        "name": "game_zone",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "铭文等级",
+                        "name": "runes_level",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "英雄数量",
+                        "name": "hero_num",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "当前段位",
+                        "name": "cur_level",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "目标段位",
+                        "name": "target_level",
                         "in": "body",
                         "schema": {
                             "type": "integer"

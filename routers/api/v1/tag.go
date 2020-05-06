@@ -66,26 +66,22 @@ func AddTag(c *gin.Context) {
 		return
 	}
 
-	tagService := tag_service.Tag{
-		Name:      form.Name,
-		CreatedBy: form.CreatedBy,
-		State:     form.State,
-	}
-	exists, err := tagService.ExistByName()
-	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_EXIST_TAG_FAIL, nil)
-		return
-	}
-	if exists {
-		appG.Response(http.StatusOK, e.ERROR_EXIST_TAG, nil)
-		return
-	}
+	//tagService := tag_service.Tag{
+	//	Name:      form.Name,
+	//	CreatedBy: form.CreatedBy,
+	//	State:     form.State,
+	//}
+	//exists, err := tagService.ExistByName()
+	//if err != nil {
+	//	appG.Response(http.StatusInternalServerError, e.ERROR_EXIST_TAG_FAIL, nil)
+	//	return
+	//}
 
-	err = tagService.Add()
-	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR_ADD_TAG_FAIL, nil)
-		return
-	}
+	//err = tagService.Add()
+	//if err != nil {
+	//	appG.Response(http.StatusInternalServerError, e.ERROR_ADD_TAG_FAIL, nil)
+	//	return
+	//}
 
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"net/http"
+	"time"
 )
 
 // @Summary 代练提交或更新段位审核
@@ -40,6 +41,7 @@ func AddCheck(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+	form.RegTime = int(time.Now().Unix())
 	if !form.Save() {
 		log, _ := json.Marshal(form)
 		logging.Error("AddCheck:form-" + string(log))
@@ -101,7 +103,6 @@ func GetAdminChecks(c *gin.Context) {
 
 // @Summary 管理员进行审核
 // @Produce  json
-// @Param user_id path int true "user_id"
 // @Param state body int false "State -1/1"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
@@ -110,10 +111,10 @@ func GetAdminChecks(c *gin.Context) {
 func AdminCheck(c *gin.Context) {
 	var (
 		appG   = app.Gin{C: c}
-		userId = com.StrTo(c.Param("user_id")).MustInt()
-		state  = com.StrTo(c.Param("state")).MustInt()
+		userId = com.StrTo(c.Param("id")).MustInt()
+		state  = com.StrTo(c.Query("state")).MustInt()
 	)
-	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+	if userId == 0 || !auth_service.ExistUserInfo(userId) || !check_service.ExistUserCheck(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -121,36 +122,50 @@ func AdminCheck(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+	userState, err := auth_service.GetUserCheckPassState(userId)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if userState == var_const.CheckPass {
+		appG.Response(http.StatusBadRequest, e.ERROR_CHECK_PASSED, nil)
+		return
+	}
 
-	//httpCode, errCode := app.BindAndValid(c, &form)
-	//if errCode != e.SUCCESS {
-	//	appG.Response(httpCode, errCode, nil)
-	//	return
-	//}
-	//
-	//tagService := tag_service.Tag{
-	//	ID:         form.ID,
-	//	Name:       form.Name,
-	//	ModifiedBy: form.ModifiedBy,
-	//	State:      form.State,
-	//}
-	//
-	//exists, err := tagService.ExistByID()
-	//if err != nil {
-	//	appG.Response(http.StatusInternalServerError, e.ERROR_EXIST_TAG_FAIL, nil)
-	//	return
-	//}
-	//
-	//if !exists {
-	//	appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_TAG, nil)
-	//	return
-	//}
-	//
-	//err = tagService.Edit()
-	//if err != nil {
-	//	appG.Response(http.StatusInternalServerError, e.ERROR_EDIT_TAG_FAIL, nil)
-	//	return
-	//}
-	//
-	//appG.Response(http.StatusOK, e.SUCCESS, nil)
+	//更新用户审核信息DB
+	userInfo := models.User{
+		UserId: userId,
+	}
+	var dbInfo = make(map[string]interface{})
+	dbInfo["check_pass"] = state
+	if state == var_const.CheckPass {
+		data, err := check_service.GetUserCheckInfo(userId)
+		if err != nil {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		dbInfo["type"] = var_const.UserTypeInstead
+		dbInfo["game_id"] = data["game_id"]
+		dbInfo["game_server"] = data["game_server"]
+		dbInfo["game_pos"] = data["game_pos"]
+		dbInfo["game_level"] = data["game_level"]
+		dbInfo["img_url"] = data["img_url"]
+	}
+	if !userInfo.Updates(dbInfo) {
+		logInfo, _ := json.Marshal(dbInfo)
+		logging.Error("AddCheck:db-check-Updates" + string(logInfo))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+
+	//删除审核数据
+	checkInfo := models.Check{
+		UserId: userId,
+	}
+	if !checkInfo.Delete() {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
 }

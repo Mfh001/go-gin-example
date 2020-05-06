@@ -44,6 +44,9 @@ func InitRouter() *gin.Engine {
 		//管理员进行审核
 		apiV1.PUT("/check/admin/:id", v1.AdminCheck)
 
+		//下单
+		apiV1.POST("/order", v1.AddOrder)
+
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)
 		////新建标签

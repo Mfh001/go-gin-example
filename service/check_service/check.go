@@ -2,6 +2,7 @@ package check_service
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
@@ -28,8 +29,7 @@ func ExistUserCheck(userId int) bool {
 	if !ok {
 		i := 50
 		for {
-			i--
-			if i <= 0 {
+			if i--; i <= 0 {
 				break
 			}
 			ok, _ := gredis.SetNX(lock.GetKey(), lock.GenerateToken(), lock.Timeout)
@@ -74,6 +74,9 @@ func ExistUserCheck(userId int) bool {
 }
 
 func GetUserCheckInfo(userId int) (map[string]interface{}, error) {
+	if !ExistUserCheck(userId) {
+		return nil, fmt.Errorf("GetUserCheckInfo:userIdnoExist")
+	}
 	fields := []string{"game_id", "game_server", "game_pos", "game_level", "img_url"}
 	data, err := gredis.HMGet(GetRedisKeyUserCheck(userId), fields...)
 	if err != nil {

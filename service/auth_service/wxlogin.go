@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 )
 
@@ -99,7 +98,7 @@ func CreateUserInfo(openId string) (int, bool) {
 	info := models.User{
 		UserId:  newUserId,
 		OpenId:  openId,
-		RegTime: strconv.FormatInt(time.Now().Unix(), 10),
+		RegTime: int(time.Now().Unix()),
 	}
 	if info.Insert() {
 		return info.UserId, true

@@ -14,7 +14,7 @@ type User struct {
 	Type       int    `json:"type" gorm:"type:int(2);not null;default:1"`
 	City       string `json:"city" gorm:"type:varchar(8);not null;default:''"`
 	Province   string `json:"province" gorm:"type:varchar(8);not null;default:''"`
-	RegTime    string `json:"reg_time" gorm:"type:varchar(25);not null;default:''"`
+	RegTime    int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	CheckPass  int    `json:"check_pass" gorm:"type:int(2);not null;default:0"`
 	GameId     string `gorm:"type:varchar(20);not null;default:''" form:"game_id" json:"game_id"  valid:"Required;MaxSize(20)"`
 	GameServer int    `gorm:"type:int(5);not null;default:0" form:"game_server" json:"game_server" valid:"Required;Range(1, 512)"`
