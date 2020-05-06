@@ -184,7 +184,7 @@
                 "tags": [
                     "下单"
                 ],
-                "summary": "代练提交或更新段位审核",
+                "summary": "下单",
                 "parameters": [
                     {
                         "description": "user_id",

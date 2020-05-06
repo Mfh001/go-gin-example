@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-// @Summary 代练提交或更新段位审核
+// @Summary 下单
 // @Produce  json
 // @Param user_id body int false "user_id"
 // @Param game_type body int false "游戏"
