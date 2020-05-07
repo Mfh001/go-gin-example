@@ -52,8 +52,8 @@ func WxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	d, err := order_service.Pay(userId, orderId, c.ClientIP())
-	if err != nil {
+	d, ok := order_service.Pay(userId, orderId, c.ClientIP())
+	if !ok {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
