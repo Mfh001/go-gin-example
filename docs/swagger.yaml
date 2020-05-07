@@ -63,7 +63,7 @@ paths:
         in: body
         name: game_level
         schema:
-          type: integer
+          type: string
       - description: img_url
         in: body
         name: img_url

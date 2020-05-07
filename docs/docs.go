@@ -105,7 +105,7 @@ var doc = `{
                         "name": "game_level",
                         "in": "body",
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     },
                     {

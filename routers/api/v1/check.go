@@ -21,7 +21,7 @@ import (
 // @Param game_id body string false "game_id"
 // @Param game_server body int false "game_server"
 // @Param game_pos body int false "game_pos"
-// @Param game_level body int false "game_level"
+// @Param game_level body string false "game_level"
 // @Param img_url body string false "img_url"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response

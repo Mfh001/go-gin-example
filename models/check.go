@@ -7,7 +7,7 @@ type Check struct {
 	GameId     string `gorm:"type:varchar(20);not null;default:''" form:"game_id" json:"game_id"  valid:"Required;MaxSize(20)"`
 	GameServer int    `gorm:"type:int(5);not null;default:0" form:"game_server" json:"game_server" valid:"Required;Range(1, 512)"`
 	GamePos    int    `gorm:"type:int(5);not null;default:0" form:"game_pos" json:"game_pos" valid:"Required;Range(1, 512)"`
-	GameLevel  int    `gorm:"type:int(5);not null;default:0" form:"game_level" json:"game_level" valid:"Required;Range(1, 200)"`
+	GameLevel  string `gorm:"type:varchar(20);not null;default:''" form:"game_level" json:"game_level" valid:"Required;MaxSize(20)"`
 	ImgUrl     string `gorm:"type:varchar(100);not null;default:''" form:"img_url" json:"img_url"  valid:"Required;MaxSize(100)"`
 	RegTime    int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 }
