@@ -180,15 +180,15 @@ type WXPayResp struct {
 	CodeUrl    string `xml:"code_url"`
 }
 
-func Pay(userId int, orderId int, ip string) bool {
+func Pay(userId int, orderId int, ip string) (map[string]interface{}, bool) {
 	totalFee, err := GetOrderPrice(orderId)
 	if err != nil || totalFee == 0 {
-		return false
+		return nil, false
 	}
 
 	openId, err := auth_service.GetUserOpenId(userId)
 	if err != nil || openId == "" {
-		return false
+		return nil, false
 	}
 
 	payOrderId := GeneratePayOrderId()
@@ -223,7 +223,7 @@ func Pay(userId int, orderId int, ip string) bool {
 	// 调用支付统一下单API
 	bytesReq, err := xml.Marshal(payReq)
 	if err != nil {
-		return false
+		return nil, false
 	}
 	strReq := string(bytesReq)
 	//wxpay的unifiedorder接口需要http body中xmldoc的根节点是<xml></xml>这种，所以这里需要replace一下
@@ -232,7 +232,7 @@ func Pay(userId int, orderId int, ip string) bool {
 
 	req, err2 := http.NewRequest("POST", "https://api.mch.weixin.qq.com/pay/unifiedorder", strings.NewReader(string(bytesReq)))
 	if err2 != nil {
-		return false
+		return nil, false
 	}
 	req.Header.Set("Content-Type", "text/xml;charset=utf-8")
 	client := &http.Client{}
@@ -241,12 +241,12 @@ func Pay(userId int, orderId int, ip string) bool {
 
 	body2, err3 := ioutil.ReadAll(resp.Body)
 	if err3 != nil {
-		return false
+		return nil, false
 	}
 	var resp1 WXPayResp
 	err = xml.Unmarshal(body2, &resp1)
 	if err != nil {
-		return false
+		return nil, false
 	}
 
 	// 返回预付单信息
@@ -275,11 +275,11 @@ func Pay(userId int, orderId int, ip string) bool {
 		if !dbInfo.Updates(m) {
 			log, _ := json.Marshal(m)
 			logging.Error("Pay:failed-" + string(log))
-			return false
+			return nil, false
 		}
-		return true
+		return resMap, true
 	}
-	return false
+	return nil, false
 }
 
 //微信支付计算签名的函数

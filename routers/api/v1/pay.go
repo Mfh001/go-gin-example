@@ -21,13 +21,8 @@ import (
 // @Produce  json
 // @Param user_id body int false "user_id"
 // @Param order_id body int false "order_id"
-// @Success 200 {object} model.Result "成功获取"
-// @Failure 400 {object} model.Result "请求参数错误"
-// @Failure 401 {object} model.Result "正在进行服务升级 请稍后"
-// @Failure 402 {object} model.Result "系统繁忙"
-// @Failure 403 {object} model.Result "userid不存在"
-// @Failure 404 {object} model.Result "下单失败"
-// @Failure 405 {object} model.Result "微信请求支付失败"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
 // @Router /api/v1/pay [post]
 // @Tags 微信支付
 func WxPay(c *gin.Context) {
@@ -57,17 +52,12 @@ func WxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-
-	openId, err := auth_service.GetUserOpenId(userId)
-	if err != nil || openId == "" {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if !order_service.Pay(userId, orderId, c.ClientIP()) {
+	d, err := order_service.Pay(userId, orderId, c.ClientIP())
+	if err != nil {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, e.SUCCESS, d)
 	return
 }
 

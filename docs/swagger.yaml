@@ -169,6 +169,46 @@ paths:
         name: target_level
         schema:
           type: integer
+      - description: 游戏账号
+        in: body
+        name: game_account
+        schema:
+          type: string
+      - description: 游戏密码
+        in: body
+        name: game_pwd
+        schema:
+          type: string
+      - description: 游戏角色名
+        in: body
+        name: game_role
+        schema:
+          type: string
+      - description: 验证手机
+        in: body
+        name: game_phone
+        schema:
+          type: string
+      - description: 保证金
+        in: body
+        name: margin
+        schema:
+          type: integer
+      - description: 有防沉迷
+        in: body
+        name: anti_addiction
+        schema:
+          type: integer
+      - description: 有指定英雄
+        in: body
+        name: designate_hero
+        schema:
+          type: integer
+      - description: 指定英雄
+        in: body
+        name: hero_name
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -183,6 +223,33 @@ paths:
       summary: 下单
       tags:
       - 下单
+  /api/v1/pay:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 微信下单 获取发起微信支付所需的数据
+      tags:
+      - 微信支付
   /login:
     post:
       parameters:
