@@ -15,7 +15,6 @@ type Check struct {
 //insert
 func (info Check) Insert() bool {
 	create := db.Create(&info)
-
 	if create.Error != nil {
 		return false
 	}
