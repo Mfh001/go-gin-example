@@ -1,0 +1,53 @@
+package util
+
+import (
+	"bytes"
+	"encoding/xml"
+	"io"
+	"strings"
+)
+
+//解析xml数据
+func Xml2Map(data string) map[string]interface{} {
+	decoder := xml.NewDecoder(strings.NewReader(data))
+	result := make(map[string]interface{})
+	key := ""
+	for {
+		token, err := decoder.Token() //读取一个标签或者文本内容
+		if err == io.EOF {
+			return result
+		}
+		if err != nil {
+			return result
+		}
+		switch tp := token.(type) { //读取的TOKEN可以是以下三种类型：StartElement起始标签，EndElement结束标签，CharData文本内容
+		case xml.StartElement:
+			se := xml.StartElement(tp) //强制类型转换
+			if se.Name.Local != "xml" {
+				key = se.Name.Local
+			}
+		case xml.EndElement:
+			ee := xml.EndElement(tp)
+			if ee.Name.Local == "xml" {
+				return result
+			}
+		case xml.CharData: //文本数据，注意一个结束标签和另一个起始标签之间可能有空格
+			cd := xml.CharData(tp)
+			data := strings.TrimSpace(string(cd))
+			if len(data) != 0 {
+				result[key] = data
+			}
+		}
+	}
+}
+
+//微信支付计算签名的函数
+func Map2Xml(mReq map[string]interface{}) (xml string) {
+	sb := bytes.Buffer{}
+	sb.WriteString("")
+	for k, v := range mReq {
+		sb.WriteString("<" + k + ">" + v.(string) + "</" + k + ">")
+	}
+	sb.WriteString("")
+	return sb.String()
+}

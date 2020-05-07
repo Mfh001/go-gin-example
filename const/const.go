@@ -6,9 +6,18 @@ const (
 	UserTypeInstead   = 2 //代练用户
 	UserTypeAccompany = 3 //陪练用户
 	UserTypeAdmin     = 4 //管理员
+
+	WXAppID  = "wx431aa31b8f263177"
+	WXSecret = "7d9deb35e916e28974a30a45b6dd618e"
+	//商户号
+	WXMchID = "1554737721"
+	//商户密钥
+	WXMchKey = "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+
 	//订单状态
-	OrderStatusWaitPay  = 0  //订单 未支付 状态
-	OrderStatusPaidPay  = 1  //订单 已支付 状态
+	OrderStatusAddOrder = 0 //订单 未支付 状态
+	OrderStatusWaitPay  = 1
+	OrderStatusPaidPay  = 2  //订单 已支付 状态
 	OrderStatusSentPay  = 2  //订单 已送达 待评论 状态
 	OrderStatusFinished = 3  //订单 已完成 状态
 	OrderStatusCancel   = -1 //订单 取消 状态

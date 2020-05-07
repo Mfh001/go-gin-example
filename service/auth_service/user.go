@@ -156,3 +156,15 @@ func GetUserNickName(userId int) (string, error) {
 	}
 	return nickName, nil
 }
+
+func GetUserOpenId(userId int) (string, error) {
+	if !ExistUserInfo(userId) {
+		return "", fmt.Errorf("GetUserOpenId:userIdnoExist")
+	}
+	openId, err := gredis.HGet(GetRedisKeyUserInfo(userId), "open_id")
+	if err != nil {
+		logging.Error("GetUserOpenId:" + strconv.Itoa(userId))
+		return "", err
+	}
+	return openId, nil
+}
