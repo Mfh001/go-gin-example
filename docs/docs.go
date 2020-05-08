@@ -25,6 +25,49 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/agent/bind": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "代理"
+                ],
+                "summary": "绑定上级",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "agent_id",
+                        "name": "agent_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/check": {
             "get": {
                 "produces": [
@@ -337,6 +380,49 @@ var doc = `{
                         "in": "body",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/order/take": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "接单"
+                ],
+                "summary": "接单",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "order_id",
+                        "name": "order_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
                         }
                     }
                 ],

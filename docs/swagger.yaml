@@ -15,6 +15,33 @@ info:
   title: Golang Gin API
   version: "1.0"
 paths:
+  /api/v1/agent/bind:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: agent_id
+        in: body
+        name: agent_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 绑定上级
+      tags:
+      - 代理
   /api/v1/check:
     get:
       parameters:
@@ -223,6 +250,33 @@ paths:
       summary: 下单
       tags:
       - 下单
+  /api/v1/order/take:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 接单
+      tags:
+      - 接单
   /api/v1/pay:
     post:
       parameters:
