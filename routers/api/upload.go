@@ -20,7 +20,7 @@ import (
 // @Tags 审核
 func UploadImage(c *gin.Context) {
 	appG := app.Gin{C: c}
-	file, image, err := c.Request.FormFile("image")
+	file, image, err := c.Request.FormFile("file")
 	if err != nil {
 		logging.Warn(err)
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
