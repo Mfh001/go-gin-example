@@ -22,6 +22,7 @@ func (info Check) Insert() bool {
 }
 
 //update
+
 func (info Check) Updates(m map[string]interface{}) bool {
 	err := db.Model(&info).Updates(m).Error
 	if err != nil {
