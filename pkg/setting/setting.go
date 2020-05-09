@@ -130,7 +130,7 @@ func Setup() {
 
 func levelInit() {
 	for i := 0; i < len(Platform.Levels); i++ {
-		for j := 0; j <= Platform.Levels[i].Stars; j++ {
+		for j := 0; j <= Platform.Levels[i].Stars-1; j++ {
 			idx := Platform.Levels[i].Idx*1000 + j
 			l := LevelCell{
 				Idx:   idx,
