@@ -185,10 +185,12 @@ func TakerWxPay(c *gin.Context) {
 	}
 
 	status, err := order_service.GetOrderStatus(orderId)
-	if err != nil || status != var_const.OrderStatusTakerWaitPay {
+	if err != nil || status != var_const.OrderStatusPaidPay {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+	//不是代练不可接单 TODO
+
 	d, ok := order_service.TakerPay(userId, orderId, c.ClientIP())
 	if !ok {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
