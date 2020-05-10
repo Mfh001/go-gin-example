@@ -161,14 +161,16 @@ func GetTakerOrderPrice(orderId int) (int, error) {
 		logging.Error("GetTakerOrderPrice:" + strconv.Itoa(orderId))
 		return 0, err
 	}
-	price, err := strconv.Atoi(fieldsV[0].(string))
+	bPrice, _ := fieldsV[0].([]byte)
+	price, err := strconv.Atoi(string(bPrice))
 	if err != nil {
-		logging.Error("GetOrderPrice:" + fieldsV[0].(string))
+		logging.Error("GetOrderPrice:" + string(bPrice))
 		return 0, err
 	}
-	margin, err := strconv.Atoi(fieldsV[1].(string))
+	bMargin, _ := fieldsV[1].([]byte)
+	margin, err := strconv.Atoi(string(bMargin))
 	if err != nil {
-		logging.Error("GetOrderMargin:" + fieldsV[1].(string))
+		logging.Error("GetOrderMargin:" + string(bMargin))
 		return 0, err
 	}
 	return price + margin, nil
