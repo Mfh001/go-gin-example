@@ -132,3 +132,16 @@ func BindAgent(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, data)
 	return
 }
+
+// @Summary Get 获取订单列表
+// @Produce  json
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/all [get]
+// @Tags 审核
+func GetAllOrders(c *gin.Context) {
+	appG := app.Gin{C: c}
+	var list []models.Order
+	order_service.GetNeedTakeOrderList(&list)
+	appG.Response(http.StatusOK, e.SUCCESS, list)
+}

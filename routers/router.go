@@ -48,6 +48,8 @@ func InitRouter() *gin.Engine {
 		//下单
 		apiV1.POST("/order", v1.AddOrder)
 
+		apiV1.GET("/order/all", v1.GetAllOrders)
+
 		//pay
 		apiV1.POST("/pay", v1.WxPay)
 

@@ -311,3 +311,11 @@ func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
 	upperSign := strings.ToUpper(hex.EncodeToString(cipherStr))
 	return upperSign
 }
+
+func GetNeedTakeOrderList(orders *[]models.Order) {
+	_, err := models.GetNeedTakeOrders(orders)
+	if err != nil {
+		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
+	}
+	return
+}
