@@ -138,7 +138,7 @@ func BindAgent(c *gin.Context) {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/order/all [get]
-// @Tags 审核
+// @Tags 接单
 func GetAllOrders(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var list []models.Order

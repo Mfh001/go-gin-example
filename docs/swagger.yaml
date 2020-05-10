@@ -265,7 +265,7 @@ paths:
             $ref: '#/definitions/app.Response'
       summary: Get 获取订单列表
       tags:
-      - 审核
+      - 接单
   /api/v1/order/take:
     post:
       parameters:
