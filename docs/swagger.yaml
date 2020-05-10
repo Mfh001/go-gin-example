@@ -250,6 +250,22 @@ paths:
       summary: 下单
       tags:
       - 下单
+  /api/v1/order/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 获取订单列表
+      tags:
+      - 审核
   /api/v1/order/take:
     post:
       parameters:
