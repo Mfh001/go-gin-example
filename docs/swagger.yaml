@@ -320,6 +320,33 @@ paths:
       summary: 微信下单 获取发起微信支付所需的数据
       tags:
       - 微信支付
+  /api/v1/pay/taker:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 微信接单 获取发起微信支付所需的数据
+      tags:
+      - 微信支付
   /login:
     post:
       parameters:

@@ -510,6 +510,49 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/pay/taker": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "微信支付"
+                ],
+                "summary": "微信接单 获取发起微信支付所需的数据",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "order_id",
+                        "name": "order_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "tags": [

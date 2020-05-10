@@ -32,6 +32,7 @@ func InitRouter() *gin.Engine {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.POST("/upload", api.UploadImage)
 	r.Any("/pay/notify", v1.WxNotify)
+	r.Any("/pay/taker/notify", v1.TakerWxNotify)
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())
@@ -52,6 +53,8 @@ func InitRouter() *gin.Engine {
 
 		//pay
 		apiV1.POST("/pay", v1.WxPay)
+
+		apiV1.POST("/pay/taker", v1.TakerWxPay)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

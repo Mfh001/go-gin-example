@@ -15,12 +15,13 @@ const (
 	WXMchKey = "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
 
 	//订单状态
-	OrderStatusAddOrder = 0 //订单 未支付 状态
-	OrderStatusWaitPay  = 1
-	OrderStatusPaidPay  = 2  //订单 已支付 状态
-	OrderStatusSentPay  = 2  //订单 已送达 待评论 状态
-	OrderStatusFinished = 3  //订单 已完成 状态
-	OrderStatusCancel   = -1 //订单 取消 状态
+	OrderStatusAddOrder     = 0 //订单 未支付 状态
+	OrderStatusWaitPay      = 1
+	OrderStatusPaidPay      = 2  //订单 已支付下单 状态
+	OrderStatusTakerWaitPay = 3  //订单 接单准备支付
+	OrderStatusTakerPaid    = 4  //订单 接单已支付
+	OrderStatusFinished     = 5  //订单 已完成 状态
+	OrderStatusCancel       = -1 //订单 取消 状态
 
 	//满意度
 	OrderSatisfied    = 1 //满意

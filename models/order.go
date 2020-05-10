@@ -32,8 +32,16 @@ type Order struct {
 	PayDesc       string `json:"pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
 	PayIp         string `json:"pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TradeType     string `json:"trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
-	RegTime       int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
-	UpdTime       int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
+
+	TakerTradeNo   string `json:"taker_trade_no" gorm:"type:varchar(50);not null;default:''"`
+	TakerUserId    int    `json:"take_user_id" form:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
+	TakerPayAmount int    `json:"taker_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	TakerPayDesc   string `json:"taker_pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
+	TakerPayIp     string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
+	TakerTradeType string `json:"taker_trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
+
+	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
+	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`
 }
 
 //insert
@@ -76,6 +84,14 @@ func (info *Order) First() (int, error) {
 
 func (info *Order) GetOrderInfoByTradeNo() (bool, error) {
 	err := db.Select("user_id, order_id, status").Where("trade_no = ?", info.TradeNo).Take(&info).Error
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (info *Order) GetOrderInfoByTakerTradeNo() (bool, error) {
+	err := db.Select("taker_user_id, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).Take(&info).Error
 	if err != nil {
 		return false, err
 	}
