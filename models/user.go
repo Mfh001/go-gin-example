@@ -7,6 +7,7 @@ import (
 type User struct {
 	UserId     int    `json:"user_id" gorm:"primary_key;type:int(12);not null"`
 	OpenId     string `json:"open_id" gorm:"unique;not null"`
+	Balance    int    `json:"balance" gorm:"type:int(12);not null;default:0"`
 	NickName   string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
 	AvatarUrl  string `json:"avatar_url" gorm:"type:varchar(100);not null;default:''"`
 	Phone      string `json:"phone" gorm:"type:varchar(11);not null;default:''"`
@@ -80,4 +81,14 @@ func GetUserIdByOpenId(openId string) (int, error) {
 	}
 
 	return user.UserId, nil
+}
+
+func (info User) FindPhone() (int, error) {
+	err := db.Select("user_id").Where("phone = ?", info.Phone).Take(&info).Error
+	if gorm.IsRecordNotFoundError(err) {
+		return -1, nil
+	} else if err != nil {
+		return -1, err
+	}
+	return info.UserId, nil
 }

@@ -161,19 +161,19 @@ func GetTakerOrderPrice(orderId int) (int, error) {
 		logging.Error("GetTakerOrderPrice:" + strconv.Itoa(orderId))
 		return 0, err
 	}
-	bPrice, _ := fieldsV[0].([]byte)
-	price, err := strconv.Atoi(string(bPrice))
-	if err != nil {
-		logging.Error("GetOrderPrice:" + string(bPrice))
-		return 0, err
-	}
+	//bPrice, _ := fieldsV[0].([]byte)
+	//price, err := strconv.Atoi(string(bPrice))
+	//if err != nil {
+	//	logging.Error("GetOrderPrice:" + string(bPrice))
+	//	return 0, err
+	//}
 	bMargin, _ := fieldsV[1].([]byte)
 	margin, err := strconv.Atoi(string(bMargin))
 	if err != nil {
 		logging.Error("GetOrderMargin:" + string(bMargin))
 		return 0, err
 	}
-	return price + margin, nil
+	return margin, nil
 }
 
 func GetOrderStatus(orderId int) (int, error) {
@@ -191,6 +191,40 @@ func GetOrderStatus(orderId int) (int, error) {
 		return 0, err
 	}
 	return status, nil
+}
+
+func GetOrderTaker(orderId int) (int, error) {
+	if !ExistOrder(orderId) {
+		return 0, fmt.Errorf("GetOrderTaker:OrderIdnoExist")
+	}
+	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "take_user_id")
+	if err != nil {
+		logging.Error("GetOrderTaker:" + strconv.Itoa(orderId))
+		return 0, err
+	}
+	takerId, err := strconv.Atoi(strTaker)
+	if err != nil {
+		logging.Error("GetOrderPrice:" + strTaker)
+		return 0, err
+	}
+	return takerId, nil
+}
+
+func GetOrderUserId(orderId int) (int, error) {
+	if !ExistOrder(orderId) {
+		return 0, fmt.Errorf("GetOrderUserId:OrderIdnoExist")
+	}
+	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "user_id")
+	if err != nil {
+		logging.Error("GetOrderUserId:" + strconv.Itoa(orderId))
+		return 0, err
+	}
+	takerId, err := strconv.Atoi(strTaker)
+	if err != nil {
+		logging.Error("GetOrderUserId:" + strTaker)
+		return 0, err
+	}
+	return takerId, nil
 }
 
 type PayOrderReq struct {

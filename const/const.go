@@ -15,13 +15,14 @@ const (
 	WXMchKey = "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
 
 	//订单状态
-	OrderStatusAddOrder     = 0 //订单 未支付 状态
-	OrderStatusWaitPay      = 1
-	OrderStatusPaidPay      = 2  //订单 已支付下单 状态
-	OrderStatusTakerWaitPay = 3  //订单 接单准备支付
-	OrderStatusTakerPaid    = 4  //订单 接单已支付
-	OrderStatusFinished     = 5  //订单 已完成 状态
-	OrderStatusCancel       = -1 //订单 取消 状态
+	OrderStatusAddOrder                 = 0 //订单 未支付 状态
+	OrderStatusWaitPay                  = 1
+	OrderStatusPaidPay                  = 2  //订单 已支付下单 状态
+	OrderStatusTakerWaitPay             = 3  //订单 接单准备支付
+	OrderStatusTakerPaid                = 4  //订单 接单已支付
+	OrderStatusTakerFinishedNeedConfirm = 5  //订单 代练已完成，请求确认 状态
+	OrderStatusConfirmFinished          = 6  //订单 确认完成 状态
+	OrderStatusCancel                   = -1 //订单 取消 状态
 
 	//满意度
 	OrderSatisfied    = 1 //满意
@@ -51,4 +52,6 @@ const (
 	CheckRefuse = -1
 	CheckNeed   = 0
 	CheckPass   = 1
+
+	SMSCodeExpireTime = 300
 )

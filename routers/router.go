@@ -50,11 +50,23 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order", v1.AddOrder)
 
 		apiV1.GET("/order/all", v1.GetAllOrders)
-
+		//完成订单
+		apiV1.POST("/order/finish", v1.FinishOrder)
+		//确认完成订单
+		apiV1.POST("/order/confirm", v1.ConfirmOrder)
 		//pay
 		apiV1.POST("/pay", v1.WxPay)
 
 		apiV1.POST("/pay/taker", v1.TakerWxPay)
+
+		//绑定手机号
+		apiV1.POST("/phone/bind", v1.BindPhone)
+		apiV1.GET("/phone/code", v1.GetPhoneRegCode)
+		apiV1.GET("/phone/code2", v1.GetPhoneCodeNoPhone)
+
+		//绑定银行卡
+		apiV1.POST("/bank/bind", v1.BindBankCard)
+		apiV1.GET("/bank", v1.GetBankCardInfo)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

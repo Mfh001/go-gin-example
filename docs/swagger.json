@@ -51,6 +51,77 @@
                 }
             }
         },
+        "/api/v1/bank": {
+            "get": {
+                "consumes": [
+                    "application/json; charset=utf-8"
+                ],
+                "tags": [
+                    "银行卡"
+                ],
+                "summary": "获取银行卡信息",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/bink/bind": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "银行卡"
+                ],
+                "summary": "绑定银行卡",
+                "parameters": [
+                    {
+                        "description": "请求的json结构",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RequestBankCardInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/check": {
             "get": {
                 "produces": [
@@ -407,6 +478,92 @@
                 }
             }
         },
+        "/api/v1/order/confirm": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "订单"
+                ],
+                "summary": "完成订单",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "order_id",
+                        "name": "order_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/order/finish": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "订单"
+                ],
+                "summary": "完成订单",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "order_id",
+                        "name": "order_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/order/take": {
             "post": {
                 "produces": [
@@ -514,6 +671,135 @@
                     {
                         "description": "order_id",
                         "name": "order_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/phone/bind": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "绑定手机号"
+                ],
+                "summary": "绑定手机号 确认绑定的接口",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "phone",
+                        "name": "phone",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "code",
+                        "name": "code",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/phone/code": {
+            "get": {
+                "consumes": [
+                    "application/json; charset=utf-8"
+                ],
+                "tags": [
+                    "绑定手机号"
+                ],
+                "summary": "获取要绑定的手机号的验证码 绑定手机时使用",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "phone",
+                        "name": "phone",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/phone/code2": {
+            "get": {
+                "consumes": [
+                    "application/json; charset=utf-8"
+                ],
+                "tags": [
+                    "手机验证码"
+                ],
+                "summary": "获取已绑定手机号的验证码 （不需要传手机号 验证提款密码时使用）",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
                         "in": "body",
                         "schema": {
                             "type": "integer"
@@ -686,6 +972,47 @@
                     "type": "object"
                 },
                 "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BankCardInfo": {
+            "type": "object",
+            "properties": {
+                "bankBranchName": {
+                    "description": "支行名称",
+                    "type": "string"
+                },
+                "bankCard": {
+                    "description": "银行卡号",
+                    "type": "string"
+                },
+                "bankName": {
+                    "description": "银行名称",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "给银行卡信息设置的密码",
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                },
+                "userName": {
+                    "description": "开户名",
+                    "type": "string"
+                }
+            }
+        },
+        "models.RequestBankCardInfo": {
+            "type": "object",
+            "properties": {
+                "bankCardInfo": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.BankCardInfo"
+                },
+                "code": {
+                    "description": "验证码",
                     "type": "string"
                 }
             }

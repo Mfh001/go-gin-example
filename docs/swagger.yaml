@@ -8,6 +8,35 @@ definitions:
       msg:
         type: string
     type: object
+  models.BankCardInfo:
+    properties:
+      bankBranchName:
+        description: 支行名称
+        type: string
+      bankCard:
+        description: 银行卡号
+        type: string
+      bankName:
+        description: 银行名称
+        type: string
+      password:
+        description: 给银行卡信息设置的密码
+        type: string
+      userId:
+        type: integer
+      userName:
+        description: 开户名
+        type: string
+    type: object
+  models.RequestBankCardInfo:
+    properties:
+      bankCardInfo:
+        $ref: '#/definitions/models.BankCardInfo'
+        type: object
+      code:
+        description: 验证码
+        type: string
+    type: object
 info:
   contact: {}
   description: A web of gin
@@ -42,6 +71,51 @@ paths:
       summary: 绑定上级
       tags:
       - 代理
+  /api/v1/bank:
+    get:
+      consumes:
+      - application/json; charset=utf-8
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 获取银行卡信息
+      tags:
+      - 银行卡
+  /api/v1/bink/bind:
+    post:
+      parameters:
+      - description: 请求的json结构
+        in: body
+        name: json
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestBankCardInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 绑定银行卡
+      tags:
+      - 银行卡
   /api/v1/check:
     get:
       parameters:
@@ -266,6 +340,60 @@ paths:
       summary: Get 获取订单列表
       tags:
       - 接单
+  /api/v1/order/confirm:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 完成订单
+      tags:
+      - 订单
+  /api/v1/order/finish:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 完成订单
+      tags:
+      - 订单
   /api/v1/order/take:
     post:
       parameters:
@@ -347,6 +475,87 @@ paths:
       summary: 微信接单 获取发起微信支付所需的数据
       tags:
       - 微信支付
+  /api/v1/phone/bind:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: phone
+        in: body
+        name: phone
+        schema:
+          type: string
+      - description: code
+        in: body
+        name: code
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 绑定手机号 确认绑定的接口
+      tags:
+      - 绑定手机号
+  /api/v1/phone/code:
+    get:
+      consumes:
+      - application/json; charset=utf-8
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: phone
+        in: body
+        name: phone
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 获取要绑定的手机号的验证码 绑定手机时使用
+      tags:
+      - 绑定手机号
+  /api/v1/phone/code2:
+    get:
+      consumes:
+      - application/json; charset=utf-8
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 获取已绑定手机号的验证码 （不需要传手机号 验证提款密码时使用）
+      tags:
+      - 手机验证码
   /login:
     post:
       parameters:

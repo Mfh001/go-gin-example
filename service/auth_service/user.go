@@ -23,6 +23,9 @@ func getRedisKeyWXCode(str string) string {
 func GetRedisKeyUserInfo(id int) string {
 	return "game_user:" + strconv.Itoa(id)
 }
+func GetRedisKeySmsCode(phone string) string {
+	return "code:" + phone
+}
 
 func IncrUserId() (int, error) {
 	return gredis.Incr(getRedisKeyUserIncr())
@@ -115,7 +118,7 @@ func GetUserInfo(userId int) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("GetUserInfo:userIdnoExist")
 	}
 	fields := []string{"user_id", "nick_name", "avatar_url", "phone", "type", "check_pass",
-		"game_id", "game_server", "game_pos", "game_level", "img_url"}
+		"game_id", "game_server", "game_pos", "game_level", "img_url", "balance"}
 	data, err := gredis.HMGet(GetRedisKeyUserInfo(userId), fields...)
 	if err != nil {
 		logging.Error("GetUserInfo:" + strconv.Itoa(userId))
@@ -167,4 +170,15 @@ func GetUserOpenId(userId int) (string, error) {
 		return "", err
 	}
 	return openId, nil
+}
+func GetUserPhone(userId int) (string, error) {
+	if !ExistUserInfo(userId) {
+		return "", fmt.Errorf("GetUserPhone:userIdnoExist")
+	}
+	phone, err := gredis.HGet(GetRedisKeyUserInfo(userId), "phone")
+	if err != nil {
+		logging.Error("GetUserOpenId:" + strconv.Itoa(userId))
+		return "", err
+	}
+	return phone, nil
 }
