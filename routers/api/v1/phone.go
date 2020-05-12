@@ -78,7 +78,7 @@ func BindPhone(c *gin.Context) {
 			appG.Response(http.StatusBadRequest, e.ERROR, nil)
 			return
 		}
-		appG.Response(http.StatusBadRequest, e.SUCCESS, nil)
+		appG.Response(http.StatusOK, e.SUCCESS, nil)
 		return
 	}
 }
@@ -132,12 +132,12 @@ func GetPhoneRegCode(c *gin.Context) {
 		_ = gredis.Set(auth_service.GetRedisKeySmsCode(phone), newCode, var_const.SMSCodeExpireTime)
 
 		util.SendSMSCode(phone, newCode)
-		appG.Response(http.StatusBadRequest, e.SUCCESS, nil)
+		appG.Response(http.StatusOK, e.SUCCESS, nil)
 		return
 	} else { //已获取到验证码 并且未过期
 		_ = gredis.Set(auth_service.GetRedisKeySmsCode(phone), code, var_const.SMSCodeExpireTime)
 		util.SendSMSCode(phone, code)
-		appG.Response(http.StatusBadRequest, e.SUCCESS, nil)
+		appG.Response(http.StatusOK, e.SUCCESS, nil)
 		return
 	}
 }
@@ -181,12 +181,12 @@ func GetPhoneCodeNoPhone(c *gin.Context) {
 		_ = gredis.Set(auth_service.GetRedisKeySmsCode(userPhone), newCode, var_const.SMSCodeExpireTime)
 
 		util.SendSMSCode(userPhone, newCode)
-		appG.Response(http.StatusBadRequest, e.SUCCESS, nil)
+		appG.Response(http.StatusOK, e.SUCCESS, nil)
 		return
 	} else { //已获取到验证码 并且未过期
 		_ = gredis.Set(auth_service.GetRedisKeySmsCode(userPhone), code, var_const.SMSCodeExpireTime)
 		util.SendSMSCode(userPhone, code)
-		appG.Response(http.StatusBadRequest, e.SUCCESS, nil)
+		appG.Response(http.StatusOK, e.SUCCESS, nil)
 		return
 	}
 }
