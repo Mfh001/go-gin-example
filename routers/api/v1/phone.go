@@ -123,10 +123,10 @@ func GetPhoneRegCode(c *gin.Context) {
 	}
 
 	code, err := gredis.Get(auth_service.GetRedisKeySmsCode(phone))
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
+	//if err != nil {
+	//	appG.Response(http.StatusBadRequest, e.ERROR, nil)
+	//	return
+	//}
 	if code == "" { //从api重新获取验证码
 		newCode := util.RandomStringNoLetter(6)
 		_ = gredis.Set(auth_service.GetRedisKeySmsCode(phone), newCode, var_const.SMSCodeExpireTime)
@@ -142,7 +142,7 @@ func GetPhoneRegCode(c *gin.Context) {
 	}
 }
 
-// @Summary 获取已绑定手机号的验证码 （不需要传手机号 验证提款密码时使用）
+// @Summary 获取已绑定手机号的验证码
 // @Accept  application/json; charset=utf-8
 // @Param user_id body int false "user_id"
 // @Success 200 {object} app.Response
