@@ -172,10 +172,10 @@ func GetPhoneCodeNoPhone(c *gin.Context) {
 		return
 	}
 	code, err := gredis.Get(auth_service.GetRedisKeySmsCode(userPhone))
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
+	//if err != nil {
+	//	appG.Response(http.StatusBadRequest, e.ERROR, nil)
+	//	return
+	//}
 	if code == "" { //从api重新获取验证码
 		newCode := util.RandomStringNoLetter(6)
 		_ = gredis.Set(auth_service.GetRedisKeySmsCode(userPhone), newCode, var_const.SMSCodeExpireTime)
