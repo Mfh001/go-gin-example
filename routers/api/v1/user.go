@@ -71,6 +71,6 @@ func GetUserBalance(c *gin.Context) {
 		return
 	}
 	m := make(map[string]interface{})
-	m["balance"], _ = auth_service.GetUserBalance()
+	m["balance"], _ = auth_service.GetUserBalance(userId)
 	appG.Response(http.StatusOK, e.SUCCESS, m)
 }
