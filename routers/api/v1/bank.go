@@ -49,7 +49,7 @@ func BindBankCard(c *gin.Context) {
 	}
 
 	form.BankCardInfo.Insert()
-	appG.Response(http.StatusBadRequest, e.SUCCESS, nil)
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
 
@@ -103,6 +103,6 @@ func GetBankCardInfo(c *gin.Context) {
 		return
 	}
 
-	appG.Response(http.StatusBadRequest, e.SUCCESS, bankInfo)
+	appG.Response(http.StatusOK, e.SUCCESS, bankInfo)
 	return
 }

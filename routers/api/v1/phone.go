@@ -110,7 +110,7 @@ func GetPhoneRegCode(c *gin.Context) {
 	//判断手机号是否已存在
 	userPhone, err := auth_service.GetUserPhone(userId)
 	if userPhone != "" || err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, e.ERROR_EXIST_PHONE, nil)
 		return
 	}
 	user := models.User{
