@@ -50,7 +50,6 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order", v1.AddOrder)
 
 		apiV1.GET("/order/all", v1.GetAllOrders)
-		apiV1.GET("/order/all", v1.GetAllOrders)
 		apiV1.GET("/order/takelist", v1.GetTakerOrders)
 		apiV1.GET("/order/userlist", v1.GetUserOrders)
 		//完成订单
