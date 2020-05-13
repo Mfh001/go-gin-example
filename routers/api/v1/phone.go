@@ -152,7 +152,7 @@ func GetPhoneRegCode(c *gin.Context) {
 func GetPhoneCodeNoPhone(c *gin.Context) {
 	appG := app.Gin{C: c}
 
-	userId, err := strconv.Atoi(c.PostForm("user_id"))
+	userId, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
