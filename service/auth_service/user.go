@@ -182,3 +182,15 @@ func GetUserPhone(userId int) (string, error) {
 	}
 	return phone, nil
 }
+
+func GetUserBalance(userId int) (string, error) {
+	if !ExistUserInfo(userId) {
+		return "", fmt.Errorf("GetUserBalance:userIdnoExist")
+	}
+	balance, err := gredis.HGet(GetRedisKeyUserInfo(userId), "balance")
+	if err != nil {
+		logging.Error("GetUserBalance:" + strconv.Itoa(userId))
+		return "", err
+	}
+	return balance, nil
+}

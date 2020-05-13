@@ -447,6 +447,8 @@ func TakerPay(userId int, orderId int, ip string) (map[string]interface{}, bool)
 		m["status"] = var_const.OrderStatusTakerWaitPay
 		m["taker_pay_amount"] = totalFee
 		m["taker_pay_desc"] = desc
+		m["taker_user_id"] = userId
+		m["taker_nick_name"], _ = auth_service.GetUserNickName(userId)
 		m["taker_pay_ip"] = ip
 		m["taker_trade_type"] = tradeType
 		m["upd_time"] = int(time.Now().Unix())
@@ -494,6 +496,21 @@ func GetNeedTakeOrderList(orders *[]models.Order) {
 	_, err := models.GetNeedTakeOrders(orders)
 	if err != nil {
 		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
+	}
+	return
+}
+func GetTakeOrderList(takerId int, orders *[]models.Order) {
+	_, err := models.GetTakeOrders(takerId, orders)
+	if err != nil {
+		logging.Error("GetTakeOrderList:db-GetTakeOrderList")
+	}
+	return
+}
+
+func GetUserOrderList(userId int, orders *[]models.Order) {
+	_, err := models.GetUserOrders(userId, orders)
+	if err != nil {
+		logging.Error("GetUserOrderList:db-GetTakeOrderList")
 	}
 	return
 }

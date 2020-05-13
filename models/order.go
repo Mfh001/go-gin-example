@@ -35,6 +35,7 @@ type Order struct {
 
 	TakerTradeNo   string `json:"taker_trade_no" gorm:"type:varchar(50);not null;default:''"`
 	TakerUserId    int    `json:"take_user_id" form:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
+	TakerNickName  string `json:"take_nick_name" gorm:"type:varchar(32);not null;default:''"`
 	TakerPayAmount int    `json:"taker_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
 	TakerPayDesc   string `json:"taker_pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
 	TakerPayIp     string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
@@ -115,6 +116,29 @@ func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
 //select all
 func GetNeedTakeOrders(infos *[]Order) (bool, error) {
 	err := db.Select("order_id, price, status, user_id, nick_name, game_type, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time").Where("status = ?", var_const.OrderStatusPaidPay).First(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Order{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Order{}
+		return false, err
+	}
+	return true, nil
+}
+func GetTakeOrders(takerId int, infos *[]Order) (bool, error) {
+	err := db.Select("order_id, price, status, user_id, nick_name, game_type, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, take_user_id, take_nick_name").Where("status >= ? and take_user_id = ?", var_const.OrderStatusTakerPaid, takerId).First(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Order{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Order{}
+		return false, err
+	}
+	return true, nil
+}
+
+func GetUserOrders(userId int, infos *[]Order) (bool, error) {
+	err := db.Select("order_id, price, status, user_id, nick_name, game_type, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, take_user_id, take_nick_name").Where("status >= ? and user_id = ?", var_const.OrderStatusWaitPay, userId).First(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil

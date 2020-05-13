@@ -93,6 +93,28 @@ paths:
       summary: 获取银行卡信息
       tags:
       - 银行卡
+  /api/v1/bank/balance:
+    get:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 用户获取钱包余额
+      tags:
+      - 接单
   /api/v1/bink/bind:
     post:
       parameters:
@@ -421,6 +443,50 @@ paths:
       summary: 接单
       tags:
       - 接单
+  /api/v1/order/takelist:
+    get:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 代练获取已接单列表
+      tags:
+      - 接单
+  /api/v1/order/userlist:
+    get:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 用户获取自己已发单列表
+      tags:
+      - 接单
   /api/v1/pay:
     post:
       parameters:
@@ -553,7 +619,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 获取已绑定手机号的验证码 （不需要传手机号 验证提款密码时使用）
+      summary: 获取已绑定手机号的验证码
       tags:
       - 手机验证码
   /login:
