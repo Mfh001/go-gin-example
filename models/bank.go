@@ -47,7 +47,7 @@ func (info BankCardInfo) Save() bool {
 	return true
 }
 func (info *BankCardInfo) FindBankCardInfo() (int, error) {
-	err := db.Select("bank_name, Bank_branch_name,bank_card,user_name").Where("user_id = ?", info.UserId).Take(&info).Error
+	err := db.Select("bank_name, bank_branch_name,bank_card,user_name").Where("user_id = ?", info.UserId).Take(&info).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return -1, nil
 	} else if err != nil {
