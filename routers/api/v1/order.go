@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -201,6 +202,35 @@ func FinishOrder(c *gin.Context) {
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("TakerFinish:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	str, err := auth_service.GetUserBalance(takerId)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	balance, err := strconv.Atoi(str)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	add, err := order_service.GetOrderPrice(orderId)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	balance += add
+	user := models.User{
+		UserId: takerId,
+	}
+	var db2Info = make(map[string]interface{})
+	db2Info["take_user_id"] = takerId
+	db2Info["balance"] = balance
+
+	if !user.Updates(db2Info) {
+		logInfo, _ := json.Marshal(db2Info)
+		logging.Error("FinishOrder2:db-Updates" + string(logInfo))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
