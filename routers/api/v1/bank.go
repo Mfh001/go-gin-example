@@ -13,10 +13,16 @@ import (
 
 // @Summary 绑定银行卡
 // @Produce  json
-// @Param   json     body    models.RequestBankCardInfo     true        "请求的json结构"
+// @Param user_id body int false "user_id"
+// @Param bank_name body string false "bank_name"
+// @Param Bank_branch_name body string false "Bank_branch_name"
+// @Param bank_card body string false "bank_card"
+// @Param user_name body string false "user_name"
+// @Param password body string false "password"
+// @Param code body string false "code"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/bink/bind [post]
+// @Router /api/v1/bank/bind [post]
 // @Tags 银行卡
 func BindBankCard(c *gin.Context) {
 	var (
@@ -28,11 +34,11 @@ func BindBankCard(c *gin.Context) {
 		appG.Response(httpCode, errCode, nil)
 		return
 	}
-	if form.BankCardInfo.UserId == 0 || !auth_service.ExistUserInfo(form.BankCardInfo.UserId) {
+	if form.UserId == 0 || !auth_service.ExistUserInfo(form.UserId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	userPhone, err := auth_service.GetUserPhone(form.BankCardInfo.UserId)
+	userPhone, err := auth_service.GetUserPhone(form.UserId)
 	if userPhone == "" || err != nil {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -47,8 +53,15 @@ func BindBankCard(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.SMSCODE_ERROR, nil)
 		return
 	}
-
-	form.BankCardInfo.Insert()
+	bankInfo := models.BankCardInfo{
+		UserId:         form.UserId,
+		BankName:       form.BankName,
+		BankBranchName: form.BankBranchName,
+		BankCard:       form.BankCard,
+		UserName:       form.UserName,
+		Password:       form.Password,
+	}
+	bankInfo.Insert()
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }

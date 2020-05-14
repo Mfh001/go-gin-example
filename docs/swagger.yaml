@@ -8,35 +8,6 @@ definitions:
       msg:
         type: string
     type: object
-  models.BankCardInfo:
-    properties:
-      bankBranchName:
-        description: 支行名称
-        type: string
-      bankCard:
-        description: 银行卡号
-        type: string
-      bankName:
-        description: 银行名称
-        type: string
-      password:
-        description: 给银行卡信息设置的密码
-        type: string
-      userId:
-        type: integer
-      userName:
-        description: 开户名
-        type: string
-    type: object
-  models.RequestBankCardInfo:
-    properties:
-      bankCardInfo:
-        $ref: '#/definitions/models.BankCardInfo'
-        type: object
-      code:
-        description: 验证码
-        type: string
-    type: object
 info:
   contact: {}
   description: A web of gin
@@ -115,15 +86,44 @@ paths:
       summary: Get 用户获取钱包余额
       tags:
       - 接单
-  /api/v1/bink/bind:
+  /api/v1/bank/bind:
     post:
       parameters:
-      - description: 请求的json结构
+      - description: user_id
         in: body
-        name: json
-        required: true
+        name: user_id
         schema:
-          $ref: '#/definitions/models.RequestBankCardInfo'
+          type: integer
+      - description: bank_name
+        in: body
+        name: bank_name
+        schema:
+          type: string
+      - description: Bank_branch_name
+        in: body
+        name: Bank_branch_name
+        schema:
+          type: string
+      - description: bank_card
+        in: body
+        name: bank_card
+        schema:
+          type: string
+      - description: user_name
+        in: body
+        name: user_name
+        schema:
+          type: string
+      - description: password
+        in: body
+        name: password
+        schema:
+          type: string
+      - description: code
+        in: body
+        name: code
+        schema:
+          type: string
       produces:
       - application/json
       responses:

@@ -14,8 +14,13 @@ type BankCardInfo struct {
 }
 
 type RequestBankCardInfo struct {
-	BankCardInfo BankCardInfo
-	Code         string //验证码
+	UserId         int    `form:"user_id"`
+	BankName       string `form:"bank_name"`        //银行名称
+	BankBranchName string `form:"Bank_branch_name"` //支行名称
+	BankCard       string `form:"bank_card"`        //银行卡号
+	UserName       string `form:"user_name"`        //开户名
+	Password       string `form:"password"`         //给银行卡信息设置的密码
+	Code           string `form:"code"`             //验证码
 }
 
 func (info BankCardInfo) Insert() bool {

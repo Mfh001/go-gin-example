@@ -121,7 +121,7 @@
                 }
             }
         },
-        "/api/v1/bink/bind": {
+        "/api/v1/bank/bind": {
             "post": {
                 "produces": [
                     "application/json"
@@ -132,12 +132,59 @@
                 "summary": "绑定银行卡",
                 "parameters": [
                     {
-                        "description": "请求的json结构",
-                        "name": "json",
+                        "description": "user_id",
+                        "name": "user_id",
                         "in": "body",
-                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RequestBankCardInfo"
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "bank_name",
+                        "name": "bank_name",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Bank_branch_name",
+                        "name": "Bank_branch_name",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "bank_card",
+                        "name": "bank_card",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "user_name",
+                        "name": "user_name",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "password",
+                        "name": "password",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "code",
+                        "name": "code",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -1077,47 +1124,6 @@
                     "type": "object"
                 },
                 "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.BankCardInfo": {
-            "type": "object",
-            "properties": {
-                "bankBranchName": {
-                    "description": "支行名称",
-                    "type": "string"
-                },
-                "bankCard": {
-                    "description": "银行卡号",
-                    "type": "string"
-                },
-                "bankName": {
-                    "description": "银行名称",
-                    "type": "string"
-                },
-                "password": {
-                    "description": "给银行卡信息设置的密码",
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "integer"
-                },
-                "userName": {
-                    "description": "开户名",
-                    "type": "string"
-                }
-            }
-        },
-        "models.RequestBankCardInfo": {
-            "type": "object",
-            "properties": {
-                "bankCardInfo": {
-                    "type": "object",
-                    "$ref": "#/definitions/models.BankCardInfo"
-                },
-                "code": {
-                    "description": "验证码",
                     "type": "string"
                 }
             }
