@@ -88,7 +88,7 @@ func (info *Order) First() (int, error) {
 }
 
 func (info *Order) GetOrderInfoByTradeNo() (bool, error) {
-	err := db.Select("user_id, order_id, status").Where("trade_no = ?", info.TradeNo).Take(&info).Error
+	err := db.Select("user_id, order_id, status").Where("trade_no = ?", info.TradeNo).First(&info).Error
 	if err != nil {
 		return false, err
 	}
@@ -96,7 +96,7 @@ func (info *Order) GetOrderInfoByTradeNo() (bool, error) {
 }
 
 func (info *Order) GetOrderInfoByTakerTradeNo() (bool, error) {
-	err := db.Select("taker_user_id, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).Take(&info).Error
+	err := db.Select("taker_user_id, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).First(&info).Error
 	if err != nil {
 		return false, err
 	}

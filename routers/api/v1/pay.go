@@ -247,6 +247,7 @@ func TakerWxNotify(c *gin.Context) {
 	if userSign != postSign {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "sign错误"
+		logging.Info("--------pay-userSign")
 		resStr := util.Map2Xml(resMap)
 		c.JSON(http.StatusOK, resStr)
 		return
@@ -265,7 +266,7 @@ func TakerWxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
-	if info.Status != var_const.OrderStatusPaidPay {
+	if info.Status != var_const.OrderStatusTakerWaitPay {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)
