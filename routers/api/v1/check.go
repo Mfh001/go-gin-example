@@ -9,6 +9,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/EDDYCJY/go-gin-example/service/check_service"
+	"github.com/EDDYCJY/go-gin-example/service/order_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"net/http"
@@ -96,6 +97,7 @@ func GetCheckInfo(c *gin.Context) {
 // @Tags 审核
 func GetAdminChecks(c *gin.Context) {
 	appG := app.Gin{C: c}
+	order_service.Refund(13)
 	var list []models.Check
 	check_service.GetCheckList(&list)
 	appG.Response(http.StatusOK, e.SUCCESS, list)

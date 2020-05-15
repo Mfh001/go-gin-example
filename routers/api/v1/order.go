@@ -290,6 +290,7 @@ func ConfirmOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	//order_service.Refund(13)
 	//收益
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
