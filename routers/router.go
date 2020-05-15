@@ -34,6 +34,11 @@ func InitRouter() *gin.Engine {
 	r.Any("/pay/notify", v1.WxNotify)
 	r.Any("/pay/taker/notify", v1.TakerWxNotify)
 
+	//管理员获取审核列表
+	r.GET("/check/admin", v1.GetAdminChecks)
+	//管理员进行审核
+	r.PUT("/check/admin/:id", v1.AdminCheck)
+
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())
 	{
@@ -41,10 +46,6 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/check", v1.AddCheck)
 		//用户获取提交的审核信息
 		apiV1.GET("/check", v1.GetCheckInfo)
-		//管理员获取审核列表
-		apiV1.GET("/check/admin", v1.GetAdminChecks)
-		//管理员进行审核
-		apiV1.PUT("/check/admin/:id", v1.AdminCheck)
 
 		//下单
 		apiV1.POST("/order", v1.AddOrder)
