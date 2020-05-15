@@ -93,7 +93,7 @@ func GetCheckInfo(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/check/admin [get]
+// @Router /check/admin [get]
 // @Tags 审核
 func GetAdminChecks(c *gin.Context) {
 	appG := app.Gin{C: c}
@@ -108,7 +108,7 @@ func GetAdminChecks(c *gin.Context) {
 // @Param state body int false "State -1/1"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/check/admin/{user_id} [put]
+// @Router /check/admin/{user_id} [put]
 // @Tags 审核
 func AdminCheck(c *gin.Context) {
 	var (

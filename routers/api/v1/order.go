@@ -28,7 +28,7 @@ import (
 // @Param hero_num body int false "英雄数量"
 // @Param cur_level body int false "当前段位"
 // @Param target_level body int false "目标段位"
-// @Param game_account body string false "游戏账号"
+// @Param game_acc body string false "游戏账号"
 // @Param game_pwd body string false "游戏密码"
 // @Param game_role body string false "游戏角色名"
 // @Param game_phone body string false "验证手机"

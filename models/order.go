@@ -33,8 +33,8 @@ type Order struct {
 	PayIp         string `json:"pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TradeType     string `json:"trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
 
-	Contact string `json:"contact" form:"-" gorm:"type:varchar(30);not null;default:''"`
-	Qq      string `json:"qq" form:"-" gorm:"type:varchar(30);not null;default:''"`
+	Contact string `json:"contact" form:"contact" gorm:"type:varchar(30);not null;default:''"`
+	Qq      string `json:"qq" form:"qq" gorm:"type:varchar(30);not null;default:''"`
 
 	TakerTradeNo   string `json:"taker_trade_no" gorm:"type:varchar(50);not null;default:''"`
 	TakerUserId    int    `json:"take_user_id" form:"-" gorm:"type:int(12);not null;default:0"`

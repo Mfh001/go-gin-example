@@ -329,66 +329,6 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/check/admin": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "审核"
-                ],
-                "summary": "Get 管理员获取审核列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/check/admin/{user_id}": {
-            "put": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "审核"
-                ],
-                "summary": "管理员进行审核",
-                "parameters": [
-                    {
-                        "description": "State -1/1",
-                        "name": "state",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/order": {
             "post": {
                 "produces": [
@@ -473,7 +413,7 @@ var doc = `{
                     },
                     {
                         "description": "游戏账号",
-                        "name": "game_account",
+                        "name": "game_acc",
                         "in": "body",
                         "schema": {
                             "type": "string"
@@ -969,6 +909,66 @@ var doc = `{
                     {
                         "description": "user_id",
                         "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/check/admin": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "审核"
+                ],
+                "summary": "Get 管理员获取审核列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/check/admin/{user_id}": {
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "审核"
+                ],
+                "summary": "管理员进行审核",
+                "parameters": [
+                    {
+                        "description": "State -1/1",
+                        "name": "state",
                         "in": "body",
                         "schema": {
                             "type": "integer"
