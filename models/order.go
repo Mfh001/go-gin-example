@@ -129,7 +129,7 @@ func GetNeedTakeOrders(infos *[]Order) (bool, error) {
 	return true, nil
 }
 func GetTakeOrders(takerId int, infos *[]Order) (bool, error) {
-	err := db.Select("order_id, price, status, user_id, nick_name, game_type, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, taker_user_id, taker_nick_name, contact, qq").Where("status >= ? and take_user_id = ?", var_const.OrderStatusTakerPaid, takerId).Find(&infos).Error
+	err := db.Select("order_id, price, status, user_id, nick_name, game_type, game_acc, game_phone, game_pwd, game_role, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, taker_user_id, taker_nick_name, contact, qq").Where("status >= ? and take_user_id = ?", var_const.OrderStatusTakerPaid, takerId).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil
@@ -141,7 +141,7 @@ func GetTakeOrders(takerId int, infos *[]Order) (bool, error) {
 }
 
 func GetUserOrders(userId int, infos *[]Order) (bool, error) {
-	err := db.Select("order_id, price, status, user_id, nick_name, game_type, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, taker_user_id, taker_nick_name, contact, qq").Where("status >= ? and user_id = ?", var_const.OrderStatusWaitPay, userId).Find(&infos).Error
+	err := db.Select("order_id, price, status, user_id, nick_name, game_type, game_acc, game_phone, game_pwd, game_role, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, taker_user_id, taker_nick_name, contact, qq").Where("status >= ? and user_id = ?", var_const.OrderStatusWaitPay, userId).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil
