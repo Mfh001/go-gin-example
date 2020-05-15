@@ -138,6 +138,7 @@ func WxNotify(c *gin.Context) {
 	}
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusPaidPay
+	m["transaction_id"] = resMap["transaction_id"]
 	m["upd_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
@@ -282,6 +283,7 @@ func TakerWxNotify(c *gin.Context) {
 	}
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusTakerPaid
+	m["taker_transaction_id"] = resMap["transaction_id"]
 	m["upd_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)

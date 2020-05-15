@@ -32,18 +32,20 @@ type Order struct {
 	PayDesc       string `json:"pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
 	PayIp         string `json:"pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TradeType     string `json:"trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
+	TransactionId string `json:"transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
 
 	Contact     string `json:"contact" form:"contact" gorm:"type:varchar(30);not null;default:''"`
 	Qq          string `json:"qq" form:"qq" gorm:"type:varchar(30);not null;default:''"`
 	Description string `json:"description" form:"description" gorm:"type:varchar(1000);not null;default:''"`
 
-	TakerTradeNo   string `json:"taker_trade_no" gorm:"type:varchar(50);not null;default:''"`
-	TakerUserId    int    `json:"take_user_id" form:"-" gorm:"type:int(12);not null;default:0"`
-	TakerNickName  string `json:"take_nick_name" gorm:"type:varchar(32);not null;default:''"`
-	TakerPayAmount int    `json:"taker_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
-	TakerPayDesc   string `json:"taker_pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
-	TakerPayIp     string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
-	TakerTradeType string `json:"taker_trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
+	TakerTradeNo       string `json:"taker_trade_no" gorm:"type:varchar(50);not null;default:''"`
+	TakerUserId        int    `json:"take_user_id" form:"-" gorm:"type:int(12);not null;default:0"`
+	TakerNickName      string `json:"take_nick_name" gorm:"type:varchar(32);not null;default:''"`
+	TakerPayAmount     int    `json:"taker_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	TakerPayDesc       string `json:"taker_pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
+	TakerPayIp         string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
+	TakerTradeType     string `json:"taker_trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
+	TakerTransactionId string `json:"taker_transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
 
 	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`
@@ -130,7 +132,7 @@ func GetNeedTakeOrders(infos *[]Order) (bool, error) {
 	return true, nil
 }
 func GetTakeOrders(takerId int, infos *[]Order) (bool, error) {
-	err := db.Select("*").Where("status >= ? and take_user_id = ?", var_const.OrderStatusTakerPaid, takerId).Find(&infos).Error
+	err := db.Select("*").Where("status >= ? and taker_user_id = ?", var_const.OrderStatusTakerPaid, takerId).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil

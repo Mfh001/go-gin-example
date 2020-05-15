@@ -498,7 +498,6 @@ func TakerPay(userId int, orderId int, ip string) (map[string]interface{}, bool)
 type RefundReq struct {
 	AppId       string `xml:"appid"`
 	MchId       string `xml:"mch_id"`
-	SubMchId    string `xml:"sub_mch_id"`
 	NonceStr    string `xml:"nonce_str"`
 	Sign        string `xml:"sign"`
 	OutTradeNo  string `xml:"out_trade_no"`
@@ -554,7 +553,6 @@ func Refund(orderId int) bool {
 	var payReq RefundReq
 	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
 	payReq.MchId = var_const.WXMchID
-	payReq.SubMchId = var_const.WXMchID
 	payReq.NonceStr = GenerateNonceStr()
 	payReq.OutTradeNo = outTradeNo
 	payReq.OutRefundNo = payOrderId
@@ -562,12 +560,11 @@ func Refund(orderId int) bool {
 	payReq.RefundFee = totalFee
 
 	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId         //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId        //商户号
-	reqMap["sub_mch_id"] = payReq.SubMchId //商户号
-	reqMap["nonce_str"] = payReq.NonceStr  //随机数
+	reqMap["appid"] = payReq.AppId        //微信小程序appid
+	reqMap["mch_id"] = payReq.MchId       //商户号
+	reqMap["nonce_str"] = payReq.NonceStr //随机数
 	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo //订单号
+	reqMap["out_trade_no"] = payReq.OutTradeNo
 	reqMap["total_fee"] = payReq.TotalFee
 	reqMap["refund_fee"] = payReq.RefundFee
 	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
@@ -582,7 +579,7 @@ func Refund(orderId int) bool {
 	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
 	bytesReq = []byte(strReq)
 
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/pay/unifiedorder", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
 	if err2 != nil {
 		return false
 	}
