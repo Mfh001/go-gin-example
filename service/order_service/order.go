@@ -579,7 +579,7 @@ func Refund(orderId int) bool {
 	}
 	strReq := string(bytesReq)
 
-	strReq = strings.Replace(strReq, "PayOrderReq", "xml", -1)
+	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
 	bytesReq = []byte(strReq)
 
 	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/pay/unifiedorder", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
