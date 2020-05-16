@@ -504,6 +504,7 @@ type RefundReq struct {
 	OutRefundNo string `xml:"out_refund_no"`
 	TotalFee    int    `xml:"total_fee"`
 	RefundFee   int    `xml:"refund_fee"`
+	NotifyUrl   string `xml:"notify_url"`
 }
 type RefundResp struct {
 	ReturnCode string `xml:"return_code"`
@@ -558,6 +559,7 @@ func Refund(orderId int) bool {
 	payReq.OutRefundNo = payOrderId
 	payReq.TotalFee = totalFee
 	payReq.RefundFee = totalFee
+	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/taker/refundnotify"
 
 	var reqMap = make(map[string]interface{}, 0)
 	reqMap["appid"] = payReq.AppId        //微信小程序appid
@@ -567,6 +569,7 @@ func Refund(orderId int) bool {
 	reqMap["out_trade_no"] = payReq.OutTradeNo
 	reqMap["total_fee"] = payReq.TotalFee
 	reqMap["refund_fee"] = payReq.RefundFee
+	reqMap["notify_url"] = payReq.NotifyUrl
 	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
 
 	// 调用支付统一下单API

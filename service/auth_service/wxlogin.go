@@ -17,8 +17,8 @@ type WxLoginUserInfo struct {
 	NickName  string `json:"nick_name" form:"nickname" valid:"Required;MaxSize(50)"`
 	AvatarUrl string `json:"avatar_url" form:"avatar_url" valid:"Required;MaxSize(300)"`
 	Gender    int    `json:"gender" form:"gender" valid:"Required;Range(1,2)"`
-	Province  string `json:"province" form:"province" valid:"Required;MaxSize(30)"`
-	City      string `json:"city" form:"city" valid:"Required;MaxSize(30)"`
+	Province  string `json:"province" form:"province" valid:"MaxSize(30)"`
+	City      string `json:"city" form:"city" valid:"MaxSize(30)"`
 }
 
 func (info *WxLoginUserInfo) WXLogin() (string, bool) {

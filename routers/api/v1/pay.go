@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
@@ -15,7 +14,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -153,8 +151,12 @@ func WxNotify(c *gin.Context) {
 		return
 	}
 	logging.Info("--------Updates")
-	strResp := "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
-	c.JSON(http.StatusOK, strResp)
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+	//logging.Info("WxNotify:SUCCESS-")
+	resStr := util.Map2Xml(resMap)
+	logging.Info("WxNotify:SUCCESS-" + resStr)
+	c.JSON(http.StatusOK, resStr)
 	return
 }
 
@@ -209,51 +211,36 @@ func TakerWxPay(c *gin.Context) {
 	return
 }
 
-type WXPayNotifyResp struct {
-	Return_code string `xml:"return_code"`
-	Return_msg  string `xml:"return_msg"`
-}
-
 // 支付回调接口
 func TakerWxNotify(c *gin.Context) {
 	logging.Info("--------pay")
-	//var resMap = make(map[string]interface{}, 0)
-	var resp WXPayNotifyResp
-	resp.Return_code = "SUCCESS"
-	resp.Return_msg = "OK"
+	var resMap = make(map[string]interface{}, 0)
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
 
 	valueXml, _ := ioutil.ReadAll(c.Request.Body) //获取post的数据
 	logging.Info("--------pay:" + string(valueXml))
 	values := util.Xml2Map(string(valueXml))
 
 	if retCode, ok := values["result_code"]; retCode != "SUCCESS" || !ok {
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "result_code错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
 	if _, ok := values["out_trade_no"]; !ok {
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
 	if _, ok := values["sign"]; !ok {
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
 
@@ -264,13 +251,11 @@ func TakerWxNotify(c *gin.Context) {
 	userSign := order_service.WxPayCalcSign(values, var_const.WXMchKey)
 	//验证提交过来的签名是否正确
 	if userSign != postSign {
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		logging.Info("--------pay-userSign")
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
 
@@ -281,23 +266,17 @@ func TakerWxNotify(c *gin.Context) {
 	}
 	_, err := info.GetOrderInfoByTakerTradeNo()
 	if err != nil {
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
 	if info.Status != var_const.OrderStatusTakerWaitPay {
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
 
@@ -309,21 +288,20 @@ func TakerWxNotify(c *gin.Context) {
 	}
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusTakerPaid
+	m["taker_transaction_id"] = resMap["transaction_id"]
 	m["upd_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("WxNotify:db-failed-" + string(log))
-		resp.Return_code = "FAIL"
-		resp.Return_msg = "result_code错误"
-
-		bytes, _ := xml.Marshal(resp)
-		strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-
-		c.JSON(http.StatusOK, strResp)
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
 		return
 	}
-
-	strResp := "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
-	c.JSON(http.StatusOK, strResp)
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+	resStr := util.Map2Xml(resMap)
+	c.JSON(http.StatusOK, resStr)
 	return
 }

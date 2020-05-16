@@ -47,6 +47,9 @@ type Order struct {
 	TakerTradeType     string `json:"taker_trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TakerTransactionId string `json:"taker_transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
 
+	RefundTradeNo string `json:"refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
+	RefundAmount  int    `json:"refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+
 	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`
 }
