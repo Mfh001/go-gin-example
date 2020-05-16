@@ -39,8 +39,8 @@ type Order struct {
 	Description string `json:"description" form:"description" gorm:"type:varchar(1000);not null;default:''"`
 
 	TakerTradeNo       string `json:"taker_trade_no" gorm:"type:varchar(50);not null;default:''"`
-	TakerUserId        int    `json:"take_user_id" form:"-" gorm:"type:int(12);not null;default:0"`
-	TakerNickName      string `json:"take_nick_name" gorm:"type:varchar(32);not null;default:''"`
+	TakerUserId        int    `json:"taker_user_id" form:"-" gorm:"type:int(12);not null;default:0"`
+	TakerNickName      string `json:"taker_nick_name" gorm:"type:varchar(32);not null;default:''"`
 	TakerPayAmount     int    `json:"taker_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
 	TakerPayDesc       string `json:"taker_pay_desc" form:"-" gorm:"type:varchar(100);not null;default:''"`
 	TakerPayIp         string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`

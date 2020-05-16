@@ -201,7 +201,7 @@ func GetOrderTaker(orderId int) (int, error) {
 	if !ExistOrder(orderId) {
 		return 0, fmt.Errorf("GetOrderTaker:OrderIdnoExist")
 	}
-	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "take_user_id")
+	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "taker_user_id")
 	if err != nil {
 		logging.Error("GetOrderTaker:" + strconv.Itoa(orderId))
 		return 0, err

@@ -225,7 +225,7 @@ func FinishOrder(c *gin.Context) {
 		UserId: takerId,
 	}
 	var db2Info = make(map[string]interface{})
-	db2Info["take_user_id"] = takerId
+	db2Info["taker_user_id"] = takerId
 	db2Info["balance"] = balance
 
 	if !user.Updates(db2Info) {
