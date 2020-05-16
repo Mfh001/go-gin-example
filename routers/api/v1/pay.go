@@ -152,7 +152,7 @@ func WxNotify(c *gin.Context) {
 	}
 	logging.Info("--------Updates")
 	resMap["return_code"] = "SUCCESS"
-	resMap["return_msg"] = "成功"
+	resMap["return_msg"] = "OK"
 	logging.Info("WxNotify:SUCCESS-")
 	resStr := util.Map2Xml(resMap)
 	c.JSON(http.StatusOK, resStr)
@@ -299,7 +299,7 @@ func TakerWxNotify(c *gin.Context) {
 		return
 	}
 	resMap["return_code"] = "SUCCESS"
-	resMap["return_msg"] = "成功"
+	resMap["return_msg"] = "OK"
 	resStr := util.Map2Xml(resMap)
 	c.JSON(http.StatusOK, resStr)
 	return
