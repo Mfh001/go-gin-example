@@ -101,14 +101,14 @@ func (info *Order) GetOrderInfoByTradeNo() (bool, error) {
 }
 
 func (info *Order) GetOrderInfoByTakerTradeNo() (bool, error) {
-	err := db.Select("taker_user_id, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).First(&info).Error
+	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).First(&info).Error
 	if err != nil {
 		return false, err
 	}
 	return true, nil
 }
 func (info *Order) GetOrderInfoByRefundTradeNo() (bool, error) {
-	err := db.Select("order_id, status").Where("refund_trade_no = ?", info.RefundTradeNo).First(&info).Error
+	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("refund_trade_no = ?", info.RefundTradeNo).First(&info).Error
 	if err != nil {
 		return false, err
 	}

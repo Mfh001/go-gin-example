@@ -614,6 +614,31 @@ func Refund(orderId int) bool {
 			logging.Error("Refund:failed-db-" + string(log))
 			return false
 		}
+		db2Info := models.Order{
+			RefundTradeNo: payReq.OutRefundNo,
+		}
+		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
+
+		userInfo := models.User{
+			UserId: db2Info.TakerUserId,
+		}
+		marginStr, _ := auth_service.GetUserMargin(db2Info.TakerUserId)
+		if marginStr == "" {
+			marginStr = "0"
+		}
+		margin, _ := strconv.Atoi(marginStr)
+		margin -= db2Info.TakerPayAmount
+		if margin < 0 {
+			margin = 0
+		}
+		var db3Info = make(map[string]interface{})
+		db3Info["margin"] = margin
+
+		if !userInfo.Updates(db3Info) {
+			log, _ := json.Marshal(m)
+			logging.Error("Refund:failed-userInfo-db-" + string(log))
+			return false
+		}
 	}
 	return true
 }

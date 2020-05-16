@@ -303,6 +303,29 @@ func TakerWxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
+
+	userInfo := models.User{
+		UserId: info.TakerUserId,
+	}
+	marginStr, _ := auth_service.GetUserMargin(info.TakerUserId)
+	if marginStr == "" {
+		marginStr = "0"
+	}
+	margin, _ := strconv.Atoi(marginStr)
+	margin += info.TakerPayAmount
+	var db2Info = make(map[string]interface{})
+	db2Info["margin"] = margin
+
+	if !userInfo.Updates(db2Info) {
+		log, _ := json.Marshal(m)
+		logging.Error("WxNotify:db-userInfo-failed-" + string(log))
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "OK"
 	resStr := util.Map2Xml(resMap)

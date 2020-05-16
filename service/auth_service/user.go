@@ -194,3 +194,15 @@ func GetUserBalance(userId int) (string, error) {
 	}
 	return balance, nil
 }
+
+func GetUserMargin(userId int) (string, error) {
+	if !ExistUserInfo(userId) {
+		return "", fmt.Errorf("GetUserMargin:userIdnoExist")
+	}
+	margin, err := gredis.HGet(GetRedisKeyUserInfo(userId), "margin")
+	if err != nil {
+		logging.Error("GetUserMargin:" + strconv.Itoa(userId))
+		return "", err
+	}
+	return margin, nil
+}
