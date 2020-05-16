@@ -71,7 +71,7 @@ func InitRouter() *gin.Engine {
 		//绑定银行卡
 		apiV1.POST("/bank/bind", v1.BindBankCard)
 		apiV1.GET("/bank", v1.GetBankCardInfo)
-		apiV1.GET("/balance/", v1.GetUserBalance)
+		apiV1.GET("/balance", v1.GetUserBalance)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

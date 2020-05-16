@@ -59,7 +59,7 @@ func GetUserOrders(c *gin.Context) {
 // @Param user_id body int false "user_id"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/bank/balance [get]
+// @Router /api/v1/balance [get]
 // @Tags 接单
 func GetUserBalance(c *gin.Context) {
 	var (
