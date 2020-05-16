@@ -153,12 +153,8 @@ func WxNotify(c *gin.Context) {
 		return
 	}
 	logging.Info("--------Updates")
-	resMap["return_code"] = "SUCCESS"
-	resMap["return_msg"] = "OK"
-	//logging.Info("WxNotify:SUCCESS-")
-	resStr := util.Map2Xml(resMap)
-	logging.Info("WxNotify:SUCCESS-" + resStr)
-	c.JSON(http.StatusOK, resStr)
+	strResp := "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
+	c.JSON(http.StatusOK, strResp)
 	return
 }
 
@@ -326,12 +322,8 @@ func TakerWxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, strResp)
 		return
 	}
-	resp.Return_code = "SUCCESS"
-	resp.Return_msg = "OK"
 
-	bytes, _ := xml.Marshal(resp)
-	strResp := strings.Replace(string(bytes), "WXPayNotifyResp", "xml", -1)
-	logging.Info("WxNotify:SUCCESS-" + strResp)
+	strResp := "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
 	c.JSON(http.StatusOK, strResp)
 	return
 }
