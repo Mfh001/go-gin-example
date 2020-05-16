@@ -67,13 +67,13 @@ func WxPay(c *gin.Context) {
 
 // 支付回调接口
 func WxNotify(c *gin.Context) {
-	logging.Info("--------pay")
+	//logging.Info("--------pay")
 	var resMap = make(map[string]interface{}, 0)
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "OK"
 
 	valueXml, _ := ioutil.ReadAll(c.Request.Body) //获取post的数据
-	logging.Info("--------pay:" + string(valueXml))
+	//logging.Info("--------pay:" + string(valueXml))
 	values := util.Xml2Map(string(valueXml))
 
 	if retCode, ok := values["result_code"]; retCode != "SUCCESS" || !ok {
@@ -125,9 +125,9 @@ func WxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
-	logging.Info("--------info.Status")
+	//logging.Info("--------info.Status")
 	if info.Status != var_const.OrderStatusWaitPay {
-		logging.Info("--------info.!Status")
+		//logging.Info("--------info.!Status")
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)
@@ -154,7 +154,7 @@ func WxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
-	logging.Info("--------Updates")
+	//logging.Info("--------Updates")
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "OK"
 	//logging.Info("WxNotify:SUCCESS-")
@@ -217,13 +217,13 @@ func TakerWxPay(c *gin.Context) {
 
 // 支付回调接口
 func TakerWxNotify(c *gin.Context) {
-	logging.Info("--------pay")
+	//logging.Info("--------pay")
 	var resMap = make(map[string]interface{}, 0)
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "OK"
 
 	valueXml, _ := ioutil.ReadAll(c.Request.Body) //获取post的数据
-	logging.Info("--------pay:" + string(valueXml))
+	//logging.Info("--------pay:" + string(valueXml))
 	values := util.Xml2Map(string(valueXml))
 
 	if retCode, ok := values["result_code"]; retCode != "SUCCESS" || !ok {
@@ -257,7 +257,7 @@ func TakerWxNotify(c *gin.Context) {
 	if userSign != postSign {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "sign错误"
-		logging.Info("--------pay-userSign")
+		//logging.Info("--------pay-userSign")
 		resStr := util.Map2Xml(resMap)
 		c.JSON(http.StatusOK, resStr)
 		return
