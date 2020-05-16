@@ -151,6 +151,7 @@ func WxNotify(c *gin.Context) {
 	}
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "成功"
+	logging.Info("WxNotify:SUCCESS-")
 	resStr := util.Map2Xml(resMap)
 	c.JSON(http.StatusOK, resStr)
 	return
