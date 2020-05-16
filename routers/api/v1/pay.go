@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
@@ -11,9 +13,11 @@ import (
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
 	"github.com/gin-gonic/gin"
+	"github.com/nanjishidu/gomini/gocrypto"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -304,4 +308,60 @@ func TakerWxNotify(c *gin.Context) {
 	resStr := util.Map2Xml(resMap)
 	c.JSON(http.StatusOK, resStr)
 	return
+}
+
+type RefundNotify struct {
+	Return_code    string `xml:"return_code"`
+	Return_msg     string `xml:"return_msg"`
+	Appid          string `xml:"appid"`
+	Mch_id         string `xml:"mch_id"`
+	Nonce          string `xml:"nonce_str"`
+	Req_info       string `xml:"req_info"`
+	Out_refund_no  string `xml:"out_refund_no"`
+	Out_trade_no   string `xml:"out_trade_no"`
+	Refund_fee     string `xml:"refund_fee"`
+	Refund_status  string `xml:"refund_status"`
+	Success_time   string `xml:"success_time"`
+	Transaction_id string `xml:"transaction_id"`
+}
+
+//微信退款回调
+func WxRefundCallback(c *gin.Context) {
+	body, _ := ioutil.ReadAll(c.Request.Body)
+
+	var mr RefundNotify
+	_ = xml.Unmarshal(body, &mr)
+	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
+	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
+	plaintext, _ := gocrypto.AesECBDecrypt(b)
+
+	var mnr RefundNotify
+	_ = xml.Unmarshal(plaintext, &mnr)
+	if mnr.Refund_status == "SUCCESS" {
+		//f(mnr.Out_trade_no)
+
+		dbInfo := models.Order{
+			RefundTradeNo: mnr.Out_trade_no,
+		}
+		_, _ = dbInfo.GetOrderInfoByRefundTradeNo()
+		if dbInfo.Status != var_const.OrderStatusConfirmFinished {
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		var m = make(map[string]interface{})
+		m["status"] = var_const.OrderStatusRefundFinished
+		m["upd_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("WxRefundCallback:failed-" + string(log))
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		c.JSON(http.StatusOK, nil)
+		return
+	} else {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
 }

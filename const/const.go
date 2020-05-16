@@ -22,6 +22,7 @@ const (
 	OrderStatusTakerPaid                = 4  //订单 接单已支付
 	OrderStatusTakerFinishedNeedConfirm = 5  //订单 代练已完成，请求确认 状态
 	OrderStatusConfirmFinished          = 6  //订单 确认完成 状态
+	OrderStatusRefundFinished           = 7  //订单 保证金已退 状态
 	OrderStatusCancel                   = -1 //订单 取消 状态
 
 	//满意度

@@ -107,6 +107,13 @@ func (info *Order) GetOrderInfoByTakerTradeNo() (bool, error) {
 	}
 	return true, nil
 }
+func (info *Order) GetOrderInfoByRefundTradeNo() (bool, error) {
+	err := db.Select("order_id, status").Where("refund_trade_no = ?", info.RefundTradeNo).First(&info).Error
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
 func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
 	var article Article

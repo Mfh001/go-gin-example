@@ -33,6 +33,7 @@ func InitRouter() *gin.Engine {
 	r.POST("/upload", api.UploadImage)
 	r.Any("/pay/notify", v1.WxNotify)
 	r.Any("/pay/taker/notify", v1.TakerWxNotify)
+	r.Any("/pay/taker/refundnotify", v1.WxRefundCallback)
 
 	//管理员获取审核列表
 	r.GET("/check/admin", v1.GetAdminChecks)

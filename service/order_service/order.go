@@ -601,7 +601,20 @@ func Refund(orderId int) bool {
 	if err != nil {
 		return false
 	}
-
+	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+		dbInfo := models.Order{
+			OrderId: orderId,
+		}
+		var m = make(map[string]interface{})
+		m["refund_trade_no"] = payReq.OutRefundNo
+		m["refund_amount"] = payReq.RefundFee
+		m["upd_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("Refund:failed-db-" + string(log))
+			return false
+		}
+	}
 	return true
 }
 
