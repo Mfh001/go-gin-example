@@ -5,7 +5,6 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
-	"github.com/EDDYCJY/go-gin-example/service/check_service"
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
@@ -24,10 +23,11 @@ func GetTakerOrders(c *gin.Context) {
 		appG   = app.Gin{C: c}
 		userId = com.StrTo(c.Query("user_id")).MustInt()
 	)
-	if userId == 0 || !auth_service.ExistUserInfo(userId) || !check_service.ExistUserCheck(userId) {
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+	//必须是代练 TODO
 	var list []models.Order
 	order_service.GetTakeOrderList(userId, &list)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
