@@ -9,7 +9,6 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/util"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
-	"github.com/EDDYCJY/go-gin-example/service/check_service"
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -180,10 +179,11 @@ func TakerWxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !check_service.ExistUserCheck(userId) {
-		appG.Response(http.StatusBadRequest, e.CHECK_NO_PASS, nil)
-		return
-	}
+	//判断是代练 TODO
+	//if !check_service.ExistUserCheck(userId) {
+	//	appG.Response(http.StatusBadRequest, e.CHECK_NO_PASS, nil)
+	//	return
+	//}
 	orderId, err := strconv.Atoi(c.PostForm("order_id"))
 	if err != nil {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
