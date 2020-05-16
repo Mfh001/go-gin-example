@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/EDDYCJY/go-gin-example/middleware/bloom_filter"
+	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
 	"net/http"
 
@@ -62,9 +63,11 @@ func Login(c *gin.Context) {
 	sessionKey := c.PostForm("session_key")
 
 	a := login{SessionKey: sessionKey}
+	logging.Info("--------Login")
 	ok, _ := valid.Valid(&a)
 	if !ok {
 		app.MarkErrors(valid.Errors)
+		logging.Info("--------SessionKey")
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -72,10 +75,12 @@ func Login(c *gin.Context) {
 	ok, _ = valid.Valid(info)
 	if !ok {
 		app.MarkErrors(valid.Errors)
+		logging.Info("--------GetWXCode")
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
 	if !bloom_filter.Filter.Has(auth_service.GetRedisKeyUserInfo(info.UserId)) {
+		logging.Info("--------bloom_filter")
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
