@@ -122,7 +122,9 @@ func WxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
+	logging.Info("--------info.Status")
 	if info.Status != var_const.OrderStatusWaitPay {
+		logging.Info("--------info.!Status")
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)
@@ -149,6 +151,7 @@ func WxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
+	logging.Info("--------Updates")
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "成功"
 	logging.Info("WxNotify:SUCCESS-")
