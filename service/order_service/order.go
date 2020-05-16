@@ -403,7 +403,7 @@ func TakerPay(userId int, orderId int, ip string) (map[string]interface{}, bool)
 	}
 
 	payOrderId := GeneratePayOrderId()
-	desc := "费用说明"
+	desc := "保证金"
 	tradeType := "JSAPI"
 
 	var payReq PayOrderReq
