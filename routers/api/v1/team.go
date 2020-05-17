@@ -117,7 +117,7 @@ func AddTeam(c *gin.Context) {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/team/joincheck [post]
-// @Tags 订单
+// @Tags 车队
 func JoinTeamCheckPwd(c *gin.Context) {
 	var (
 		appG   = app.Gin{C: c}
@@ -141,7 +141,7 @@ func JoinTeamCheckPwd(c *gin.Context) {
 	return
 }
 
-// @Summary 验证密码 用户是否可以加入车队
+// @Summary 加入车队
 // @Produce  json
 // @Param user_id body int false "user_id"
 // @Param team_id body int false "team_id"
@@ -153,7 +153,7 @@ func JoinTeamCheckPwd(c *gin.Context) {
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/team/join [post]
-// @Tags 订单
+// @Tags 车队
 func JoinTeam(c *gin.Context) {
 	var (
 		appG        = app.Gin{C: c}

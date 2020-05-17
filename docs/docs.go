@@ -1052,9 +1052,9 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "订单"
+                    "车队"
                 ],
-                "summary": "验证密码 用户是否可以加入车队",
+                "summary": "加入车队",
                 "parameters": [
                     {
                         "description": "user_id",
@@ -1135,7 +1135,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "订单"
+                    "车队"
                 ],
                 "summary": "验证密码 用户是否可以加入车队",
                 "parameters": [

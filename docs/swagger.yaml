@@ -705,9 +705,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 验证密码 用户是否可以加入车队
+      summary: 加入车队
       tags:
-      - 订单
+      - 车队
   /api/v1/team/joincheck:
     post:
       parameters:
@@ -734,7 +734,7 @@ paths:
             $ref: '#/definitions/app.Response'
       summary: 验证密码 用户是否可以加入车队
       tags:
-      - 订单
+      - 车队
   /api/v1/teampay:
     post:
       parameters:
