@@ -64,6 +64,10 @@ func initTable() {
 	if !tableBank {
 		db.CreateTable(BankCardInfo{})
 	}
+	tableTeam := db.HasTable(Team{})
+	if !tableTeam {
+		db.CreateTable(Team{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)

@@ -51,15 +51,15 @@
                 }
             }
         },
-        "/api/v1/bank": {
+        "/api/v1/balance": {
             "get": {
-                "consumes": [
-                    "application/json; charset=utf-8"
+                "produces": [
+                    "application/json"
                 ],
                 "tags": [
-                    "银行卡"
+                    "接单"
                 ],
-                "summary": "获取银行卡信息",
+                "summary": "Get 用户获取钱包余额",
                 "parameters": [
                     {
                         "description": "user_id",
@@ -86,15 +86,15 @@
                 }
             }
         },
-        "/api/v1/bank/balance": {
+        "/api/v1/bank": {
             "get": {
-                "produces": [
-                    "application/json"
+                "consumes": [
+                    "application/json; charset=utf-8"
                 ],
                 "tags": [
-                    "接单"
+                    "银行卡"
                 ],
-                "summary": "Get 用户获取钱包余额",
+                "summary": "获取银行卡信息",
                 "parameters": [
                     {
                         "description": "user_id",
@@ -892,6 +892,290 @@
                     {
                         "description": "user_id",
                         "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/team": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "车队"
+                ],
+                "summary": "下单",
+                "parameters": [
+                    {
+                        "description": "owner_id",
+                        "name": "owner_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "游戏",
+                        "name": "game_type",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "游戏大区",
+                        "name": "big_zone",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "起始段位",
+                        "name": "cur_level",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "结束段位",
+                        "name": "target_level",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "代练发布最多2人，用户发布只能1人",
+                        "name": "need_num",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "代练发布可以设置是否需要密码",
+                        "name": "need_pwd",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "密码",
+                        "name": "pwd",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "contact",
+                        "name": "contact",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "微信",
+                        "name": "qq",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "description",
+                        "name": "description",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/team/join": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "订单"
+                ],
+                "summary": "验证密码 用户是否可以加入车队",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "team_id",
+                        "name": "team_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "起始段位",
+                        "name": "cur_level",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "结束段位",
+                        "name": "target_level",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "contact",
+                        "name": "contact",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "微信",
+                        "name": "qq",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "description",
+                        "name": "description",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/team/joincheck": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "订单"
+                ],
+                "summary": "验证密码 用户是否可以加入车队",
+                "parameters": [
+                    {
+                        "description": "team_id",
+                        "name": "team_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "pwd",
+                        "name": "pwd",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/teampay": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "微信支付"
+                ],
+                "summary": "微信下单 获取发起微信支付所需的数据",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "team_id",
+                        "name": "order_id",
                         "in": "body",
                         "schema": {
                             "type": "integer"

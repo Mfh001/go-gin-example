@@ -206,3 +206,19 @@ func GetUserMargin(userId int) (string, error) {
 	}
 	return margin, nil
 }
+
+func GetUserType(userId int) (int, error) {
+	if !ExistUserInfo(userId) {
+		return 0, fmt.Errorf("GetUserType:userIdnoExist")
+	}
+	strType, err := gredis.HGet(GetRedisKeyUserInfo(userId), "type")
+	if err != nil {
+		logging.Error("GetUserType:" + strconv.Itoa(userId))
+		return 0, err
+	}
+	state, err := strconv.Atoi(strType)
+	if err != nil {
+		return 0, err
+	}
+	return state, nil
+}

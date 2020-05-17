@@ -57,7 +57,7 @@ func AddOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !order_service.CreateOrder(&form) {
+	if !order_service.CreateOrder(&form, 0) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
@@ -76,31 +76,7 @@ func AddOrder(c *gin.Context) {
 // @Router /api/v1/order/take [post]
 // @Tags 接单
 func TakeOrder(c *gin.Context) {
-	var (
-		appG = app.Gin{C: c}
-		form models.Order
-	)
-	httpCode, errCode := app.BindAndValid(c, &form)
-	if errCode != e.SUCCESS {
-		appG.Response(httpCode, errCode, nil)
-		return
-	}
-	if !auth_service.ExistUserInfo(form.UserId) {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if !order_service.CreateOrder(&form) {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	data := gin.H{}
-	data["order_id"] = form.OrderId
-	appG.Response(http.StatusOK, e.SUCCESS, data)
-	return
+
 }
 
 // @Summary 绑定上级
@@ -112,31 +88,7 @@ func TakeOrder(c *gin.Context) {
 // @Router /api/v1/agent/bind [post]
 // @Tags 代理
 func BindAgent(c *gin.Context) {
-	var (
-		appG = app.Gin{C: c}
-		form models.Order
-	)
-	httpCode, errCode := app.BindAndValid(c, &form)
-	if errCode != e.SUCCESS {
-		appG.Response(httpCode, errCode, nil)
-		return
-	}
-	if !auth_service.ExistUserInfo(form.UserId) {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if !order_service.CreateOrder(&form) {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	data := gin.H{}
-	data["order_id"] = form.OrderId
-	appG.Response(http.StatusOK, e.SUCCESS, data)
-	return
+
 }
 
 // @Summary Get 获取订单列表

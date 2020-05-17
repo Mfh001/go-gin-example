@@ -12,6 +12,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/util"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
+	"github.com/EDDYCJY/go-gin-example/service/team_service"
 	"github.com/gin-gonic/gin"
 	"github.com/nanjishidu/gomini/gocrypto"
 	"io/ioutil"
@@ -154,6 +155,31 @@ func WxNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, resStr)
 		return
 	}
+	//判断是否是车队订单
+	teamId, _ := order_service.GetOrderTeamId(info.OrderId)
+	if teamId > 0 {
+		team_service.SetTeamOrderFinished(teamId, info.OrderId)
+
+		uId, _ := order_service.GetOrderUserId(info.OrderId)
+		var m2 = make(map[string]interface{})
+		team := models.Team{
+			TeamId: teamId,
+		}
+		if team_service.GetTeamParam(teamId, "owner_type") == var_const.UserTypeNormal && team_service.GetTeamParam(teamId, "owner_id") == uId {
+			m2["status"] = var_const.TeamCanShow
+		} else {
+			if uId == team_service.GetTeamParam(teamId, "user_id1") {
+				m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
+				m2["order_status1"] = 1
+			}
+			if uId == team_service.GetTeamParam(teamId, "user_id2") {
+				m2["nick_name2"], _ = auth_service.GetUserNickName(uId)
+				m2["order_status2"] = 1
+			}
+		}
+		team.Updates(m2)
+	}
+
 	//logging.Info("--------Updates")
 	resMap["return_code"] = "SUCCESS"
 	resMap["return_msg"] = "OK"
@@ -190,6 +216,11 @@ func TakerWxPay(c *gin.Context) {
 	//	return
 	//}
 	orderId, err := strconv.Atoi(c.PostForm("order_id"))
+	teamId, _ := order_service.GetOrderTeamId(orderId)
+	if teamId > 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
 	if err != nil {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -387,4 +418,190 @@ func WxRefundCallback(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
 		return
 	}
+}
+
+// @Summary 微信下单 获取发起微信支付所需的数据
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "team_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/teampay [post]
+// @Tags 微信支付
+func TeamWxPay(c *gin.Context) {
+	appG := app.Gin{C: c}
+
+	userId, err := strconv.Atoi(c.PostForm("user_id"))
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	teamId, err := strconv.Atoi(c.PostForm("team_id"))
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !team_service.ExistTeam(teamId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	staus := team_service.GetTeamParam(teamId, "status")
+	if staus >= var_const.TeamWorking {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	takePayStaus := team_service.GetTeamParam(teamId, "taker_pay_status")
+	if takePayStaus == 1 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	//如果是接用户的车队
+	if team_service.GetTeamParam(teamId, "owner_type") == var_const.UserTypeNormal {
+		takerId := team_service.GetTeamParam(teamId, "taker_user_id")
+		if takerId != 0 && takerId != userId {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+	}
+	if team_service.GetTeamParam(teamId, "owner_type") == var_const.UserTypeInstead {
+		if team_service.GetTeamParam(teamId, "owner_id") != userId {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+	}
+
+	d, ok := team_service.Pay(userId, teamId, c.ClientIP())
+	if !ok {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, d)
+	return
+}
+
+func TeamWxNotify(c *gin.Context) {
+	//logging.Info("--------pay")
+	var resMap = make(map[string]interface{}, 0)
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+
+	valueXml, _ := ioutil.ReadAll(c.Request.Body) //获取post的数据
+	//logging.Info("--------pay:" + string(valueXml))
+	values := util.Xml2Map(string(valueXml))
+
+	if retCode, ok := values["result_code"]; retCode != "SUCCESS" || !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "result_code错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if _, ok := values["out_trade_no"]; !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if _, ok := values["sign"]; !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//微信提交过来的签名
+	postSign := values["sign"]
+	delete(values, "sign")
+	//根据提交过来的值，和我的商户支付秘钥，生成的签名
+	userSign := order_service.WxPayCalcSign(values, var_const.WXMchKey)
+	//验证提交过来的签名是否正确
+	if userSign != postSign {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		//logging.Info("--------pay-userSign")
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//判断订单存在
+	payOrderId := values["out_trade_no"].(string)
+	info := models.Team{
+		TakerTradeNo: payOrderId,
+	}
+	_, err := info.GetOrderInfoByTakerTradeNo()
+	if err != nil {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if info.TakerPayStatus != 0 {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//
+	//order信息更新
+	//保存支付订单 TODO
+	dbInfo := models.Team{
+		TeamId: info.TeamId,
+	}
+	var m = make(map[string]interface{})
+	m["taker_pay_status"] = 1
+	if info.OwnerType == var_const.UserTypeNormal && info.OrderStatus1 == 1 {
+		m["status"] = var_const.TeamWorking
+		//设置订单为已接单 TODO
+	}
+	if info.OwnerType == var_const.UserTypeInstead {
+		m["status"] = var_const.TeamCanShow
+	}
+	m["upd_time"] = int(time.Now().Unix())
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("WxNotify:db-failed-" + string(log))
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	userInfo := models.User{
+		UserId: info.TakerUserId,
+	}
+	marginStr, _ := auth_service.GetUserMargin(info.TakerUserId)
+	if marginStr == "" {
+		marginStr = "0"
+	}
+	margin, _ := strconv.Atoi(marginStr)
+	margin += info.TakerPayAmount
+	var db2Info = make(map[string]interface{})
+	db2Info["margin"] = margin
+
+	if !userInfo.Updates(db2Info) {
+		log, _ := json.Marshal(m)
+		logging.Error("WxNotify:db-userInfo-failed-" + string(log))
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+	resStr := util.Map2Xml(resMap)
+	c.JSON(http.StatusOK, resStr)
+	return
 }

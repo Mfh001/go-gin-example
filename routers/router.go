@@ -34,6 +34,7 @@ func InitRouter() *gin.Engine {
 	r.Any("/pay/notify", v1.WxNotify)
 	r.Any("/pay/taker/notify", v1.TakerWxNotify)
 	r.Any("/pay/taker/refundnotify", v1.WxRefundCallback)
+	r.Any("/pay/teamnotify", v1.TeamWxNotify)
 
 	//管理员获取审核列表
 	r.GET("/check/admin", v1.GetAdminChecks)
@@ -72,6 +73,12 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/bank/bind", v1.BindBankCard)
 		apiV1.GET("/bank", v1.GetBankCardInfo)
 		apiV1.GET("/balance", v1.GetUserBalance)
+
+		//车队
+		apiV1.POST("/team", v1.AddTeam)
+		apiV1.POST("/team/joincheck", v1.JoinTeamCheckPwd)
+		apiV1.POST("/team/join", v1.JoinTeam)
+		apiV1.POST("/teampay", v1.TeamWxPay)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

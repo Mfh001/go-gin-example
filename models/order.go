@@ -8,6 +8,7 @@ import (
 type Order struct {
 	OrderId       int    `json:"order_id" form:"-" gorm:"primary_key;type:int(12);not null"`
 	Price         int    `json:"price" form:"-" gorm:"type:int(12);not null"`
+	TeamId        int    `json:"team_id" form:"-" gorm:"type:int(12);not null;default:0"`
 	Status        int    `json:"status" form:"-" gorm:"type:int(12);not null"`
 	TradeNo       string `json:"trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UserId        int    `json:"user_id" form:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`

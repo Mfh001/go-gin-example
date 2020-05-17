@@ -37,6 +37,14 @@ func IncrOrderId() (int, error) {
 	return gredis.Incr(getRedisKeyOrderIncr())
 }
 
+func getRedisKeyTeamIncr() string {
+	return "max_team"
+}
+
+func IncrTeamId() (int, error) {
+	return gredis.Incr(getRedisKeyTeamIncr())
+}
+
 //支付订单号
 func GeneratePayOrderId() string {
 	t := time.Now().UnixNano()
@@ -53,7 +61,7 @@ func GenerateNonceStr() string {
 	return newId
 }
 
-func CreateOrder(form *models.Order) bool {
+func CreateOrder(form *models.Order, teamId int) bool {
 	//等级idx*1000 + star
 	price := 0
 	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
@@ -67,6 +75,7 @@ func CreateOrder(form *models.Order) bool {
 		return false
 	}
 	form.OrderId = orderId
+	form.TeamId = teamId
 	nickName, _ := auth_service.GetUserNickName(form.UserId)
 	form.NickName = nickName
 	form.Price = price
@@ -258,6 +267,26 @@ func GetOrderUserId(orderId int) (int, error) {
 		return 0, err
 	}
 	return takerId, nil
+}
+
+func GetOrderTeamId(orderId int) (int, error) {
+	if !ExistOrder(orderId) {
+		return 0, fmt.Errorf("GetOrderTeamId:OrderIdnoExist")
+	}
+	strTeamId, err := gredis.HGet(GetRedisKeyOrder(orderId), "team_id")
+	if err != nil {
+		logging.Error("GetOrderTeamId:" + strconv.Itoa(orderId))
+		return 0, err
+	}
+	if strTeamId == "" {
+		strTeamId = "0"
+	}
+	teamId, err := strconv.Atoi(strTeamId)
+	if err != nil {
+		logging.Error("GetOrderTeamId:" + strTeamId)
+		return 0, err
+	}
+	return teamId, nil
 }
 
 type PayOrderReq struct {

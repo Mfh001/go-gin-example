@@ -42,6 +42,28 @@ paths:
       summary: 绑定上级
       tags:
       - 代理
+  /api/v1/balance:
+    get:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 用户获取钱包余额
+      tags:
+      - 接单
   /api/v1/bank:
     get:
       consumes:
@@ -64,28 +86,6 @@ paths:
       summary: 获取银行卡信息
       tags:
       - 银行卡
-  /api/v1/bank/balance:
-    get:
-      parameters:
-      - description: user_id
-        in: body
-        name: user_id
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: Get 用户获取钱包余额
-      tags:
-      - 接单
   /api/v1/bank/bind:
     post:
       parameters:
@@ -584,6 +584,184 @@ paths:
       summary: 获取已绑定手机号的验证码
       tags:
       - 手机验证码
+  /api/v1/team:
+    post:
+      parameters:
+      - description: owner_id
+        in: body
+        name: owner_id
+        schema:
+          type: integer
+      - description: 游戏
+        in: body
+        name: game_type
+        schema:
+          type: integer
+      - description: 游戏大区
+        in: body
+        name: big_zone
+        schema:
+          type: integer
+      - description: 起始段位
+        in: body
+        name: cur_level
+        schema:
+          type: integer
+      - description: 结束段位
+        in: body
+        name: target_level
+        schema:
+          type: integer
+      - description: 代练发布最多2人，用户发布只能1人
+        in: body
+        name: need_num
+        schema:
+          type: integer
+      - description: 代练发布可以设置是否需要密码
+        in: body
+        name: need_pwd
+        schema:
+          type: integer
+      - description: 密码
+        in: body
+        name: pwd
+        schema:
+          type: string
+      - description: contact
+        in: body
+        name: contact
+        schema:
+          type: string
+      - description: 微信
+        in: body
+        name: qq
+        schema:
+          type: string
+      - description: description
+        in: body
+        name: description
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 下单
+      tags:
+      - 车队
+  /api/v1/team/join:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: team_id
+        in: body
+        name: team_id
+        schema:
+          type: integer
+      - description: 起始段位
+        in: body
+        name: cur_level
+        schema:
+          type: integer
+      - description: 结束段位
+        in: body
+        name: target_level
+        schema:
+          type: integer
+      - description: contact
+        in: body
+        name: contact
+        schema:
+          type: string
+      - description: 微信
+        in: body
+        name: qq
+        schema:
+          type: string
+      - description: description
+        in: body
+        name: description
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 验证密码 用户是否可以加入车队
+      tags:
+      - 订单
+  /api/v1/team/joincheck:
+    post:
+      parameters:
+      - description: team_id
+        in: body
+        name: team_id
+        schema:
+          type: integer
+      - description: pwd
+        in: body
+        name: pwd
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 验证密码 用户是否可以加入车队
+      tags:
+      - 订单
+  /api/v1/teampay:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: team_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 微信下单 获取发起微信支付所需的数据
+      tags:
+      - 微信支付
   /check/admin:
     get:
       produces:
