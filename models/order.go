@@ -34,6 +34,7 @@ type Order struct {
 	PayIp         string `json:"pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TradeType     string `json:"trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TransactionId string `json:"transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
+	PayTime       int    `json:"pay_time" gorm:"type:int(12);not null;default:0"`
 
 	Contact     string `json:"contact" form:"contact" gorm:"type:varchar(30);not null;default:''"`
 	Qq          string `json:"qq" form:"qq" gorm:"type:varchar(30);not null;default:''"`
@@ -47,9 +48,18 @@ type Order struct {
 	TakerPayIp         string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TakerTradeType     string `json:"taker_trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TakerTransactionId string `json:"taker_transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
+	TakerTime          int    `json:"taker_time" gorm:"type:int(12);not null;default:0"`
 
-	RefundTradeNo string `json:"refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
-	RefundAmount  int    `json:"refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	RefundTradeNo   string `json:"refund_trade_no" gorm:"type:varchar(50);not null;default:''"` //订单完成 保证金退还
+	RefundAmount    int    `json:"refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	TakerRefundTime int    `json:"taker_refund_time" gorm:"type:int(12);not null;default:0"`
+
+	PayRefundTradeNo string `json:"pay_refund_trade_no" gorm:"type:varchar(50);not null;default:''"` //用户退款
+	PayRefundAmount  int    `json:"pay_refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	PayRefundTime    int    `json:"pay_refund_time" gorm:"type:int(12);not null;default:0"`
+
+	TeamCardNum int `json:"team_card_num" form:"-" gorm:"type:int(12);not null;default:0"`
+	RealPrice   int `json:"real_price" form:"-" gorm:"type:int(12);not null;default:0"`
 
 	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`

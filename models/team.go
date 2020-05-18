@@ -24,11 +24,15 @@ type Team struct {
 	UserId1      int    `json:"user_id1" form:"-" gorm:"type:int(12);not null;default:0"`
 	NickName1    string `json:"nick_name1" gorm:"type:varchar(32);not null;default:''"`
 	OrderStatus1 int    `json:"order_status1" form:"-" gorm:"type:int(2);not null;default:0"`
+	User1PayTime int    `json:"user1_pay_time" gorm:"type:int(12);not null;default:0"`
 	OrderId1     int    `json:"order_id1" form:"-" gorm:"type:int(12);not null;default:0"`
+	PayAmount1   int    `json:"pay_amount1" form:"-" gorm:"type:int(12);not null;default:0"`
 	UserId2      int    `json:"user_id2" form:"-" gorm:"type:int(12);not null;default:0"`
 	NickName2    string `json:"nick_name2" gorm:"type:varchar(32);not null;default:''"`
 	OrderStatus2 int    `json:"order_status2" form:"-" gorm:"type:int(2);not null;default:0"`
+	User2PayTime int    `json:"user2_pay_time" gorm:"type:int(12);not null;default:0"`
 	OrderId2     int    `json:"order_id2" form:"-" gorm:"type:int(12);not null;default:0"`
+	PayAmount2   int    `json:"pay_amount2" form:"-" gorm:"type:int(12);not null;default:0"`
 
 	Contact     string `json:"contact" form:"contact" gorm:"type:varchar(30);not null;default:''"`
 	Qq          string `json:"qq" form:"qq" gorm:"type:varchar(30);not null;default:''"`
@@ -43,12 +47,27 @@ type Team struct {
 	TakerPayIp         string `json:"taker_pay_ip" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TakerTradeType     string `json:"taker_trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TakerTransactionId string `json:"taker_transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
+	TakerTime          int    `json:"taker_time" gorm:"type:int(12);not null;default:0"`
 
-	RefundTradeNo string `json:"refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
-	RefundAmount  int    `json:"refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	RefundTradeNo   string `json:"refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
+	RefundAmount    int    `json:"refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	TakerRefundTime int    `json:"taker_refund_time" gorm:"type:int(12);not null;default:0"`
+
+	IsUrgent        int    `json:"is_urgent" form:"-" gorm:"type:int(2);not null;default:0"`      //是否加急
+	UrgentUserId    int    `json:"urgent_user_id" form:"-" gorm:"type:int(2);not null;default:0"` //哪个用户加急
+	UrgentNickName  string `json:"urgent_nick_name" gorm:"type:varchar(32);not null;default:''"`
+	UrgentTradeNo   string `json:"urgent_trade_no" gorm:"type:varchar(50);not null;default:''"`
+	UrgentPayAmount int    `json:"urgent_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	UrgentPayTime   int    `json:"urgent_pay_time" gorm:"type:int(12);not null;default:0"`
+
+	UrgentRefundTradeNo string `json:"urgent_refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
+	UrgentRefundAmount  int    `json:"urgent_refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	UrgentRefundTime    int    `json:"urgent_refund_time" gorm:"type:int(12);not null;default:0"`
 
 	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`
+
+	TeamCardNum int `json:"team_card_num" form:"team_card_num" gorm:"-" valid:"Range(0, 100)"`
 }
 
 //insert

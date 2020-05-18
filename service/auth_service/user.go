@@ -222,3 +222,34 @@ func GetUserType(userId int) (int, error) {
 	}
 	return state, nil
 }
+
+func GetUserParam(userId int, param string) int {
+	if !ExistUserInfo(userId) {
+		return 0
+	}
+	strParam, err := gredis.HGet(GetRedisKeyUserInfo(userId), param)
+	if err != nil {
+		logging.Error("GetUserParam:" + strconv.Itoa(userId))
+		return 0
+	}
+	if strParam == "" {
+		strParam = "0"
+	}
+	p, err := strconv.Atoi(strParam)
+	if err != nil {
+		logging.Error("GetTeamParam:" + strParam)
+		return 0
+	}
+	return p
+}
+func GetUserParamString(userId int, param string) string {
+	if !ExistUserInfo(userId) {
+		return ""
+	}
+	strParam, err := gredis.HGet(GetRedisKeyUserInfo(userId), param)
+	if err != nil {
+		logging.Error("GetUserParamString:" + strconv.Itoa(userId))
+		return ""
+	}
+	return strParam
+}

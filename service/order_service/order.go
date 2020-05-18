@@ -61,11 +61,19 @@ func GenerateNonceStr() string {
 	return newId
 }
 
-func CreateOrder(form *models.Order, teamId int) bool {
+func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	//等级idx*1000 + star
 	price := 0
+	realPrice := 0
+	c := 0
 	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
 		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
+			c++
+			if c <= teamCardNum {
+				realPrice += var_const.TeamCardPrice
+			} else {
+				realPrice += setting.PlatFormLevelAll[i].Price
+			}
 			price += setting.PlatFormLevelAll[i].Price
 		}
 	}
@@ -79,6 +87,8 @@ func CreateOrder(form *models.Order, teamId int) bool {
 	nickName, _ := auth_service.GetUserNickName(form.UserId)
 	form.NickName = nickName
 	form.Price = price
+	form.RealPrice = realPrice
+	form.TeamCardNum = teamCardNum
 	form.Status = var_const.OrderStatusAddOrder
 	form.RegTime = int(time.Now().Unix())
 	if !form.Save() {
@@ -145,6 +155,37 @@ func ExistOrder(orderId int) bool {
 	}
 	lock.UnLock()
 	return true
+}
+
+func GetOrderParam(orderId int, param string) int {
+	if !ExistOrder(orderId) {
+		return 0
+	}
+	strParam, err := gredis.HGet(GetRedisKeyOrder(orderId), param)
+	if err != nil {
+		logging.Error("GetTeamParam:" + strconv.Itoa(orderId))
+		return 0
+	}
+	if strParam == "" {
+		strParam = "0"
+	}
+	p, err := strconv.Atoi(strParam)
+	if err != nil {
+		logging.Error("GetTeamParam:" + strParam)
+		return 0
+	}
+	return p
+}
+func GetOrderParamString(orderId int, param string) string {
+	if !ExistOrder(orderId) {
+		return ""
+	}
+	strParam, err := gredis.HGet(GetRedisKeyOrder(orderId), param)
+	if err != nil {
+		logging.Error("GetOrderTeamId:" + strconv.Itoa(orderId))
+		return ""
+	}
+	return strParam
 }
 
 func GetOrderPrice(orderId int) (int, error) {
@@ -319,8 +360,9 @@ type WXPayResp struct {
 }
 
 func Pay(userId int, orderId int, ip string) (map[string]interface{}, bool) {
-	totalFee, err := GetOrderPrice(orderId)
-	if err != nil || totalFee == 0 {
+	//totalFee, err := GetOrderPrice(orderId)
+	totalFee := GetOrderParam(orderId, "real_price")
+	if totalFee == 0 {
 		return nil, false
 	}
 

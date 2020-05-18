@@ -234,11 +234,8 @@ type WXPayResp struct {
 	CodeUrl    string `xml:"code_url"`
 }
 
-func GetOrderPrice() int {
-	return 3000
-}
 func Pay(userId int, orderId int, ip string) (map[string]interface{}, bool) {
-	totalFee := GetOrderPrice()
+	totalFee := var_const.TeamTakerMargin
 	openId, err := auth_service.GetUserOpenId(userId)
 	if err != nil || openId == "" {
 		return nil, false

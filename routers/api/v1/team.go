@@ -21,6 +21,7 @@ import (
 // @Param big_zone body int false "游戏大区"
 // @Param cur_level body int false "起始段位"
 // @Param target_level body int false "结束段位"
+// @Param team_card_num body int false "使用车队卡的数量"
 // @Param need_num body int false "代练发布最多2人，用户发布只能1人"
 // @Param need_pwd body int false "代练发布可以设置是否需要密码"
 // @Param pwd body string false "密码"
@@ -46,6 +47,17 @@ func AddTeam(c *gin.Context) {
 		return
 	}
 	if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	//不能多于5颗星
+	count := 0
+	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
+		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
+			count++
+		}
+	}
+	if count > 5 {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -83,11 +95,28 @@ func AddTeam(c *gin.Context) {
 			Qq:          form.Qq,
 			Description: form.Description,
 		}
-		if !order_service.CreateOrder(&order, form.TeamId) {
+		teamCardNum := auth_service.GetUserParam(form.OwnerId, "team_card_num")
+		if form.TeamCardNum > teamCardNum {
+			form.TeamCardNum = teamCardNum
+		}
+		if form.TeamCardNum > var_const.TeamCardMax {
+			form.TeamCardNum = var_const.TeamCardMax
+		}
+		if !order_service.CreateOrder(&order, form.TeamId, form.TeamCardNum) {
 			appG.Response(http.StatusBadRequest, e.ERROR, nil)
 			return
 		}
+		if form.TeamCardNum > 0 {
+			user := models.User{
+				UserId: form.OwnerId,
+			}
+			m := make(map[string]interface{})
+			m["team_card_num"] = teamCardNum - form.TeamCardNum
+			user.Updates(m)
+		}
+
 		form.OrderId1 = order.OrderId
+		form.PayAmount1 = order.Price
 		form.Price = order.Price
 		if !team_service.CreateTeam(&form) {
 			appG.Response(http.StatusBadRequest, e.ERROR, nil)
@@ -98,6 +127,10 @@ func AddTeam(c *gin.Context) {
 		appG.Response(http.StatusOK, e.SUCCESS, data)
 		return
 	} else {
+		if form.NeedNum > 2 {
+			form.NeedNum = 2
+		}
+		form.Num = 0
 		if !team_service.CreateTeam(&form) {
 			appG.Response(http.StatusBadRequest, e.ERROR, nil)
 			return
@@ -150,6 +183,7 @@ func JoinTeamCheckPwd(c *gin.Context) {
 // @Param contact body string false "contact"
 // @Param qq body string false "微信"
 // @Param description body string false "description"
+// @Param team_card_num body int false "使用车队卡的数量"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/team/join [post]
@@ -161,6 +195,7 @@ func JoinTeam(c *gin.Context) {
 		teamId      = com.StrTo(c.PostForm("team_id")).MustInt()
 		curLevel    = com.StrTo(c.PostForm("cur_level")).MustInt()
 		targetLevel = com.StrTo(c.PostForm("target_level")).MustInt()
+		cardNum     = com.StrTo(c.PostForm("team_card_num")).MustInt()
 		contact     = c.PostForm("contact")
 		qq          = c.PostForm("qq")
 		description = c.PostForm("description")
@@ -203,19 +238,40 @@ func JoinTeam(c *gin.Context) {
 		Qq:          qq,
 		Description: description,
 	}
-	if !order_service.CreateOrder(&order, teamId) {
+
+	teamCardNum := auth_service.GetUserParam(userId, "team_card_num")
+	if cardNum < teamCardNum {
+		cardNum = teamCardNum
+	}
+	if cardNum > var_const.TeamCardMax {
+		cardNum = var_const.TeamCardMax
+	}
+	if !order_service.CreateOrder(&order, teamId, cardNum) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	if cardNum > 0 {
+		user := models.User{
+			UserId: userId,
+		}
+		m := make(map[string]interface{})
+		m["team_card_num"] = teamCardNum - cardNum
+		user.Updates(m)
+	}
+
 	team := models.Team{
 		TeamId: teamId,
 	}
 	m := make(map[string]interface{})
-	if team_service.GetTeamParam(teamId, "num") == 0 {
+	if team_service.GetTeamParam(teamId, "num") == 0 || team_service.GetTeamParam(teamId, "user_id1") == 0 {
 		m["user_id1"] = userId
+		m["nick_name1"] = auth_service.GetUserParamString(userId, "nick_name")
+		m["pay_amount1"] = order.Price
 	}
-	if team_service.GetTeamParam(teamId, "num") == 1 {
+	if team_service.GetTeamParam(teamId, "num") == 1 || team_service.GetTeamParam(teamId, "user_id2") == 0 {
 		m["user_id2"] = userId
+		m["nick_name2"] = auth_service.GetUserParamString(userId, "nick_name")
+		m["pay_amount2"] = order.Price
 	}
 
 	if !team.Updates(m) {

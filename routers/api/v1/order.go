@@ -57,7 +57,7 @@ func AddOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !order_service.CreateOrder(&form, 0) {
+	if !order_service.CreateOrder(&form, 0, 0) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}

@@ -145,7 +145,7 @@ func WxNotify(c *gin.Context) {
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusPaidPay
 	m["transaction_id"] = resMap["transaction_id"]
-	m["upd_time"] = int(time.Now().Unix())
+	m["pay_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("WxNotify:db-failed-" + string(log))
@@ -167,14 +167,21 @@ func WxNotify(c *gin.Context) {
 		}
 		if team_service.GetTeamParam(teamId, "owner_type") == var_const.UserTypeNormal && team_service.GetTeamParam(teamId, "owner_id") == uId {
 			m2["status"] = var_const.TeamCanShow
+			if uId == team_service.GetTeamParam(teamId, "user_id1") {
+				m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
+				m2["order_status1"] = 1
+				m2["user1_pay_time"] = int(time.Now().Unix())
+			}
 		} else {
 			if uId == team_service.GetTeamParam(teamId, "user_id1") {
 				m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
 				m2["order_status1"] = 1
+				m2["user1_pay_time"] = int(time.Now().Unix())
 			}
 			if uId == team_service.GetTeamParam(teamId, "user_id2") {
 				m2["nick_name2"], _ = auth_service.GetUserNickName(uId)
 				m2["order_status2"] = 1
+				m2["user2_pay_time"] = int(time.Now().Unix())
 			}
 		}
 		team.Updates(m2)
@@ -324,7 +331,7 @@ func TakerWxNotify(c *gin.Context) {
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusTakerPaid
 	m["taker_transaction_id"] = resMap["transaction_id"]
-	m["upd_time"] = int(time.Now().Unix())
+	m["taker_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("WxNotify:db-failed-" + string(log))
@@ -562,11 +569,23 @@ func TeamWxNotify(c *gin.Context) {
 	if info.OwnerType == var_const.UserTypeNormal && info.OrderStatus1 == 1 {
 		m["status"] = var_const.TeamWorking
 		//设置订单为已接单 TODO
+		dbInfo := models.Order{
+			OrderId: team_service.GetTeamParam(info.TeamId, "order_id1"),
+		}
+		var m = make(map[string]interface{})
+		m["status"] = var_const.OrderStatusTakerPaid
+		m["taker_user_id"] = team_service.GetTeamParam(info.TeamId, "taker_user_id")
+		m["taker_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("TeamWxNotify:db-failed-" + string(log))
+			return
+		}
 	}
 	if info.OwnerType == var_const.UserTypeInstead {
 		m["status"] = var_const.TeamCanShow
 	}
-	m["upd_time"] = int(time.Now().Unix())
+	m["taker_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("WxNotify:db-failed-" + string(log))

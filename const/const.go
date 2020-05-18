@@ -31,6 +31,9 @@ const (
 	TeamFinishedNeedConfirm = 3 //代练完成请求确认
 	TeamConfirmed           = 4 //已确认完成
 
+	TeamCardPrice   = 100
+	TeamCardMax     = 5    //每次最多使用数量
+	TeamTakerMargin = 3000 //车队代练支付的保证金
 	//满意度
 	OrderSatisfied    = 1 //满意
 	OrderOrdinary     = 2 //一般
