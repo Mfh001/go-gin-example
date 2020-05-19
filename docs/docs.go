@@ -1188,6 +1188,31 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/team/list": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "接单"
+                ],
+                "summary": "Get 获取未发出车队列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/team/urgent": {
             "post": {
                 "produces": [
