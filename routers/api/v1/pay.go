@@ -389,7 +389,7 @@ type RefundNotify struct {
 //微信退款回调
 func WxRefundCallback(c *gin.Context) {
 	body, _ := ioutil.ReadAll(c.Request.Body)
-
+	logging.Info("WxRefundCallback" + string(body))
 	var mr RefundNotify
 	_ = xml.Unmarshal(body, &mr)
 	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"

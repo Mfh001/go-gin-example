@@ -177,6 +177,7 @@ func SetTeamOrderFinished(teamId int, orderId int) bool {
 		}
 		var m = make(map[string]interface{})
 		m["order_status1"] = 1
+		m["pay_amount1"] = price
 		m["num"] = num
 		m["price"] = priceT
 		if !team.Updates(m) {
@@ -193,6 +194,7 @@ func SetTeamOrderFinished(teamId int, orderId int) bool {
 		}
 		var m = make(map[string]interface{})
 		m["order_status2"] = 1
+		m["pay_amount2"] = price
 		m["num"] = num
 		m["price"] = priceT
 		if !team.Updates(m) {
@@ -559,4 +561,96 @@ func GetNeedTakeTeamList(orders *[]models.Team) {
 		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
 	}
 	return
+}
+
+func RefundUrgent(userId int, teamId int) bool {
+	if !auth_service.ExistUserInfo(userId) || !ExistTeam(teamId) || GetTeamParam(teamId, "status") != var_const.TeamCanShow {
+		return false
+	}
+	if GetTeamParam(teamId, "is_urgent") == 0 {
+		return false
+	}
+	if GetTeamParam(teamId, "user_id1") != userId && GetTeamParam(teamId, "user_id2") != userId {
+		return false
+	}
+	if GetTeamParam(teamId, "urgent_user_id") != userId {
+		return false
+	}
+
+	if GetTeamParam(teamId, "urgent_pay_status") != 1 {
+		return false
+	}
+
+	totalFee := GetTeamParam(teamId, "urgent_pay_amount")
+	if totalFee == 0 {
+		return false
+	}
+	outTradeNo := GetTeamParamString(teamId, "urgent_trade_no")
+	payOrderId := GeneratePayOrderId()
+
+	var payReq RefundReq
+	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+	payReq.MchId = var_const.WXMchID
+	payReq.NonceStr = GenerateNonceStr()
+	payReq.OutTradeNo = outTradeNo
+	payReq.OutRefundNo = payOrderId
+	payReq.TotalFee = totalFee
+	payReq.RefundFee = totalFee
+	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/team/refundrefundnotify"
+
+	var reqMap = make(map[string]interface{}, 0)
+	reqMap["appid"] = payReq.AppId        //微信小程序appid
+	reqMap["mch_id"] = payReq.MchId       //商户号
+	reqMap["nonce_str"] = payReq.NonceStr //随机数
+	reqMap["out_refund_no"] = payReq.OutRefundNo
+	reqMap["out_trade_no"] = payReq.OutTradeNo
+	reqMap["total_fee"] = payReq.TotalFee
+	reqMap["refund_fee"] = payReq.RefundFee
+	reqMap["notify_url"] = payReq.NotifyUrl
+	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+
+	// 调用支付统一下单API
+	bytesReq, err := xml.Marshal(payReq)
+	if err != nil {
+		return false
+	}
+	strReq := string(bytesReq)
+
+	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+	bytesReq = []byte(strReq)
+
+	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	if err2 != nil {
+		return false
+	}
+	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+	//client := &http.Client{}
+	//resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	body2, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return false
+	}
+	logging.Debug("refund" + string(body2))
+	var resp1 RefundResp
+	err = xml.Unmarshal(body2, &resp1)
+	if err != nil {
+		return false
+	}
+	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+		dbInfo := models.Team{
+			TeamId: teamId,
+		}
+		var m = make(map[string]interface{})
+		m["urgent_refund_trade_no"] = payReq.OutRefundNo
+		m["urgent_refund_amount"] = payReq.RefundFee
+		m["urgent_refund_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("Refund:failed-db-" + string(log))
+			return false
+		}
+	}
+	return true
 }

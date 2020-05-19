@@ -7,28 +7,28 @@ import (
 
 type Team struct {
 	TeamId      int    `json:"team_id" form:"-" gorm:"primary_key;type:int(12);not null"`
-	Price       int    `json:"price" form:"-" gorm:"type:int(12);not null;default:0"`
-	Status      int    `json:"status" form:"-" gorm:"type:int(12);not null;default:0"`
-	OwnerId     int    `json:"owner_id" form:"owner_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
-	OwnerType   int    `json:"owner_type" form:"-" gorm:"type:int(2);not null;default:1"`
-	NickName    string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
+	Price       int    `json:"price" form:"-" gorm:"type:int(12);not null;default:0"`                                       //车队总金额
+	Status      int    `json:"status" form:"-" gorm:"type:int(12);not null;default:0"`                                      //1 车队可以加入或者被代练接；2 已发车
+	OwnerId     int    `json:"owner_id" form:"owner_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"` //拥有者
+	OwnerType   int    `json:"owner_type" form:"-" gorm:"type:int(2);not null;default:1"`                                   //拥有者类型
+	NickName    string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`                                       //拥有者名称
 	GameType    int    `json:"game_type" form:"game_type" gorm:"type:int(2);not null" valid:"Range(0, 1)"`
 	BigZone     int    `json:"big_zone" form:"big_zone" gorm:"type:int(8);not null" valid:"Range(0, 10)"`
 	CurLevel    int    `json:"cur_level" form:"cur_level" gorm:"type:int(8);not null" valid:"Range(0, 10000)"`
 	TargetLevel int    `json:"target_level" form:"target_level" gorm:"type:int(8);not null" valid:"Required;Range(1, 10000)"`
 
-	NeedPwd int    `json:"need_pwd" form:"need_pwd" gorm:"type:int(2);not null;default:0"`
+	NeedPwd int    `json:"need_pwd" form:"need_pwd" gorm:"type:int(2);not null;default:0"` //是否需要密码
 	Pwd     string `json:"pwd" form:"pwd" gorm:"type:varchar(32);not null;default:''"`
 
-	NeedNum      int    `json:"need_num" form:"need_num" gorm:"type:int(12);not null;default:1"`
-	Num          int    `json:"num" form:"-" gorm:"type:int(12);not null;default:0"`
-	UserId1      int    `json:"user_id1" form:"-" gorm:"type:int(12);not null;default:0"`
-	NickName1    string `json:"nick_name1" gorm:"type:varchar(32);not null;default:''"`
-	OrderStatus1 int    `json:"order_status1" form:"-" gorm:"type:int(2);not null;default:0"`
-	User1PayTime int    `json:"user1_pay_time" gorm:"type:int(12);not null;default:0"`
+	NeedNum      int    `json:"need_num" form:"need_num" gorm:"type:int(12);not null;default:1"` //几人车队
+	Num          int    `json:"num" form:"-" gorm:"type:int(12);not null;default:0"`             //当前已加入几人
+	UserId1      int    `json:"user_id1" form:"-" gorm:"type:int(12);not null;default:0"`        //第一个用户id
+	NickName1    string `json:"nick_name1" gorm:"type:varchar(32);not null;default:''"`          //第一个用户名称
+	OrderStatus1 int    `json:"order_status1" form:"-" gorm:"type:int(2);not null;default:0"`    //第一个用户支付状态 0未支付，1已支付
+	User1PayTime int    `json:"user1_pay_time" gorm:"type:int(12);not null;default:0"`           //支付时间
 	OrderId1     int    `json:"order_id1" form:"-" gorm:"type:int(12);not null;default:0"`
-	PayAmount1   int    `json:"pay_amount1" form:"-" gorm:"type:int(12);not null;default:0"`
-	UserId2      int    `json:"user_id2" form:"-" gorm:"type:int(12);not null;default:0"`
+	PayAmount1   int    `json:"pay_amount1" form:"-" gorm:"type:int(12);not null;default:0"` //第一个用户支付的金额
+	UserId2      int    `json:"user_id2" form:"-" gorm:"type:int(12);not null;default:0"`    //第二个用户
 	NickName2    string `json:"nick_name2" gorm:"type:varchar(32);not null;default:''"`
 	OrderStatus2 int    `json:"order_status2" form:"-" gorm:"type:int(2);not null;default:0"`
 	User2PayTime int    `json:"user2_pay_time" gorm:"type:int(12);not null;default:0"`
@@ -58,13 +58,14 @@ type Team struct {
 	UrgentUserId    int    `json:"urgent_user_id" form:"-" gorm:"type:int(2);not null;default:0"` //哪个用户加急
 	UrgentNickName  string `json:"urgent_nick_name" gorm:"type:varchar(32);not null;default:''"`
 	UrgentTradeNo   string `json:"urgent_trade_no" gorm:"type:varchar(50);not null;default:''"`
-	UrgentPayAmount int    `json:"urgent_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
+	UrgentPayAmount int    `json:"urgent_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"` //加急金额
 	UrgentPayTime   int    `json:"urgent_pay_time" gorm:"type:int(12);not null;default:0"`
-	UrgentPayStatus int    `json:"urgent_pay_status" form:"-" gorm:"type:int(2);not null;default:0"`
+	UrgentPayStatus int    `json:"urgent_pay_status" form:"-" gorm:"type:int(2);not null;default:0"` //是否已支付加急金额
 
 	UrgentRefundTradeNo string `json:"urgent_refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UrgentRefundAmount  int    `json:"urgent_refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
 	UrgentRefundTime    int    `json:"urgent_refund_time" gorm:"type:int(12);not null;default:0"`
+	UrgentRefundStatus  int    `json:"urgent_refund_status" form:"-" gorm:"type:int(2);not null;default:0"` //加急金额是否已退款成功
 
 	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`

@@ -355,6 +355,37 @@ func GetAllTeams(c *gin.Context) {
 }
 
 //取消加急 退款
+// @Summary 取消加急 退款
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param team_id body int false "team_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/team/cancelurgent [post]
+// @Tags 车队
+func CancelUrgent(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+		teamId = com.StrTo(c.PostForm("team_id")).MustInt()
+	)
+	if teamId <= 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !team_service.RefundUrgent(userId, teamId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+
+	d, ok := team_service.UrgentPay(userId, teamId, c.ClientIP())
+	if !ok {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, d)
+	return
+}
 
 //用户退出车队
 
