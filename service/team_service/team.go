@@ -440,13 +440,6 @@ func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
 	return upperSign
 }
 
-func GetNeedTakeOrderList(orders *[]models.Order) {
-	_, err := models.GetNeedTakeOrders(orders)
-	if err != nil {
-		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
-	}
-	return
-}
 func GetTakeOrderList(takerId int, orders *[]models.Order) {
 	_, err := models.GetTakeOrders(takerId, orders)
 	if err != nil {
@@ -558,4 +551,12 @@ func UrgentPay(userId int, orderId int, ip string) (map[string]interface{}, bool
 		return resMap, true
 	}
 	return nil, false
+}
+
+func GetNeedTakeTeamList(orders *[]models.Team) {
+	_, err := models.GetNeedTakeTeams(orders)
+	if err != nil {
+		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
+	}
+	return
 }

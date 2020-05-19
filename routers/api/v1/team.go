@@ -341,6 +341,19 @@ func Urgent(c *gin.Context) {
 	return
 }
 
+// @Summary Get 获取未发出车队列表
+// @Produce  json
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/team/list [get]
+// @Tags 接单
+func GetAllTeams(c *gin.Context) {
+	appG := app.Gin{C: c}
+	var list []models.Team
+	team_service.GetNeedTakeTeamList(&list)
+	appG.Response(http.StatusOK, e.SUCCESS, list)
+}
+
 //取消加急 退款
 
 //用户退出车队

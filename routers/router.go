@@ -81,6 +81,7 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/team/join", v1.JoinTeam)
 		apiV1.POST("/teampay", v1.TeamWxPay)
 		apiV1.POST("/team/urgent", v1.Urgent)
+		apiV1.GET("/team/list", v1.GetAllTeams)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

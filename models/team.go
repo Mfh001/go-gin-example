@@ -1,6 +1,7 @@
 package models
 
 import (
+	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/jinzhu/gorm"
 )
 
@@ -134,6 +135,18 @@ func (info *Team) GetTeamInfoByUrgentTradeNo() (bool, error) {
 func (info *Team) GetOrderInfoByRefundTradeNo() (bool, error) {
 	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("refund_trade_no = ?", info.RefundTradeNo).First(&info).Error
 	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func GetNeedTakeTeams(infos *[]Team) (bool, error) {
+	err := db.Select("*").Where("status = ?", var_const.TeamCanShow).Find(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Team{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Team{}
 		return false, err
 	}
 	return true, nil
