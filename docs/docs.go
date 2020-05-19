@@ -1054,6 +1054,49 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/team/cancelurgent": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "车队"
+                ],
+                "summary": "取消加急 退款",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "team_id",
+                        "name": "team_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/team/join": {
             "post": {
                 "produces": [

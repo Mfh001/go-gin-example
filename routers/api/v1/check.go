@@ -98,7 +98,7 @@ func GetCheckInfo(c *gin.Context) {
 func GetAdminChecks(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var list []models.Check
-	order_service.Refund(47)
+	order_service.Refund(48)
 	check_service.GetCheckList(&list)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }

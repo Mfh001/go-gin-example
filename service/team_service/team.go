@@ -596,7 +596,7 @@ func RefundUrgent(userId int, teamId int) bool {
 	payReq.OutRefundNo = payOrderId
 	payReq.TotalFee = totalFee
 	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/team/refundrefundnotify"
+	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/team/urgentrefundnotify"
 
 	var reqMap = make(map[string]interface{}, 0)
 	reqMap["appid"] = payReq.AppId        //微信小程序appid

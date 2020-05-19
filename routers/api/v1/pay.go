@@ -389,7 +389,6 @@ type RefundNotify struct {
 //微信退款回调
 func WxRefundCallback(c *gin.Context) {
 	body, _ := ioutil.ReadAll(c.Request.Body)
-	logging.Info("WxRefundCallback" + string(body))
 	var mr RefundNotify
 	_ = xml.Unmarshal(body, &mr)
 	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
@@ -402,8 +401,6 @@ func WxRefundCallback(c *gin.Context) {
 
 	if mnr.Refund_status == "SUCCESS" {
 		//f(mnr.Out_trade_no)
-		logging.Info("WxRefundCallback4" + mnr.Out_trade_no)
-		logging.Info("WxRefundCallback4" + mnr.Out_refund_no)
 		dbInfo := models.Order{
 			RefundTradeNo: mnr.Out_refund_no,
 		}
@@ -423,7 +420,6 @@ func WxRefundCallback(c *gin.Context) {
 		}
 		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
 
-		logging.Info("WxRefundCallback4" + resStr)
 		c.JSON(http.StatusOK, resStr)
 		return
 	} else {
@@ -722,4 +718,48 @@ func TeamUrgentWxNotify(c *gin.Context) {
 	resStr := util.Map2Xml(resMap)
 	c.JSON(http.StatusOK, resStr)
 	return
+}
+
+//加急退款回调
+func UrgentRefundCallback(c *gin.Context) {
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var mr RefundNotify
+	_ = xml.Unmarshal(body, &mr)
+	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
+	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
+	plaintext, _ := gocrypto.AesECBDecrypt(b)
+
+	var mnr RefundNotify
+	_ = xml.Unmarshal(plaintext, &mnr)
+
+	if mnr.Refund_status == "SUCCESS" {
+		//f(mnr.Out_trade_no)
+		dbInfo := models.Team{
+			UrgentRefundTradeNo: mnr.Out_refund_no,
+		}
+		_, _ = dbInfo.GetTeamInfoByUrgentRefundTradeNo()
+		if dbInfo.UrgentRefundAmount == 0 {
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		var m = make(map[string]interface{})
+		m["urgent_refund_trade_no"] = ""
+		m["urgent_refund_amount"] = 0
+		m["urgent_refund_time"] = 0
+		m["urgent_refund_status"] = 0
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("WxRefundCallback:failed-" + string(log))
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
+
+		c.JSON(http.StatusOK, resStr)
+		return
+	} else {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
 }
