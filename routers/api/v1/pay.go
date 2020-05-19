@@ -396,12 +396,13 @@ func WxRefundCallback(c *gin.Context) {
 	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
 	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
 	plaintext, _ := gocrypto.AesECBDecrypt(b)
-
+	logging.Info("WxRefundCallback2" + string(plaintext))
 	var mnr RefundNotify
 	_ = xml.Unmarshal(plaintext, &mnr)
+	logging.Info("WxRefundCallback3" + mnr.Refund_status)
 	if mnr.Refund_status == "SUCCESS" {
 		//f(mnr.Out_trade_no)
-
+		logging.Info("WxRefundCallback4" + string(plaintext))
 		dbInfo := models.Order{
 			RefundTradeNo: mnr.Out_trade_no,
 		}

@@ -229,7 +229,7 @@ func GetUserParam(userId int, param string) int {
 	}
 	strParam, err := gredis.HGet(GetRedisKeyUserInfo(userId), param)
 	if err != nil {
-		logging.Error("GetUserParam:" + strconv.Itoa(userId))
+		logging.Error("GetUserParam:" + param + ":" + strconv.Itoa(userId))
 		return 0
 	}
 	if strParam == "" {
