@@ -66,10 +66,10 @@ func AddTeam(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if ownType != var_const.UserTypeNormal {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	//if ownType != var_const.UserTypeNormal {
+	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	//	return
+	//}
 	form.OwnerType = ownType
 	nickName, _ := auth_service.GetUserNickName(form.OwnerId)
 	form.NickName = nickName
