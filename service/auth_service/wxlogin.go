@@ -2,7 +2,6 @@ package auth_service
 
 import (
 	"encoding/json"
-	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
@@ -74,7 +73,6 @@ func (info *WxLoginUserInfo) WXLogin() (string, bool) {
 					dbInfo["nick_name"] = info.NickName
 					dbInfo["avatar_url"] = info.AvatarUrl
 					dbInfo["gender"] = info.Gender
-					dbInfo["type"] = var_const.UserTypeNormal
 					dbInfo["city"] = info.City
 					dbInfo["province"] = info.Province
 					if !userInfo.Updates(dbInfo) {
