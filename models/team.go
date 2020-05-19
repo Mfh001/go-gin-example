@@ -59,6 +59,7 @@ type Team struct {
 	UrgentTradeNo   string `json:"urgent_trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UrgentPayAmount int    `json:"urgent_pay_amount" form:"-" gorm:"type:int(12);not null;default:0"`
 	UrgentPayTime   int    `json:"urgent_pay_time" gorm:"type:int(12);not null;default:0"`
+	UrgentPayStatus int    `json:"urgent_pay_status" form:"-" gorm:"type:int(2);not null;default:0"`
 
 	UrgentRefundTradeNo string `json:"urgent_refund_trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UrgentRefundAmount  int    `json:"urgent_refund_amount" form:"-" gorm:"type:int(12);not null;default:0"`
@@ -118,6 +119,13 @@ func (info *Team) First() (int, error) {
 
 func (info *Team) GetOrderInfoByTakerTradeNo() (bool, error) {
 	err := db.Select("owner_type, order_status1, taker_user_id, taker_pay_amount, team_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).First(&info).Error
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+func (info *Team) GetTeamInfoByUrgentTradeNo() (bool, error) {
+	err := db.Select("urgent_pay_status, is_urgent, urgent_user_id, team_id").Where("urgent_trade_no = ?", info.UrgentTradeNo).First(&info).Error
 	if err != nil {
 		return false, err
 	}

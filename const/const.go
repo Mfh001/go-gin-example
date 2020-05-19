@@ -34,6 +34,7 @@ const (
 	TeamCardPrice   = 100
 	TeamCardMax     = 5    //每次最多使用数量
 	TeamTakerMargin = 3000 //车队代练支付的保证金
+	TeamUrgentPrice = 1000 //加急费用
 	//满意度
 	OrderSatisfied    = 1 //满意
 	OrderOrdinary     = 2 //一般

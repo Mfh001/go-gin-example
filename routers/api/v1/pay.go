@@ -624,3 +624,97 @@ func TeamWxNotify(c *gin.Context) {
 	c.JSON(http.StatusOK, resStr)
 	return
 }
+
+func TeamUrgentWxNotify(c *gin.Context) {
+	//logging.Info("--------pay")
+	var resMap = make(map[string]interface{}, 0)
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+
+	valueXml, _ := ioutil.ReadAll(c.Request.Body) //获取post的数据
+	//logging.Info("--------pay:" + string(valueXml))
+	values := util.Xml2Map(string(valueXml))
+
+	if retCode, ok := values["result_code"]; retCode != "SUCCESS" || !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "result_code错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if _, ok := values["out_trade_no"]; !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if _, ok := values["sign"]; !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//微信提交过来的签名
+	postSign := values["sign"]
+	delete(values, "sign")
+	//根据提交过来的值，和我的商户支付秘钥，生成的签名
+	userSign := order_service.WxPayCalcSign(values, var_const.WXMchKey)
+	//验证提交过来的签名是否正确
+	if userSign != postSign {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		//logging.Info("--------pay-userSign")
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//判断订单存在
+	payOrderId := values["out_trade_no"].(string)
+	info := models.Team{
+		UrgentTradeNo: payOrderId,
+	}
+	_, err := info.GetTeamInfoByUrgentTradeNo()
+	if err != nil {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if info.UrgentPayStatus != 0 {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//
+	//order信息更新
+	//保存支付订单 TODO
+	dbInfo := models.Team{
+		TeamId: info.TeamId,
+	}
+	var m = make(map[string]interface{})
+	m["urgent_pay_status"] = 1
+	m["urgent_pay_time"] = int(time.Now().Unix())
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("WxNotify:db-failed-" + string(log))
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+	resStr := util.Map2Xml(resMap)
+	c.JSON(http.StatusOK, resStr)
+	return
+}

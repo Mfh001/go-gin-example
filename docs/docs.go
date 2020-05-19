@@ -982,6 +982,14 @@ var doc = `{
                         }
                     },
                     {
+                        "description": "使用车队卡的数量",
+                        "name": "team_card_num",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "description": "代练发布最多2人，用户发布只能1人",
                         "name": "need_num",
                         "in": "body",
@@ -1111,6 +1119,14 @@ var doc = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "description": "使用车队卡的数量",
+                        "name": "team_card_num",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -1153,6 +1169,49 @@ var doc = `{
                         "in": "body",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/team/urgent": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "车队"
+                ],
+                "summary": "加急",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "team_id",
+                        "name": "team_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
                         }
                     }
                 ],

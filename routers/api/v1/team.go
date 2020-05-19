@@ -212,6 +212,10 @@ func JoinTeam(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+	if !auth_service.ExistUserInfo(userId) || !team_service.ExistTeam(teamId) || team_service.GetTeamParam(teamId, "status") != var_const.TeamCanShow {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
 	//不能多于5颗星
 	count := 0
 	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
@@ -281,6 +285,59 @@ func JoinTeam(c *gin.Context) {
 	data := gin.H{}
 	data["order_id"] = order.OrderId
 	appG.Response(http.StatusOK, e.SUCCESS, data)
+	return
+}
+
+//加急
+// @Summary 加急
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param team_id body int false "team_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/team/urgent [post]
+// @Tags 车队
+func Urgent(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+		teamId = com.StrTo(c.PostForm("team_id")).MustInt()
+	)
+	if teamId <= 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !auth_service.ExistUserInfo(userId) || !team_service.ExistTeam(teamId) || team_service.GetTeamParam(teamId, "status") != var_const.TeamCanShow {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if team_service.GetTeamParam(teamId, "is_urgent") == 1 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if team_service.GetTeamParam(teamId, "user_id1") != userId && team_service.GetTeamParam(teamId, "user_id2") != userId {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if team_service.GetTeamParam(teamId, "user_id1") == userId {
+		if team_service.GetTeamParam(teamId, "order_status1") != 1 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+	}
+	if team_service.GetTeamParam(teamId, "user_id2") == userId {
+		if team_service.GetTeamParam(teamId, "order_status2") != 1 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+	}
+
+	d, ok := team_service.UrgentPay(userId, teamId, c.ClientIP())
+	if !ok {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, d)
 	return
 }
 
