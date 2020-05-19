@@ -402,12 +402,12 @@ func WxRefundCallback(c *gin.Context) {
 
 	if mnr.Refund_status == "SUCCESS" {
 		//f(mnr.Out_trade_no)
-
+		logging.Info("WxRefundCallback4" + mnr.Out_trade_no)
+		logging.Info("WxRefundCallback4" + mnr.Out_refund_no)
 		dbInfo := models.Order{
-			RefundTradeNo: mnr.Out_trade_no,
+			RefundTradeNo: mnr.Out_refund_no,
 		}
 		_, _ = dbInfo.GetOrderInfoByRefundTradeNo()
-		logging.Info("status" + strconv.Itoa(dbInfo.Status))
 		if dbInfo.Status != var_const.OrderStatusConfirmFinished {
 			c.JSON(http.StatusOK, nil)
 			return
