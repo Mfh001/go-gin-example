@@ -421,10 +421,8 @@ func WxRefundCallback(c *gin.Context) {
 			c.JSON(http.StatusOK, nil)
 			return
 		}
-		var resMap = make(map[string]interface{}, 0)
-		resMap["return_code"] = "SUCCESS"
-		resMap["return_msg"] = "OK"
-		resStr := util.Map2Xml(resMap)
+		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
+
 		logging.Info("WxRefundCallback4" + resStr)
 		c.JSON(http.StatusOK, resStr)
 		return
