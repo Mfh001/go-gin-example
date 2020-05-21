@@ -20,6 +20,8 @@ import (
 // @Produce  json
 // @Param user_id body int false "user_id"
 // @Param game_type body int false "游戏"
+// @Param price body int false "价格"
+// @Param time_limit body int false "时限"
 // @Param order_type body int false "订单类型"
 // @Param instead_type body int false "代练类型"
 // @Param game_zone body int false "游戏区服"

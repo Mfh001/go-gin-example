@@ -7,9 +7,10 @@ import (
 
 type Order struct {
 	OrderId       int    `json:"order_id" form:"-" gorm:"primary_key;type:int(12);not null"`
-	Price         int    `json:"price" form:"price" gorm:"type:int(12);not null" valid:"Required;Range(1, 100000000)"`
+	Price         int    `json:"price" form:"price" gorm:"type:int(12);not null;default:0" valid:"Required;Range(0, 100000000)"`
+	TimeLimit     int    `json:"time_limit" form:"time_limit" gorm:"type:int(12);not null;default:0" valid:"Required;Range(0, 1000000)"`
 	TeamId        int    `json:"team_id" form:"-" gorm:"type:int(12);not null;default:0"`
-	Status        int    `json:"status" form:"-" gorm:"type:int(12);not null"`
+	Status        int    `json:"status" form:"-" gorm:"type:int(12);not null;default:0"`
 	TradeNo       string `json:"trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UserId        int    `json:"user_id" form:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
 	NickName      string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`

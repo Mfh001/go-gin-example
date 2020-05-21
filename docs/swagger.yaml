@@ -219,6 +219,16 @@ paths:
         name: game_type
         schema:
           type: integer
+      - description: 价格
+        in: body
+        name: price
+        schema:
+          type: integer
+      - description: 时限
+        in: body
+        name: time_limit
+        schema:
+          type: integer
       - description: 订单类型
         in: body
         name: order_type

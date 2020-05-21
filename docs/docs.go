@@ -356,6 +356,22 @@ var doc = `{
                         }
                     },
                     {
+                        "description": "价格",
+                        "name": "price",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "时限",
+                        "name": "time_limit",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "description": "订单类型",
                         "name": "order_type",
                         "in": "body",
