@@ -89,16 +89,18 @@ var Platform = struct {
 		Idx  int
 	}
 	Levels []struct {
-		Name  string
-		Idx   int
-		Stars int
-		Price int
+		Name     string
+		Idx      int
+		Stars    int
+		Price    int
+		AddPrice int
 	}
 }{}
 
 type LevelCell struct {
-	Idx   int
-	Price int
+	Idx      int
+	Price    int
+	AddPrice int
 }
 
 var PlatFormLevelAll []LevelCell
@@ -133,8 +135,9 @@ func levelInit() {
 		for j := 0; j <= Platform.Levels[i].Stars-1; j++ {
 			idx := Platform.Levels[i].Idx*1000 + j
 			l := LevelCell{
-				Idx:   idx,
-				Price: Platform.Levels[i].Price,
+				Idx:      idx,
+				Price:    Platform.Levels[i].Price,
+				AddPrice: Platform.Levels[i].AddPrice,
 			}
 			PlatFormLevelAll = append(PlatFormLevelAll, l)
 		}

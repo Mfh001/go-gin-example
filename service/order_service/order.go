@@ -74,7 +74,13 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 			} else {
 				realPrice += setting.PlatFormLevelAll[i].Price
 			}
+			if form.RunesLevel < var_const.RunesAddPriceLevel {
+				realPrice += setting.PlatFormLevelAll[i].AddPrice
+			}
 			price += setting.PlatFormLevelAll[i].Price
+			if form.RunesLevel < var_const.RunesAddPriceLevel {
+				price += setting.PlatFormLevelAll[i].AddPrice
+			}
 		}
 	}
 	//
@@ -82,6 +88,11 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	if err != nil {
 		return false
 	}
+
+	if form.Price >= price {
+		form.ChannelType = var_const.ChannelTypePlatform
+	}
+
 	form.OrderId = orderId
 	form.TeamId = teamId
 	nickName, _ := auth_service.GetUserNickName(form.UserId)

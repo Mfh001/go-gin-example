@@ -156,36 +156,36 @@ func WxNotify(c *gin.Context) {
 		return
 	}
 	//判断是否是车队订单
-	teamId, _ := order_service.GetOrderTeamId(info.OrderId)
-	if teamId > 0 {
-		team_service.SetTeamOrderFinished(teamId, info.OrderId)
-
-		uId, _ := order_service.GetOrderUserId(info.OrderId)
-		var m2 = make(map[string]interface{})
-		team := models.Team{
-			TeamId: teamId,
-		}
-		if team_service.GetTeamParam(teamId, "owner_type") == var_const.UserTypeNormal && team_service.GetTeamParam(teamId, "owner_id") == uId {
-			m2["status"] = var_const.TeamCanShow
-			if uId == team_service.GetTeamParam(teamId, "user_id1") {
-				m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
-				m2["order_status1"] = 1
-				m2["user1_pay_time"] = int(time.Now().Unix())
-			}
-		} else {
-			if uId == team_service.GetTeamParam(teamId, "user_id1") {
-				m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
-				m2["order_status1"] = 1
-				m2["user1_pay_time"] = int(time.Now().Unix())
-			}
-			if uId == team_service.GetTeamParam(teamId, "user_id2") {
-				m2["nick_name2"], _ = auth_service.GetUserNickName(uId)
-				m2["order_status2"] = 1
-				m2["user2_pay_time"] = int(time.Now().Unix())
-			}
-		}
-		team.Updates(m2)
-	}
+	//teamId, _ := order_service.GetOrderTeamId(info.OrderId)
+	//if teamId > 0 {
+	//	team_service.SetTeamOrderFinished(teamId, info.OrderId)
+	//
+	//	uId, _ := order_service.GetOrderUserId(info.OrderId)
+	//	var m2 = make(map[string]interface{})
+	//	team := models.Team{
+	//		TeamId: teamId,
+	//	}
+	//	if team_service.GetTeamParam(teamId, "owner_type") == var_const.UserTypeNormal && team_service.GetTeamParam(teamId, "owner_id") == uId {
+	//		m2["status"] = var_const.TeamCanShow
+	//		if uId == team_service.GetTeamParam(teamId, "user_id1") {
+	//			m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
+	//			m2["order_status1"] = 1
+	//			m2["user1_pay_time"] = int(time.Now().Unix())
+	//		}
+	//	} else {
+	//		if uId == team_service.GetTeamParam(teamId, "user_id1") {
+	//			m2["nick_name1"], _ = auth_service.GetUserNickName(uId)
+	//			m2["order_status1"] = 1
+	//			m2["user1_pay_time"] = int(time.Now().Unix())
+	//		}
+	//		if uId == team_service.GetTeamParam(teamId, "user_id2") {
+	//			m2["nick_name2"], _ = auth_service.GetUserNickName(uId)
+	//			m2["order_status2"] = 1
+	//			m2["user2_pay_time"] = int(time.Now().Unix())
+	//		}
+	//	}
+	//	team.Updates(m2)
+	//}
 
 	//logging.Info("--------Updates")
 	resMap["return_code"] = "SUCCESS"
@@ -739,7 +739,7 @@ func UrgentRefundCallback(c *gin.Context) {
 			UrgentRefundTradeNo: mnr.Out_refund_no,
 		}
 		_, _ = dbInfo.GetTeamInfoByUrgentRefundTradeNo()
-		if dbInfo.UrgentRefundAmount == 0 {
+		if dbInfo.UrgentTradeNo != mnr.Out_trade_no {
 			c.JSON(http.StatusOK, nil)
 			return
 		}
@@ -748,6 +748,13 @@ func UrgentRefundCallback(c *gin.Context) {
 		m["urgent_refund_amount"] = 0
 		m["urgent_refund_time"] = 0
 		m["urgent_refund_status"] = 0
+		m["is_urgent"] = 0
+		m["urgent_user_id"] = 0
+		m["urgent_nick_name"] = ""
+		m["urgent_trade_no"] = ""
+		m["urgent_pay_amount"] = 0
+		m["urgent_pay_time"] = 0
+		m["urgent_pay_status"] = 0
 		if !dbInfo.Updates(m) {
 			log, _ := json.Marshal(m)
 			logging.Error("WxRefundCallback:failed-" + string(log))

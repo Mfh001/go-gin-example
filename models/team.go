@@ -134,7 +134,7 @@ func (info *Team) GetTeamInfoByUrgentTradeNo() (bool, error) {
 	return true, nil
 }
 func (info *Team) GetTeamInfoByUrgentRefundTradeNo() (bool, error) {
-	err := db.Select("urgent_refund_amount, team_id").Where("urgent_refund_trade_no = ?", info.UrgentRefundTradeNo).First(&info).Error
+	err := db.Select("urgent_refund_amount, urgent_trade_no, team_id").Where("urgent_refund_trade_no = ?", info.UrgentRefundTradeNo).First(&info).Error
 	if err != nil {
 		return false, err
 	}

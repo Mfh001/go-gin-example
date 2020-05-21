@@ -7,7 +7,7 @@ import (
 
 type Order struct {
 	OrderId       int    `json:"order_id" form:"-" gorm:"primary_key;type:int(12);not null"`
-	Price         int    `json:"price" form:"-" gorm:"type:int(12);not null"`
+	Price         int    `json:"price" form:"price" gorm:"type:int(12);not null" valid:"Required;Range(1, 100000000)"`
 	TeamId        int    `json:"team_id" form:"-" gorm:"type:int(12);not null;default:0"`
 	Status        int    `json:"status" form:"-" gorm:"type:int(12);not null"`
 	TradeNo       string `json:"trade_no" gorm:"type:varchar(50);not null;default:''"`
@@ -35,6 +35,8 @@ type Order struct {
 	TradeType     string `json:"trade_type" form:"-" gorm:"type:varchar(30);not null;default:''"`
 	TransactionId string `json:"transaction_id" form:"-" gorm:"type:varchar(40);not null;default:''"`
 	PayTime       int    `json:"pay_time" gorm:"type:int(12);not null;default:0"`
+
+	ChannelType int `json:"channel_type" form:"-" gorm:"type:int(2);not null;default:0"`
 
 	Contact     string `json:"contact" form:"contact" gorm:"type:varchar(30);not null;default:''"`
 	Qq          string `json:"qq" form:"qq" gorm:"type:varchar(30);not null;default:''"`
