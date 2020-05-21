@@ -64,8 +64,8 @@ func GenerateNonceStr() string {
 func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	//等级idx*1000 + star
 	price := 0
-	realPrice := 0
-	c := 0
+	//realPrice := 0
+	//c := 0
 	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
 		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
 			//c++
