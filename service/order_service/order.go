@@ -68,15 +68,15 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	c := 0
 	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
 		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
-			c++
-			if c <= teamCardNum {
-				realPrice += var_const.TeamCardPrice
-			} else {
-				realPrice += setting.PlatFormLevelAll[i].Price
-			}
-			if form.RunesLevel < var_const.RunesAddPriceLevel {
-				realPrice += setting.PlatFormLevelAll[i].AddPrice
-			}
+			//c++
+			//if c <= teamCardNum {
+			//	realPrice += var_const.TeamCardPrice
+			//} else {
+			//	realPrice += setting.PlatFormLevelAll[i].Price
+			//}
+			//if form.RunesLevel < var_const.RunesAddPriceLevel {
+			//	realPrice += setting.PlatFormLevelAll[i].AddPrice
+			//}
 			price += setting.PlatFormLevelAll[i].Price
 			if form.RunesLevel < var_const.RunesAddPriceLevel {
 				price += setting.PlatFormLevelAll[i].AddPrice
@@ -97,8 +97,7 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	form.TeamId = teamId
 	nickName, _ := auth_service.GetUserNickName(form.UserId)
 	form.NickName = nickName
-	form.Price = price
-	form.RealPrice = realPrice
+	form.RealPrice = form.Price
 	form.TeamCardNum = teamCardNum
 	form.Status = var_const.OrderStatusAddOrder
 	form.RegTime = int(time.Now().Unix())
