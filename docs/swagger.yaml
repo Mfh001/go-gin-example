@@ -331,6 +331,56 @@ paths:
         name: count
         schema:
           type: integer
+      - description: 开始价格
+        in: body
+        name: price_b
+        schema:
+          type: integer
+      - description: 结束价格
+        in: body
+        name: price_e
+        schema:
+          type: integer
+      - description: 最低时限
+        in: body
+        name: time_b
+        schema:
+          type: integer
+      - description: 最高时限
+        in: body
+        name: time_e
+        schema:
+          type: integer
+      - description: 最少星数
+        in: body
+        name: star_b
+        schema:
+          type: integer
+      - description: 最多星数
+        in: body
+        name: star_e
+        schema:
+          type: integer
+      - description: 最低每颗星平均价格
+        in: body
+        name: star_price_b
+        schema:
+          type: integer
+      - description: 最高每颗星平均价格
+        in: body
+        name: star_price_e
+        schema:
+          type: integer
+      - description: 最低段位
+        in: body
+        name: level_b
+        schema:
+          type: integer
+      - description: 最高段位
+        in: body
+        name: level_e
+        schema:
+          type: integer
       produces:
       - application/json
       responses:
@@ -460,24 +510,6 @@ paths:
       - 接单
   /api/v1/order/userlist:
     get:
-      parameters:
-      - description: user_id
-        in: body
-        name: user_id
-        schema:
-          type: integer
-      - description: index
-        in: body
-        name: index
-        schema:
-          type: integer
-      - description: count
-        in: body
-        name: count
-        schema:
-          type: integer
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
@@ -487,7 +519,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: Get 用户获取自己已发单列表
       tags:
       - 接单
   /api/v1/pay:

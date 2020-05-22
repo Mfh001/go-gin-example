@@ -533,6 +533,86 @@ var doc = `{
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "description": "开始价格",
+                        "name": "price_b",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "结束价格",
+                        "name": "price_e",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最低时限",
+                        "name": "time_b",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最高时限",
+                        "name": "time_e",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最少星数",
+                        "name": "star_b",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最多星数",
+                        "name": "star_e",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最低每颗星平均价格",
+                        "name": "star_price_b",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最高每颗星平均价格",
+                        "name": "star_price_e",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最低段位",
+                        "name": "level_b",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最高段位",
+                        "name": "level_e",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -733,38 +813,8 @@ var doc = `{
         },
         "/api/v1/order/userlist": {
             "get": {
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "接单"
-                ],
-                "summary": "Get 用户获取自己已发单列表",
-                "parameters": [
-                    {
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "index",
-                        "name": "index",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "count",
-                        "name": "count",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
                 ],
                 "responses": {
                     "200": {
