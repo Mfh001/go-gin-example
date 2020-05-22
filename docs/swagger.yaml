@@ -320,6 +320,17 @@ paths:
       - 下单
   /api/v1/order/all:
     get:
+      parameters:
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
+        schema:
+          type: integer
       produces:
       - application/json
       responses:

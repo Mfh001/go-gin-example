@@ -144,8 +144,8 @@ func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
 }
 
 //select all
-func GetNeedTakeOrders(infos *[]Order) (bool, error) {
-	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status = ? and team_id = 0", var_const.OrderStatusPaidPay).Find(&infos).Error
+func GetNeedTakeOrders(infos *[]Order, index int, count int) (bool, error) {
+	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status = ? and team_id = 0 and limit ?,?", var_const.OrderStatusPaidPay, index, count).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil

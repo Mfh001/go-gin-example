@@ -95,14 +95,18 @@ func BindAgent(c *gin.Context) {
 
 // @Summary Get 获取订单列表
 // @Produce  json
+// @Param index body int false "index"
+// @Param count body int false "count"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/order/all [get]
 // @Tags 接单
 func GetAllOrders(c *gin.Context) {
 	appG := app.Gin{C: c}
+	index := com.StrTo(c.Query("index")).MustInt()
+	count := com.StrTo(c.Query("count")).MustInt()
 	var list []models.Order
-	order_service.GetNeedTakeOrderList(&list)
+	order_service.GetNeedTakeOrderList(&list, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
 
@@ -129,20 +133,12 @@ func FinishOrder(c *gin.Context) {
 	//	appG.Response(http.StatusBadRequest, e.CHECK_NO_PASS, nil)
 	//	return
 	//}
-	status, err := order_service.GetOrderStatus(orderId)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	status := order_service.GetOrderParam(orderId, "status")
 	if status != var_const.OrderStatusTakerPaid {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	takerId, err := order_service.GetOrderTaker(orderId)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
 	if takerId != userId {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -153,41 +149,14 @@ func FinishOrder(c *gin.Context) {
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusTakerFinishedNeedConfirm
 	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("FinishOrder: begin order_id-" + strconv.Itoa(orderId))
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("TakerFinish:failed-" + string(log))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
-	str, err := auth_service.GetUserBalance(takerId)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	balance, err := strconv.Atoi(str)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	add, err := order_service.GetOrderPrice(orderId)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	balance += add
-	user := models.User{
-		UserId: takerId,
-	}
-	var db2Info = make(map[string]interface{})
-	db2Info["taker_user_id"] = takerId
-	db2Info["balance"] = balance
-
-	if !user.Updates(db2Info) {
-		logInfo, _ := json.Marshal(db2Info)
-		logging.Error("FinishOrder2:db-Updates" + string(logInfo))
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
+	logging.Info("FinishOrder: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
@@ -214,20 +183,12 @@ func ConfirmOrder(c *gin.Context) {
 	//	appG.Response(http.StatusBadRequest, e.CHECK_NO_PASS, nil)
 	//	return
 	//}
-	status, err := order_service.GetOrderStatus(orderId)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	status := order_service.GetOrderParam(orderId, "status")
 	if status != var_const.OrderStatusTakerFinishedNeedConfirm {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	uId, err := order_service.GetOrderUserId(orderId)
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	uId := order_service.GetOrderParam(orderId, "user_id")
 	if uId != userId {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -235,18 +196,31 @@ func ConfirmOrder(c *gin.Context) {
 	dbInfo := models.Order{
 		OrderId: orderId,
 	}
+	logging.Info("ConfirmOrder: begin order_id-" + strconv.Itoa(orderId))
 	var m = make(map[string]interface{})
 	m["status"] = var_const.OrderStatusConfirmFinished
 	m["upd_time"] = int(time.Now().Unix())
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
-		logging.Error("orderFinish:failed-" + string(log))
+		logging.Error("ConfirmOrder:db1-failed-" + string(log))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	//收益
+	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
+	add := order_service.GetOrderParam(orderId, "price")
+	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add))
+	if add >= var_const.OrderNeedRate {
+		add = add * (100 - var_const.OrderRate) / 100
+	}
+	if !auth_service.AddUserBalance(takerId, add) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("ConfirmOrder: end")
 	//order_service.Refund(13)
 	order_service.Refund(orderId)
-	//收益
+
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }

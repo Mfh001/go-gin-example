@@ -237,8 +237,8 @@ func TakerWxPay(c *gin.Context) {
 		return
 	}
 
-	status, err := order_service.GetOrderStatus(orderId)
-	if err != nil || status != var_const.OrderStatusPaidPay {
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusPaidPay {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -342,21 +342,7 @@ func TakerWxNotify(c *gin.Context) {
 		return
 	}
 
-	userInfo := models.User{
-		UserId: info.TakerUserId,
-	}
-	marginStr, _ := auth_service.GetUserMargin(info.TakerUserId)
-	if marginStr == "" {
-		marginStr = "0"
-	}
-	margin, _ := strconv.Atoi(marginStr)
-	margin += info.TakerPayAmount
-	var db2Info = make(map[string]interface{})
-	db2Info["margin"] = margin
-
-	if !userInfo.Updates(db2Info) {
-		log, _ := json.Marshal(m)
-		logging.Error("WxNotify:db-userInfo-failed-" + string(log))
+	if !auth_service.AddUserMargin(info.TakerUserId, info.TakerPayAmount) {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)
@@ -418,6 +404,7 @@ func WxRefundCallback(c *gin.Context) {
 			c.JSON(http.StatusOK, nil)
 			return
 		}
+		logging.Info("refund finish RefundTradeNo:" + mnr.Out_refund_no)
 		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
 
 		c.JSON(http.StatusOK, resStr)
@@ -597,21 +584,7 @@ func TeamWxNotify(c *gin.Context) {
 		return
 	}
 
-	userInfo := models.User{
-		UserId: info.TakerUserId,
-	}
-	marginStr, _ := auth_service.GetUserMargin(info.TakerUserId)
-	if marginStr == "" {
-		marginStr = "0"
-	}
-	margin, _ := strconv.Atoi(marginStr)
-	margin += info.TakerPayAmount
-	var db2Info = make(map[string]interface{})
-	db2Info["margin"] = margin
-
-	if !userInfo.Updates(db2Info) {
-		log, _ := json.Marshal(m)
-		logging.Error("WxNotify:db-userInfo-failed-" + string(log))
+	if !auth_service.AddUserMargin(info.TakerUserId, info.TakerPayAmount) {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)

@@ -517,6 +517,24 @@ var doc = `{
                     "接单"
                 ],
                 "summary": "Get 获取订单列表",
+                "parameters": [
+                    {
+                        "description": "index",
+                        "name": "index",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "count",
+                        "name": "count",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

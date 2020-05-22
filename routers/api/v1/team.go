@@ -61,8 +61,8 @@ func AddTeam(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	ownType, err := auth_service.GetUserType(form.OwnerId)
-	if err != nil {
+	ownType := auth_service.GetUserParam(form.OwnerId, "type")
+	if ownType == 0 {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}

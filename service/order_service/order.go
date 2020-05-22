@@ -240,40 +240,6 @@ func GetTakerOrderPrice(orderId int) (int, error) {
 	return margin, nil
 }
 
-func GetOrderStatus(orderId int) (int, error) {
-	if !ExistOrder(orderId) {
-		return 0, fmt.Errorf("GetOrderStatus:OrderIdnoExist")
-	}
-	strStatus, err := gredis.HGet(GetRedisKeyOrder(orderId), "status")
-	if err != nil {
-		logging.Error("GetOrderPrice:" + strconv.Itoa(orderId))
-		return 0, err
-	}
-	status, err := strconv.Atoi(strStatus)
-	if err != nil {
-		logging.Error("GetOrderPrice:" + strStatus)
-		return 0, err
-	}
-	return status, nil
-}
-
-func GetOrderTaker(orderId int) (int, error) {
-	if !ExistOrder(orderId) {
-		return 0, fmt.Errorf("GetOrderTaker:OrderIdnoExist")
-	}
-	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "taker_user_id")
-	if err != nil {
-		logging.Error("GetOrderTaker:" + strconv.Itoa(orderId))
-		return 0, err
-	}
-	takerId, err := strconv.Atoi(strTaker)
-	if err != nil {
-		logging.Error("GetOrderPrice:" + strTaker)
-		return 0, err
-	}
-	return takerId, nil
-}
-
 func GetOrderTakerPayAmount(orderId int) (int, error) {
 	if !ExistOrder(orderId) {
 		return 0, fmt.Errorf("GetOrderTakerPayAmount:OrderIdnoExist")
@@ -301,23 +267,6 @@ func GetOrderTakerTradeNo(orderId int) (string, error) {
 		return "", err
 	}
 	return strTakerTradeNo, nil
-}
-
-func GetOrderUserId(orderId int) (int, error) {
-	if !ExistOrder(orderId) {
-		return 0, fmt.Errorf("GetOrderUserId:OrderIdnoExist")
-	}
-	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "user_id")
-	if err != nil {
-		logging.Error("GetOrderUserId:" + strconv.Itoa(orderId))
-		return 0, err
-	}
-	takerId, err := strconv.Atoi(strTaker)
-	if err != nil {
-		logging.Error("GetOrderUserId:" + strTaker)
-		return 0, err
-	}
-	return takerId, nil
 }
 
 func GetOrderTeamId(orderId int) (int, error) {
@@ -676,7 +625,6 @@ func Refund(orderId int) bool {
 	if err3 != nil {
 		return false
 	}
-	logging.Debug("refund" + string(body2))
 	var resp1 RefundResp
 	err = xml.Unmarshal(body2, &resp1)
 	if err != nil {
@@ -690,9 +638,10 @@ func Refund(orderId int) bool {
 		m["refund_trade_no"] = payReq.OutRefundNo
 		m["refund_amount"] = payReq.RefundFee
 		m["upd_time"] = int(time.Now().Unix())
+		log, _ := json.Marshal(m)
+		logging.Info("refund: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
 		if !dbInfo.Updates(m) {
-			log, _ := json.Marshal(m)
-			logging.Error("Refund:failed-db-" + string(log))
+			logging.Error("refund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
 			return false
 		}
 		db2Info := models.Order{
@@ -700,26 +649,7 @@ func Refund(orderId int) bool {
 		}
 		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
 
-		userInfo := models.User{
-			UserId: db2Info.TakerUserId,
-		}
-		marginStr, _ := auth_service.GetUserMargin(db2Info.TakerUserId)
-		if marginStr == "" {
-			marginStr = "0"
-		}
-		margin, _ := strconv.Atoi(marginStr)
-		margin -= db2Info.TakerPayAmount
-		if margin < 0 {
-			margin = 0
-		}
-		var db3Info = make(map[string]interface{})
-		db3Info["margin"] = margin
-
-		if !userInfo.Updates(db3Info) {
-			log, _ := json.Marshal(m)
-			logging.Error("Refund:failed-userInfo-db-" + string(log))
-			return false
-		}
+		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount)
 	}
 	return true
 }
@@ -786,8 +716,8 @@ func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
 	return upperSign
 }
 
-func GetNeedTakeOrderList(orders *[]models.Order) {
-	_, err := models.GetNeedTakeOrders(orders)
+func GetNeedTakeOrderList(orders *[]models.Order, index int, count int) {
+	_, err := models.GetNeedTakeOrders(orders, index, count)
 	if err != nil {
 		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
 	}

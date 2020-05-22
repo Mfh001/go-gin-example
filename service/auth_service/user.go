@@ -113,6 +113,31 @@ func ExistUserInfo(userId int) bool {
 	return true
 }
 
+func UpdateUserInfoToRedis(userId int) bool {
+	logging.Info("UpdateUserInfoToRedis:" + strconv.Itoa(userId))
+	key := GetRedisKeyUserInfo(userId)
+	info := models.User{
+		UserId: userId,
+	}
+	dbRes, err := info.First()
+	if dbRes == 0 {
+		return false
+	} else if dbRes == -1 {
+		return false
+	}
+	//将数据放入redis
+	jData, _ := json.Marshal(info)
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(jData, &m); err != nil {
+		return false
+	}
+	_, err = gredis.HMSet(key, m)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func GetUserInfo(userId int) (map[string]interface{}, error) {
 	if !ExistUserInfo(userId) {
 		return nil, fmt.Errorf("GetUserInfo:userIdnoExist")
@@ -183,44 +208,85 @@ func GetUserPhone(userId int) (string, error) {
 	return phone, nil
 }
 
-func GetUserBalance(userId int) (string, error) {
-	if !ExistUserInfo(userId) {
-		return "", fmt.Errorf("GetUserBalance:userIdnoExist")
+func AddUserMargin(userId int, amount int) bool {
+	userInfo := models.User{
+		UserId: userId,
 	}
-	balance, err := gredis.HGet(GetRedisKeyUserInfo(userId), "balance")
-	if err != nil {
-		logging.Error("GetUserBalance:" + strconv.Itoa(userId))
-		return "", err
+	margin := GetUserParam(userId, "margin")
+	logging.Info("AddUserMargin:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",margin-" + strconv.Itoa(margin))
+	margin += amount
+	var db2Info = make(map[string]interface{})
+	db2Info["margin"] = margin
+
+	if !userInfo.Updates(db2Info) {
+		log, _ := json.Marshal(db2Info)
+		logging.Error("AddUserMargin:db-userInfo-failed-" + string(log))
+		return false
 	}
-	return balance, nil
+	logging.Info("AddUserMargin Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
+	return true
 }
 
-func GetUserMargin(userId int) (string, error) {
-	if !ExistUserInfo(userId) {
-		return "", fmt.Errorf("GetUserMargin:userIdnoExist")
+func RemoveUserMargin(userId int, amount int) bool {
+	userInfo := models.User{
+		UserId: userId,
 	}
-	margin, err := gredis.HGet(GetRedisKeyUserInfo(userId), "margin")
-	if err != nil {
-		logging.Error("GetUserMargin:" + strconv.Itoa(userId))
-		return "", err
+	margin := GetUserParam(userId, "margin")
+	logging.Info("RemoveUserMargin:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",margin-" + strconv.Itoa(margin))
+	margin -= amount
+	if margin < 0 {
+		margin = 0
 	}
-	return margin, nil
+	var db2Info = make(map[string]interface{})
+	db2Info["margin"] = margin
+
+	if !userInfo.Updates(db2Info) {
+		log, _ := json.Marshal(db2Info)
+		logging.Error("RemoveUserMargin:db-userInfo-failed-" + string(log))
+		return false
+	}
+	logging.Info("RemoveUserMargin Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
+	return true
+}
+func AddUserBalance(userId int, amount int) bool {
+	userInfo := models.User{
+		UserId: userId,
+	}
+	margin := GetUserParam(userId, "balance")
+	logging.Info("AddUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin))
+	margin += amount
+	var db2Info = make(map[string]interface{})
+	db2Info["balance"] = margin
+
+	if !userInfo.Updates(db2Info) {
+		log, _ := json.Marshal(db2Info)
+		logging.Error("AddUserBalance:db-userInfo-failed-" + string(log))
+		return false
+	}
+	logging.Info("AddUserBalance Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
+	return true
 }
 
-func GetUserType(userId int) (int, error) {
-	if !ExistUserInfo(userId) {
-		return 0, fmt.Errorf("GetUserType:userIdnoExist")
+func RemoveUserBalance(userId int, amount int) bool {
+	userInfo := models.User{
+		UserId: userId,
 	}
-	strType, err := gredis.HGet(GetRedisKeyUserInfo(userId), "type")
-	if err != nil {
-		logging.Error("GetUserType:" + strconv.Itoa(userId))
-		return 0, err
+	margin := GetUserParam(userId, "balance")
+	logging.Info("RemoveUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin))
+	margin -= amount
+	if margin < 0 {
+		margin = 0
 	}
-	state, err := strconv.Atoi(strType)
-	if err != nil {
-		return 0, err
+	var db2Info = make(map[string]interface{})
+	db2Info["balance"] = margin
+
+	if !userInfo.Updates(db2Info) {
+		log, _ := json.Marshal(db2Info)
+		logging.Error("RemoveUserBalance:db-userInfo-failed-" + string(log))
+		return false
 	}
-	return state, nil
+	logging.Info("RemoveUserBalance Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
+	return true
 }
 
 func GetUserParam(userId int, param string) int {
@@ -230,7 +296,9 @@ func GetUserParam(userId int, param string) int {
 	strParam, err := gredis.HGet(GetRedisKeyUserInfo(userId), param)
 	if err != nil {
 		logging.Error("GetUserParam:" + param + ":" + strconv.Itoa(userId))
-		return 0
+		UpdateUserInfoToRedis(userId)
+		strParam, _ = gredis.HGet(GetRedisKeyUserInfo(userId), param)
+		//return 0
 	}
 	if strParam == "" {
 		strParam = "0"
@@ -248,8 +316,10 @@ func GetUserParamString(userId int, param string) string {
 	}
 	strParam, err := gredis.HGet(GetRedisKeyUserInfo(userId), param)
 	if err != nil {
-		logging.Error("GetUserParamString:" + strconv.Itoa(userId))
-		return ""
+		logging.Error("GetUserParamString:" + param + ":" + strconv.Itoa(userId))
+		UpdateUserInfoToRedis(userId)
+		strParam, _ = gredis.HGet(GetRedisKeyUserInfo(userId), param)
+		//return ""
 	}
 	return strParam
 }
