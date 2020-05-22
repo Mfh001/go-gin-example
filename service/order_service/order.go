@@ -723,16 +723,16 @@ func GetNeedTakeOrderList(orders *[]models.Order, index int, count int) {
 	}
 	return
 }
-func GetTakeOrderList(takerId int, orders *[]models.Order) {
-	_, err := models.GetTakeOrders(takerId, orders)
+func GetTakeOrderList(takerId int, orders *[]models.Order, index int, count int) {
+	_, err := models.GetTakeOrders(takerId, orders, index, count)
 	if err != nil {
 		logging.Error("GetTakeOrderList:db-GetTakeOrderList")
 	}
 	return
 }
 
-func GetUserOrderList(userId int, orders *[]models.Order) {
-	_, err := models.GetUserOrders(userId, orders)
+func GetUserOrderList(userId int, orders *[]models.Order, index int, count int) {
+	_, err := models.GetUserOrders(userId, orders, index, count)
 	if err != nil {
 		logging.Error("GetUserOrderList:db-GetTakeOrderList")
 	}

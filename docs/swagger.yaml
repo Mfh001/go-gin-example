@@ -434,6 +434,16 @@ paths:
         name: user_id
         schema:
           type: integer
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
+        schema:
+          type: integer
       produces:
       - application/json
       responses:
@@ -454,6 +464,16 @@ paths:
       - description: user_id
         in: body
         name: user_id
+        schema:
+          type: integer
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
         schema:
           type: integer
       produces:

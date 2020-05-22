@@ -697,6 +697,22 @@ var doc = `{
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "description": "index",
+                        "name": "index",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "count",
+                        "name": "count",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -728,6 +744,22 @@ var doc = `{
                     {
                         "description": "user_id",
                         "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "index",
+                        "name": "index",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "count",
+                        "name": "count",
                         "in": "body",
                         "schema": {
                             "type": "integer"

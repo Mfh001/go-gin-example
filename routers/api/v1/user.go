@@ -14,6 +14,8 @@ import (
 // @Summary Get 代练获取已接单列表
 // @Produce  json
 // @Param user_id body int false "user_id"
+// @Param index body int false "index"
+// @Param count body int false "count"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/order/takelist [get]
@@ -22,6 +24,8 @@ func GetTakerOrders(c *gin.Context) {
 	var (
 		appG   = app.Gin{C: c}
 		userId = com.StrTo(c.Query("user_id")).MustInt()
+		index  = com.StrTo(c.Query("index")).MustInt()
+		count  = com.StrTo(c.Query("count")).MustInt()
 	)
 	if userId == 0 || !auth_service.ExistUserInfo(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
@@ -29,13 +33,15 @@ func GetTakerOrders(c *gin.Context) {
 	}
 	//必须是代练 TODO
 	var list []models.Order
-	order_service.GetTakeOrderList(userId, &list)
+	order_service.GetTakeOrderList(userId, &list, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
 
 // @Summary Get 用户获取自己已发单列表
 // @Produce  json
 // @Param user_id body int false "user_id"
+// @Param index body int false "index"
+// @Param count body int false "count"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/order/userlist [get]
@@ -44,13 +50,15 @@ func GetUserOrders(c *gin.Context) {
 	var (
 		appG   = app.Gin{C: c}
 		userId = com.StrTo(c.Query("user_id")).MustInt()
+		index  = com.StrTo(c.Query("index")).MustInt()
+		count  = com.StrTo(c.Query("count")).MustInt()
 	)
 	if userId == 0 || !auth_service.ExistUserInfo(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
 	var list []models.Order
-	order_service.GetUserOrderList(userId, &list)
+	order_service.GetUserOrderList(userId, &list, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
 
