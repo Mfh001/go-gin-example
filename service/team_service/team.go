@@ -443,7 +443,7 @@ func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
 }
 
 func GetTakeOrderList(takerId int, orders *[]models.Order) {
-	_, err := models.GetTakeOrders(takerId, orders)
+	_, err := models.GetTakeOrders(takerId, orders, 0, 0)
 	if err != nil {
 		logging.Error("GetTakeOrderList:db-GetTakeOrderList")
 	}
@@ -451,7 +451,7 @@ func GetTakeOrderList(takerId int, orders *[]models.Order) {
 }
 
 func GetUserOrderList(userId int, orders *[]models.Order) {
-	_, err := models.GetUserOrders(userId, orders)
+	_, err := models.GetUserOrders(userId, orders, 0, 0)
 	if err != nil {
 		logging.Error("GetUserOrderList:db-GetTakeOrderList")
 	}
