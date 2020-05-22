@@ -40,6 +40,7 @@ func InitRouter() *gin.Engine {
 
 	//管理员获取审核列表
 	r.GET("/check/admin", v1.GetAdminChecks)
+	r.GET("/exchange/all", v1.GetAdminExchanges)
 	//管理员进行审核
 	r.PUT("/check/admin/:id", v1.AdminCheck)
 

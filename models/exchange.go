@@ -1,15 +1,19 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+)
 
 type Exchange struct {
-	Id       int    `form:"-" json:"id" gorm:"AUTO_INCREMENT;primary_key;"`
-	UserId   int    `form:"user_id" json:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
-	NickName string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
-	Money    int    `form:"money" json:"money" gorm:"type:int(12);not null;default:0" valid:"Required;Range(1, 100000)"`
-	Status   int    `form:"-" json:"status" gorm:"type:int(2);not null;default:0"`
-	RegTime  int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
-	UpdTime  int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
+	Id        int    `form:"-" json:"id" gorm:"AUTO_INCREMENT;primary_key;"`
+	UserId    int    `form:"user_id" json:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
+	NickName  string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
+	Money     int    `form:"money" json:"money" gorm:"type:int(12);not null;default:0" valid:"Required;Range(1, 100000)"`
+	RealMoney int    `form:"-" json:"real_money" gorm:"type:int(12);not null;default:0"`
+	Rate      int    `form:"-" json:"rate" gorm:"type:int(12);not null;default:0"`
+	Status    int    `form:"-" json:"status" gorm:"type:int(2);not null;default:0"`
+	RegTime   int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
+	UpdTime   int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
 }
 
 //insert
@@ -71,4 +75,27 @@ func (info *Exchange) Delete() bool {
 		return false
 	}
 	return true
+}
+
+func GetUserExchanges(userId int, infos *[]Exchange, index int, count int) (bool, error) {
+	err := db.Select("*").Where("user_id = ?", userId).Limit(count).Offset(index).Find(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Exchange{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Exchange{}
+		return false, err
+	}
+	return true, nil
+}
+func GetNeedExchanges(infos *[]Exchange, index int, count int) (bool, error) {
+	err := db.Select("*").Where("status = ?", 0).Limit(count).Offset(index).Find(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Exchange{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Exchange{}
+		return false, err
+	}
+	return true, nil
 }

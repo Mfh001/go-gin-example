@@ -9,6 +9,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/gin-gonic/gin"
+	"github.com/unknwon/com"
 	"net/http"
 	"time"
 )
@@ -48,14 +49,10 @@ func AddExchange(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	form.RealMoney = form.Money * (100 - var_const.ExchangeRate) / 100
+	form.Rate = var_const.ExchangeRate
 	form.NickName = auth_service.GetUserParamString(form.UserId, "nick_name")
 	form.RegTime = int(time.Now().Unix())
-	//db:= &models.Exchange{
-	//	UserId: form.UserId,
-	//	NickName: form.NickName,
-	//	Money: form.Money,
-	//	RegTime: int(time.Now().Unix()),
-	//}
 	if !form.Insert() {
 		log, _ := json.Marshal(form)
 		logging.Error("AddExchange:form-" + string(log))
@@ -64,4 +61,21 @@ func AddExchange(c *gin.Context) {
 	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
+}
+
+// @Summary Get 管理员获取提现审核列表
+// @Produce  json
+// @Param index body int false "index"
+// @Param count body int false "count"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /exchange/all [get]
+// @Tags 提现
+func GetAdminExchanges(c *gin.Context) {
+	appG := app.Gin{C: c}
+	index := com.StrTo(c.Query("index")).MustInt()
+	count := com.StrTo(c.Query("count")).MustInt()
+	var list []models.Exchange
+	models.GetNeedExchanges(&list, index, count)
+	appG.Response(http.StatusOK, e.SUCCESS, list)
 }

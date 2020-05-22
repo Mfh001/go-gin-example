@@ -979,6 +979,33 @@ paths:
       summary: 管理员进行审核
       tags:
       - 审核
+  /exchange/all:
+    get:
+      parameters:
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 管理员获取提现审核列表
+      tags:
+      - 提现
   /login:
     post:
       parameters:
