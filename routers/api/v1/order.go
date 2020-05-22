@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
@@ -97,6 +98,16 @@ func BindAgent(c *gin.Context) {
 // @Produce  json
 // @Param index body int false "index"
 // @Param count body int false "count"
+// @Param price_b body int false "开始价格"
+// @Param price_e body int false "结束价格"
+// @Param time_b body int false "最低时限"
+// @Param time_e body int false "最高时限"
+// @Param star_b body int false "最少星数"
+// @Param star_e body int false "最多星数"
+// @Param star_price_b body int false "最低每颗星平均价格"
+// @Param star_price_e body int false "最高每颗星平均价格"
+// @Param level_b body int false "最低段位"
+// @Param level_e body int false "最高段位"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/order/all [get]
@@ -105,8 +116,36 @@ func GetAllOrders(c *gin.Context) {
 	appG := app.Gin{C: c}
 	index := com.StrTo(c.Query("index")).MustInt()
 	count := com.StrTo(c.Query("count")).MustInt()
+	priceB := com.StrTo(c.Query("price_b")).MustInt()
+	priceE := com.StrTo(c.Query("price_e")).MustInt()
+	timeB := com.StrTo(c.Query("time_b")).MustInt()
+	timeE := com.StrTo(c.Query("time_e")).MustInt()
+	starB := com.StrTo(c.Query("star_b")).MustInt()
+	starE := com.StrTo(c.Query("star_e")).MustInt()
+	starPriceB := com.StrTo(c.Query("star_price_b")).MustInt()
+	starPriceE := com.StrTo(c.Query("star_price_e")).MustInt()
+	levelB := com.StrTo(c.Query("level_b")).MustInt()
+	levelE := com.StrTo(c.Query("level_e")).MustInt()
+
 	var list []models.Order
-	order_service.GetNeedTakeOrderList(&list, index, count)
+
+	where := " "
+	if priceB >= priceE && priceE > 0 {
+		where = fmt.Sprintf(where+"and price >=%d and price <=%d ", priceB, priceE)
+	}
+	if timeB >= timeE && timeE > 0 {
+		where = fmt.Sprintf(where+"and time_limit >=%d and time_limit <=%d ", timeB, timeE)
+	}
+	if starB >= starE && starE > 0 {
+		where = fmt.Sprintf(where+"and star_num >=%d and star_num <=%d ", starB, starE)
+	}
+	if starPriceB >= starPriceE && starPriceE > 0 {
+		where = fmt.Sprintf(where+"and star_per_price >=%d and star_per_price <=%d ", starPriceB, starPriceE)
+	}
+	if levelB >= levelE && levelE > 0 {
+		where = fmt.Sprintf(where+"and cur_level <=%d and target_level >=%d ", levelB, levelE)
+	}
+	order_service.GetNeedTakeOrderList(&list, where, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
 

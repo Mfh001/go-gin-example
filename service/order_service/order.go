@@ -65,10 +65,10 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	//等级idx*1000 + star
 	price := 0
 	//realPrice := 0
-	//c := 0
+	starNum := 0
 	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
 		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
-			//c++
+			starNum++
 			//if c <= teamCardNum {
 			//	realPrice += var_const.TeamCardPrice
 			//} else {
@@ -92,7 +92,10 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	if form.Price >= price {
 		form.ChannelType = var_const.ChannelTypePlatform
 	}
-
+	form.StarNum = starNum
+	if starNum > 0 {
+		form.StarPerPrice = form.Price / starNum
+	}
 	form.OrderId = orderId
 	form.TeamId = teamId
 	nickName, _ := auth_service.GetUserNickName(form.UserId)
@@ -716,8 +719,8 @@ func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
 	return upperSign
 }
 
-func GetNeedTakeOrderList(orders *[]models.Order, index int, count int) {
-	_, err := models.GetNeedTakeOrders(orders, index, count)
+func GetNeedTakeOrderList(orders *[]models.Order, where string, index int, count int) {
+	_, err := models.GetNeedTakeOrders(orders, where, index, count)
 	if err != nil {
 		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
 	}

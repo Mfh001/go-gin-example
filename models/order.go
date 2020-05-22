@@ -11,6 +11,8 @@ type Order struct {
 	TimeLimit     int    `json:"time_limit" form:"time_limit" gorm:"type:int(12);not null;default:0" valid:"Required;Range(0, 1000000)"`
 	TeamId        int    `json:"team_id" form:"-" gorm:"type:int(12);not null;default:0"`
 	Status        int    `json:"status" form:"-" gorm:"type:int(12);not null;default:0"`
+	StarNum       int    `json:"star_num" form:"-" gorm:"type:int(12);not null;default:0"`
+	StarPerPrice  int    `json:"star_per_price" form:"-" gorm:"type:int(12);not null;default:0"`
 	TradeNo       string `json:"trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UserId        int    `json:"user_id" form:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
 	NickName      string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
@@ -144,8 +146,8 @@ func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
 }
 
 //select all
-func GetNeedTakeOrders(infos *[]Order, index int, count int) (bool, error) {
-	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status = ? and team_id = 0 and limit ?,?", var_const.OrderStatusPaidPay, index, count).Find(&infos).Error
+func GetNeedTakeOrders(infos *[]Order, where string, index int, count int) (bool, error) {
+	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status = ? and team_id = 0 "+where+" and limit ?,?", var_const.OrderStatusPaidPay, index, count).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil
