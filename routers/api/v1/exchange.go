@@ -19,12 +19,12 @@ import (
 // @Param money body string false "money"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/check [post]
+// @Router /api/v1/exchange [post]
 // @Tags 提现
 func AddExchange(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
-		form models.Check
+		form models.Exchange
 	)
 	httpCode, errCode := app.BindAndValid(c, &form)
 	if errCode != e.SUCCESS {
@@ -35,22 +35,30 @@ func AddExchange(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	form.RegTime = int(time.Now().Unix())
-	if !form.Save() {
-		log, _ := json.Marshal(form)
-		logging.Error("AddCheck:form-" + string(log))
+	if auth_service.GetUserParam(form.UserId, "type") != var_const.UserTypeInstead {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	balance := auth_service.GetUserParam(form.UserId, "balance")
+	if balance < form.Money || form.Money < var_const.ExchangeMinMoney {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !auth_service.RemoveUserBalance(form.UserId, form.Money) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
-	//更新用户审核信息DB
-	userInfo := models.User{
-		UserId: form.UserId,
-	}
-	var dbInfo = make(map[string]interface{})
-	dbInfo["check_pass"] = var_const.CheckNeed
-	if !userInfo.Updates(dbInfo) {
-		logInfo, _ := json.Marshal(dbInfo)
-		logging.Error("AddCheck:db-check-Updates" + string(logInfo))
+	form.NickName = auth_service.GetUserParamString(form.UserId, "nick_name")
+	form.RegTime = int(time.Now().Unix())
+	//db:= &models.Exchange{
+	//	UserId: form.UserId,
+	//	NickName: form.NickName,
+	//	Money: form.Money,
+	//	RegTime: int(time.Now().Unix()),
+	//}
+	if !form.Insert() {
+		log, _ := json.Marshal(form)
+		logging.Error("AddExchange:form-" + string(log))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}

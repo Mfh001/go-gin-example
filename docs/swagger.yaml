@@ -206,6 +206,33 @@ paths:
       summary: 代练提交或更新段位审核
       tags:
       - 审核
+  /api/v1/exchange:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: money
+        in: body
+        name: money
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 提现申请
+      tags:
+      - 提现
   /api/v1/order:
     post:
       parameters:

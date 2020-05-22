@@ -68,6 +68,10 @@ func initTable() {
 	if !tableTeam {
 		db.CreateTable(Team{})
 	}
+	tableExchange := db.HasTable(Exchange{})
+	if !tableExchange {
+		db.CreateTable(Exchange{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)
