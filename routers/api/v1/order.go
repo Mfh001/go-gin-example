@@ -130,20 +130,20 @@ func GetAllOrders(c *gin.Context) {
 	var list []models.Order
 
 	where := " "
-	if priceB >= priceE && priceE > 0 {
+	if priceB <= priceE && priceE > 0 {
 		where = fmt.Sprintf(where+"and price >=%d and price <=%d ", priceB, priceE)
 	}
-	if timeB >= timeE && timeE > 0 {
+	if timeB <= timeE && timeE > 0 {
 		where = fmt.Sprintf(where+"and time_limit >=%d and time_limit <=%d ", timeB, timeE)
 	}
-	if starB >= starE && starE > 0 {
+	if starB <= starE && starE > 0 {
 		where = fmt.Sprintf(where+"and star_num >=%d and star_num <=%d ", starB, starE)
 	}
-	if starPriceB >= starPriceE && starPriceE > 0 {
+	if starPriceB <= starPriceE && starPriceE > 0 {
 		where = fmt.Sprintf(where+"and star_per_price >=%d and star_per_price <=%d ", starPriceB, starPriceE)
 	}
-	if levelB >= levelE && levelE > 0 {
-		where = fmt.Sprintf(where+"and cur_level <=%d and target_level >=%d ", levelB, levelE)
+	if levelB <= levelE && levelE > 0 {
+		where = fmt.Sprintf(where+"and cur_level >=%d and target_level <=%d ", levelB, levelE)
 	}
 	order_service.GetNeedTakeOrderList(&list, where, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
@@ -249,7 +249,7 @@ func ConfirmOrder(c *gin.Context) {
 	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
 	add := order_service.GetOrderParam(orderId, "price")
 	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add))
-	if add >= var_const.OrderNeedRate {
+	if add >= var_const.OrderNeedRate && add < var_const.OrderNeedRateMax {
 		add = add * (100 - var_const.OrderRate) / 100
 	}
 	if !auth_service.AddUserBalance(takerId, add) {
