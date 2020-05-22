@@ -147,7 +147,7 @@ func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
 
 //select all
 func GetNeedTakeOrders(infos *[]Order, where string, index int, count int) (bool, error) {
-	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status = ? and team_id = 0 "+where+" and limit ?,?", var_const.OrderStatusPaidPay, index, count).Find(&infos).Error
+	err := db.Select("star_num, star_per_price, channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status = ? and team_id = 0 "+where, var_const.OrderStatusPaidPay).Limit(count).Offset(index).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil
@@ -158,7 +158,7 @@ func GetNeedTakeOrders(infos *[]Order, where string, index int, count int) (bool
 	return true, nil
 }
 func GetTakeOrders(takerId int, infos *[]Order, index int, count int) (bool, error) {
-	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status >= ? and taker_user_id = ? and limit ?,?", var_const.OrderStatusTakerPaid, takerId, index, count).Find(&infos).Error
+	err := db.Select("star_num, star_per_price, channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status >= ? and taker_user_id = ?", var_const.OrderStatusTakerPaid, takerId).Limit(count).Offset(index).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil
@@ -170,7 +170,7 @@ func GetTakeOrders(takerId int, infos *[]Order, index int, count int) (bool, err
 }
 
 func GetUserOrders(userId int, infos *[]Order, index int, count int) (bool, error) {
-	err := db.Select("channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status >= ? and user_id = ? and limit ?,?", var_const.OrderStatusWaitPay, userId, index, count).Find(&infos).Error
+	err := db.Select("star_num, star_per_price, channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status >= ? and user_id = ?", var_const.OrderStatusWaitPay, userId).Limit(count).Offset(index).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil
