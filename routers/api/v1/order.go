@@ -82,18 +82,6 @@ func TakeOrder(c *gin.Context) {
 
 }
 
-// @Summary 绑定上级
-// @Produce  json
-// @Param user_id body int false "user_id"
-// @Param agent_id body int false "agent_id"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /api/v1/agent/bind [post]
-// @Tags 代理
-func BindAgent(c *gin.Context) {
-
-}
-
 // @Summary Get 获取订单列表
 // @Produce  json
 // @Param index body int false "index"

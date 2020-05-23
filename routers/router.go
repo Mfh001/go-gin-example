@@ -86,6 +86,9 @@ func InitRouter() *gin.Engine {
 		apiV1.GET("/team/list", v1.GetAllTeams)
 		apiV1.POST("/team/cancelurgent", v1.CancelUrgent)
 
+		//代理
+		apiV1.POST("/agent/bind", v1.BindAgent)
+
 		//提现
 		apiV1.POST("/exchange", v1.AddExchange)
 
