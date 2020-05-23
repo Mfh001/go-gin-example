@@ -13,9 +13,9 @@ import (
 
 type WxLoginUserInfo struct {
 	Code      string `form:"code" valid:"Required;MinSize(30);MaxSize(32)"`
-	NickName  string `json:"nick_name" form:"nickname" valid:"Required;MaxSize(50)"`
-	AvatarUrl string `json:"avatar_url" form:"avatar_url" valid:"Required;MaxSize(300)"`
-	Gender    int    `json:"gender" form:"gender" valid:"Required;Range(1,2)"`
+	NickName  string `json:"nick_name" form:"nickname"`
+	AvatarUrl string `json:"avatar_url" form:"avatar_url"`
+	Gender    int    `json:"gender" form:"gender"`
 	Province  string `json:"province" form:"province"`
 	City      string `json:"city" form:"city"`
 }
