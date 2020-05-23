@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
@@ -9,7 +10,9 @@ import (
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // @Summary Get 代练获取已接单列表
@@ -122,4 +125,73 @@ func BindAgent(c *gin.Context) {
 	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
+}
+
+type GetQRcodeInfo struct {
+	Scene string `json:"scene" validate:"required"`
+	Page  string `json:"page"`
+	Width int    `json:"width"`
+}
+
+// @Summary 获取二维码
+// @Produce  json
+// @Param scene body string false "scene"
+// @Param page body string false "page"
+// @Param width body int false "width"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/qrcode [post]
+// @Tags 二维码
+func QRcodeGet(c *gin.Context) {
+	var (
+		appG  = app.Gin{C: c}
+		scene = c.PostForm("scene")
+		page  = c.PostForm("page")
+		width = com.StrTo(c.Query("width")).MustInt()
+	)
+	var accessToken string
+	if accessToken = auth_service.GetAccessToken(); accessToken == "" {
+		token, retErr := auth_service.UpdateAccessToken()
+		if retErr != 0 {
+			appG.Response(http.StatusBadRequest, e.ERROR, nil)
+			return
+		}
+		accessToken = token
+	}
+	url := "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=" + accessToken //请求地址
+	contentType := "application/json"
+	//参数，多个用&隔开
+
+	getQRcodeInfo := GetQRcodeInfo{
+		Scene: scene,
+		Page:  page,
+		Width: width,
+	}
+	jsonData, e2 := json.Marshal(getQRcodeInfo)
+	if e2 != nil {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	data := strings.NewReader(string(jsonData))
+	resp, err2 := http.Post(url, contentType, data)
+	if err2 != nil {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	defer resp.Body.Close()
+	body, err3 := ioutil.ReadAll(resp.Body)
+	if err3 == nil {
+		var dat map[string]interface{}
+		if err := json.Unmarshal([]byte(string(body)), &dat); err == nil {
+			appG.Response(http.StatusBadRequest, e.ERROR, nil)
+			return
+		} else {
+			appG.Response(http.StatusOK, e.SUCCESS, body)
+			return
+		}
+
+	} else {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
 }

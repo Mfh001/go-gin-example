@@ -5,10 +5,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -19,6 +23,9 @@ func getRedisKeyUserIncr() string {
 
 func getRedisKeyWXCode(str string) string {
 	return "sessionKey:" + str
+}
+func getRedisKeyAccessToken() string {
+	return "accessToken:" + setting.AppSetting.WXAppID
 }
 func GetRedisKeyUserInfo(id int) string {
 	return "game_user:" + strconv.Itoa(id)
@@ -52,6 +59,46 @@ func GetWXCode(sessionKey string) (*models.WXCode, error) {
 	var m *models.WXCode
 	_ = json.Unmarshal([]byte(data), &m)
 	return m, nil
+}
+
+func GetAccessToken() string {
+	res, err := gredis.Get(getRedisKeyAccessToken())
+	if err != nil {
+		return ""
+	}
+	return res
+}
+
+func SetAccessToken(token string) bool {
+	_ = gredis.Set(getRedisKeyAccessToken(), token, var_const.AccessTokenExpireTime)
+	return true
+}
+
+func UpdateAccessToken() (string, int) {
+	params := url.Values{}
+	Url, _ := url.Parse("https://api.weixin.qq.com/cgi-bin/token")
+	params.Set("appid", setting.AppSetting.WXAppID)
+	params.Set("secret", setting.AppSetting.WXSecret)
+	params.Set("grant_type", "client_credential")
+	//如果参数中有中文参数,这个方法会进行URLEncode
+	Url.RawQuery = params.Encode()
+	urlPath := Url.String()
+	resp, _ := http.Get(urlPath)
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var dat map[string]interface{}
+	if err := json.Unmarshal([]byte(string(body)), &dat); err == nil {
+		_, ok := dat["access_token"]
+
+		if !ok {
+			return dat["errmsg"].(string), dat["errcode"].(int)
+		} else {
+			SetAccessToken(dat["access_token"].(string))
+			return dat["access_token"].(string), 0
+		}
+	}
+	return "", 1
 }
 
 func ExistUserInfo(userId int) bool {

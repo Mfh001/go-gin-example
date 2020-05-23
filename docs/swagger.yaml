@@ -683,6 +683,38 @@ paths:
       summary: 获取已绑定手机号的验证码
       tags:
       - 手机验证码
+  /api/v1/qrcode:
+    post:
+      parameters:
+      - description: scene
+        in: body
+        name: scene
+        schema:
+          type: string
+      - description: page
+        in: body
+        name: page
+        schema:
+          type: string
+      - description: width
+        in: body
+        name: width
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 获取二维码
+      tags:
+      - 二维码
   /api/v1/team:
     post:
       parameters:

@@ -44,6 +44,8 @@ const (
 	ExchangeMinMoney    = 10000 //每次最少提现100元
 	ExchangeRate        = 1     //订单抽成费率%
 
+	AccessTokenExpireTime = 1.8 * 60 * 60
+
 	//满意度
 	OrderSatisfied    = 1 //满意
 	OrderOrdinary     = 2 //一般
