@@ -133,6 +133,7 @@ func GetAllOrders(c *gin.Context) {
 	if levelB <= levelE && levelE > 0 {
 		where = fmt.Sprintf(where+"and cur_level >=%d and target_level <=%d ", levelB, levelE)
 	}
+	logging.Info("where:" + where + ";index:" + c.Query("index") + ";count:" + c.Query("count"))
 	order_service.GetNeedTakeOrderList(&list, where, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
