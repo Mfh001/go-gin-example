@@ -94,6 +94,7 @@ func InitRouter() *gin.Engine {
 
 		//提现
 		apiV1.POST("/exchange", v1.AddExchange)
+		apiV1.POST("/exchange/check", v1.ExchangeCheck)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

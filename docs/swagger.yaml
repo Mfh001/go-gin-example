@@ -1065,6 +1065,33 @@ paths:
       summary: Get 管理员获取提现审核列表
       tags:
       - 提现
+  /exchange/check:
+    post:
+      parameters:
+      - description: 提现id
+        in: body
+        name: id
+        schema:
+          type: integer
+      - description: state ：-1拒绝 1通过
+        in: body
+        name: state
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 管理员审核提现
+      tags:
+      - 提现
   /login:
     post:
       parameters:

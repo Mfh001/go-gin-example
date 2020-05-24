@@ -388,3 +388,13 @@ func GetUserParamString(userId int, param string) string {
 	}
 	return strParam
 }
+
+func IsUserTypeInstead(userId int) bool {
+	if userId <= 0 {
+		return false
+	}
+	if var_const.UserTypeInstead == GetUserParam(userId, "type") {
+		return true
+	}
+	return false
+}

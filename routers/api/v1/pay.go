@@ -213,15 +213,10 @@ func TakerWxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !auth_service.ExistUserInfo(userId) {
+	if !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	//判断是代练 TODO
-	//if !check_service.ExistUserCheck(userId) {
-	//	appG.Response(http.StatusBadRequest, e.CHECK_NO_PASS, nil)
-	//	return
-	//}
 	orderId, err := strconv.Atoi(c.PostForm("order_id"))
 	teamId, _ := order_service.GetOrderTeamId(orderId)
 	if teamId > 0 {
@@ -248,7 +243,6 @@ func TakerWxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	//不是代练不可接单 TODO
 
 	d, ok := order_service.TakerPay(userId, orderId, c.ClientIP())
 	if !ok {

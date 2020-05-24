@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -18,6 +19,9 @@ type Exchange struct {
 
 //insert
 func (info Exchange) Insert() bool {
+	if info.UserId <= 0 || info.Id <= 0 {
+		return false
+	}
 	create := db.Create(&info)
 	if create.Error != nil {
 		return false
@@ -28,7 +32,7 @@ func (info Exchange) Insert() bool {
 //update
 
 func (info Exchange) Updates(m map[string]interface{}) bool {
-	if info.UserId <= 0 {
+	if info.UserId <= 0 || info.Id <= 0 {
 		return false
 	}
 	err := db.Model(&info).Updates(m).Error
@@ -40,6 +44,9 @@ func (info Exchange) Updates(m map[string]interface{}) bool {
 
 //insert and update
 func (info Exchange) Save() bool {
+	if info.UserId <= 0 || info.Id <= 0 {
+		return false
+	}
 	create := db.Save(&info)
 	if create.Error != nil {
 		return false
@@ -49,6 +56,9 @@ func (info Exchange) Save() bool {
 
 //select
 func (info *Exchange) First() (int, error) {
+	if info.UserId <= 0 || info.Id <= 0 {
+		return -1, fmt.Errorf("GetUserInfo:userIdnoExist")
+	}
 	err := db.First(&info).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return 0, nil

@@ -1698,6 +1698,49 @@ var doc = `{
                 }
             }
         },
+        "/exchange/check": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "提现"
+                ],
+                "summary": "Get 管理员审核提现",
+                "parameters": [
+                    {
+                        "description": "提现id",
+                        "name": "id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "state ：-1拒绝 1通过",
+                        "name": "state",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "tags": [

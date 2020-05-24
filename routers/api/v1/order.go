@@ -154,7 +154,7 @@ func FinishOrder(c *gin.Context) {
 		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
 		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
 	)
-	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+	if userId == 0 || !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}

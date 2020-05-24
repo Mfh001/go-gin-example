@@ -34,11 +34,10 @@ func GetTakerOrders(c *gin.Context) {
 		index  = com.StrTo(c.Query("index")).MustInt()
 		count  = com.StrTo(c.Query("count")).MustInt()
 	)
-	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+	if userId == 0 || !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	//必须是代练 TODO
 	var list []models.Order
 	order_service.GetTakeOrderList(userId, &list, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)

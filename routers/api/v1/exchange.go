@@ -8,6 +8,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
+	"github.com/EDDYCJY/go-gin-example/service/exchange_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"net/http"
@@ -32,7 +33,7 @@ func AddExchange(c *gin.Context) {
 		appG.Response(httpCode, errCode, nil)
 		return
 	}
-	if !auth_service.ExistUserInfo(form.UserId) {
+	if !auth_service.ExistUserInfo(form.UserId) || !auth_service.IsUserTypeInstead(form.UserId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -78,4 +79,44 @@ func GetAdminExchanges(c *gin.Context) {
 	var list []models.Exchange
 	models.GetNeedExchanges(&list, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
+}
+
+// @Summary Get 管理员审核提现
+// @Produce  json
+// @Param id body int false "提现id"
+// @Param state body int false "state ：-1拒绝 1通过"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /exchange/check [post]
+// @Tags 提现
+func ExchangeCheck(c *gin.Context) {
+	appG := app.Gin{C: c}
+	id := com.StrTo(c.PostForm("id")).MustInt()
+	state := com.StrTo(c.PostForm("state")).MustInt()
+	if state != -1 && state != 1 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !exchange_service.ExistExchange(id) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if exchange_service.GetExchangeParam(id, "status") != 0 {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	exchange := models.Exchange{
+		Id: id,
+	}
+
+	m := make(map[string]interface{})
+	m["status"] = state
+	m["upd_time"] = int(time.Now().Unix())
+
+	if !exchange.Updates(m) {
+		logging.Error("ExchangeCheck-db: id-" + c.PostForm("id") + ",state-" + c.PostForm("state"))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }
