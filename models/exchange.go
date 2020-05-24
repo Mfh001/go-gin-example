@@ -13,6 +13,7 @@ type Exchange struct {
 	RealMoney int    `form:"-" json:"real_money" gorm:"type:int(12);not null;default:0"`
 	Rate      int    `form:"-" json:"rate" gorm:"type:int(12);not null;default:0"`
 	Status    int    `form:"-" json:"status" gorm:"type:int(2);not null;default:0"`
+	Remarks   string `json:"remarks" gorm:"type:varchar(32);not null;default:''"`
 	RegTime   int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	UpdTime   int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
 }

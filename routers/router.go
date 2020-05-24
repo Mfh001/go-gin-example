@@ -43,6 +43,7 @@ func InitRouter() *gin.Engine {
 	r.GET("/exchange/all", v1.GetAdminExchanges)
 	//管理员进行审核
 	r.PUT("/check/admin/:id", v1.AdminCheck)
+	r.POST("/exchange/check", v1.ExchangeCheck)
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())
@@ -94,7 +95,6 @@ func InitRouter() *gin.Engine {
 
 		//提现
 		apiV1.POST("/exchange", v1.AddExchange)
-		apiV1.POST("/exchange/check", v1.ExchangeCheck)
 
 		////获取标签列表
 		//apiV1.GET("/tags", v1.GetTags)

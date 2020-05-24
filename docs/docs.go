@@ -1723,6 +1723,14 @@ var doc = `{
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "description": "备注",
+                        "name": "remarks",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {

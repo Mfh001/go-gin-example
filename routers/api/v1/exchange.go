@@ -37,6 +37,7 @@ func AddExchange(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+	//TODO 是否绑定银行卡
 	if auth_service.GetUserParam(form.UserId, "type") != var_const.UserTypeInstead {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -77,7 +78,7 @@ func GetAdminExchanges(c *gin.Context) {
 	index := com.StrTo(c.Query("index")).MustInt()
 	count := com.StrTo(c.Query("count")).MustInt()
 	var list []models.Exchange
-	models.GetNeedExchanges(&list, index, count)
+	_, _ = models.GetNeedExchanges(&list, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
 
@@ -85,6 +86,7 @@ func GetAdminExchanges(c *gin.Context) {
 // @Produce  json
 // @Param id body int false "提现id"
 // @Param state body int false "state ：-1拒绝 1通过"
+// @Param remarks body string false "备注"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /exchange/check [post]
