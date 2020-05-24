@@ -38,7 +38,10 @@ func AddExchange(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	//TODO 是否绑定银行卡
+	if !bank_service.ExistBank(form.UserId) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
 	if auth_service.GetUserParam(form.UserId, "type") != var_const.UserTypeInstead {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -80,7 +83,10 @@ func GetAdminExchanges(c *gin.Context) {
 	count := com.StrTo(c.Query("count")).MustInt()
 	var list []models.Exchange
 	_, _ = models.GetNeedExchanges(&list, index, count)
-	appG.Response(http.StatusOK, e.SUCCESS, list)
+	m := make(map[string]interface{})
+	m["list"] = list
+	m["count"] = len(list)
+	appG.Response(http.StatusOK, e.SUCCESS, m)
 }
 
 // @Summary Get 管理员审核提现
