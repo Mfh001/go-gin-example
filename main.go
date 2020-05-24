@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/EDDYCJY/go-gin-example/service/cron_service"
 	"log"
 	"net/http"
 	"os"
@@ -27,6 +28,7 @@ func init() {
 	logging.Setup()
 	gredis.Setup()
 	util.Setup()
+	cron_service.Start()
 }
 
 // @title Golang Gin API

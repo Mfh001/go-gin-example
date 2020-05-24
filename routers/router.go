@@ -88,6 +88,7 @@ func InitRouter() *gin.Engine {
 
 		//代理
 		apiV1.POST("/agent/bind", v1.BindAgent)
+		apiV1.GET("/agent/profit", v1.GetAgentProfit)
 		//获取二维码
 		apiV1.POST("/qrcode", v1.QRcodeGet)
 

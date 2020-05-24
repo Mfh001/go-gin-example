@@ -5,13 +5,16 @@ import (
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
+	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
+	"github.com/EDDYCJY/go-gin-example/service/profit_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -101,6 +104,10 @@ func BindAgent(c *gin.Context) {
 	appG := app.Gin{C: c}
 	userId := com.StrTo(c.PostForm("user_id")).MustInt()
 	agentId := com.StrTo(c.PostForm("agent_id")).MustInt()
+	if userId == agentId {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
 	if !auth_service.ExistUserInfo(userId) || !auth_service.ExistUserInfo(agentId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -194,4 +201,50 @@ func QRcodeGet(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+}
+
+// @Summary Get 获取昨天团队发单接单收益
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/agent/profit [get]
+// @Tags 用户信息
+func GetAgentProfit(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.Query("user_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	pProfit := profit_service.GetProfitParam(userId, "order_yesterday_publish_profit")
+	tProfit := profit_service.GetProfitParam(userId, "order_yesterday_taker_profit")
+
+	keys := gredis.GetKeys("game_user:")
+	for _, v := range keys {
+		fields := []string{"user_id", "agent_id"}
+		data, err := gredis.HMGet(v, fields...)
+		if err != nil || len(data) != 2 || data[0] == nil || data[1] == nil {
+			continue
+		}
+		agentId, err := strconv.Atoi(string(data[1].([]byte)))
+		if err != nil {
+			continue
+		}
+		if agentId == userId {
+			childId, err := strconv.Atoi(string(data[0].([]byte)))
+			if err != nil {
+				continue
+			}
+			pProfit += profit_service.GetProfitParam(childId, "order_yesterday_agent_publish_profit")
+			tProfit += profit_service.GetProfitParam(childId, "order_yesterday_agent_taker_profit")
+		}
+	}
+
+	m := make(map[string]interface{})
+	m["pProfit"] = pProfit
+	m["tProfit"] = tProfit
+	appG.Response(http.StatusOK, e.SUCCESS, m)
 }

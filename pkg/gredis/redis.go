@@ -180,6 +180,18 @@ func LikeDeletes(key string) error {
 	return nil
 }
 
+func GetKeys(key string) []string {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	keys, err := redis.Strings(conn.Do("KEYS", key+"*"))
+	if err != nil {
+		return []string{}
+	}
+
+	return keys
+}
+
 // Incr a key
 func Incr(key string) (int, error) {
 	conn := RedisConn.Get()
