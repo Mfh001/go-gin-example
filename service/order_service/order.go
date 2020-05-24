@@ -113,6 +113,9 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 }
 
 func ExistOrder(orderId int) bool {
+	if orderId <= 0 {
+		return false
+	}
 	key := GetRedisKeyOrder(orderId)
 	if gredis.Exists(key) {
 		return true

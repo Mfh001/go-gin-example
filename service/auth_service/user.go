@@ -102,6 +102,9 @@ func UpdateAccessToken() (string, int) {
 }
 
 func ExistUserInfo(userId int) bool {
+	if userId <= 0 {
+		return false
+	}
 	key := GetRedisKeyUserInfo(userId)
 	if gredis.Exists(key) {
 		return true
@@ -256,6 +259,9 @@ func GetUserPhone(userId int) (string, error) {
 }
 
 func AddUserMargin(userId int, amount int) bool {
+	if userId <= 0 || !ExistUserInfo(userId) {
+		return false
+	}
 	userInfo := models.User{
 		UserId: userId,
 	}
@@ -275,6 +281,9 @@ func AddUserMargin(userId int, amount int) bool {
 }
 
 func RemoveUserMargin(userId int, amount int) bool {
+	if userId <= 0 || !ExistUserInfo(userId) {
+		return false
+	}
 	userInfo := models.User{
 		UserId: userId,
 	}
@@ -296,6 +305,9 @@ func RemoveUserMargin(userId int, amount int) bool {
 	return true
 }
 func AddUserBalance(userId int, amount int, flag string) bool {
+	if userId <= 0 || !ExistUserInfo(userId) {
+		return false
+	}
 	userInfo := models.User{
 		UserId: userId,
 	}
@@ -315,6 +327,9 @@ func AddUserBalance(userId int, amount int, flag string) bool {
 }
 
 func RemoveUserBalance(userId int, amount int) bool {
+	if userId <= 0 || !ExistUserInfo(userId) {
+		return false
+	}
 	userInfo := models.User{
 		UserId: userId,
 	}
@@ -337,7 +352,7 @@ func RemoveUserBalance(userId int, amount int) bool {
 }
 
 func GetUserParam(userId int, param string) int {
-	if !ExistUserInfo(userId) {
+	if userId <= 0 || !ExistUserInfo(userId) {
 		return 0
 	}
 	strParam, err := gredis.HGet(GetRedisKeyUserInfo(userId), param)
@@ -352,12 +367,15 @@ func GetUserParam(userId int, param string) int {
 	}
 	p, err := strconv.Atoi(strParam)
 	if err != nil {
-		logging.Error("GetTeamParam:" + strParam)
+		logging.Error("GetUserParam:userId-" + strconv.Itoa(userId) + " param-" + param)
 		return 0
 	}
 	return p
 }
 func GetUserParamString(userId int, param string) string {
+	if userId <= 0 {
+		return ""
+	}
 	if !ExistUserInfo(userId) {
 		return ""
 	}

@@ -237,6 +237,10 @@ func ConfirmOrder(c *gin.Context) {
 		return
 	}
 	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
+	if takerId <= 0 || !auth_service.ExistUserInfo(takerId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
 	add := order_service.GetOrderParam(orderId, "price")
 	//收益
 	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add) + " order_id" + strconv.Itoa(orderId))

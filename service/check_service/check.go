@@ -7,6 +7,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
+	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"strconv"
 	"time"
 )
@@ -16,6 +17,9 @@ func GetRedisKeyUserCheck(userId int) string {
 }
 
 func ExistUserCheck(userId int) bool {
+	if userId <= 0 || !auth_service.ExistUserInfo(userId) {
+		return false
+	}
 	key := GetRedisKeyUserCheck(userId)
 	if gredis.Exists(key) {
 		return true

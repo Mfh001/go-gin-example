@@ -17,6 +17,9 @@ func GetRedisKeyProfit(userId int) string {
 }
 
 func ExistProfit(userId int) bool {
+	if userId <= 0 {
+		return false
+	}
 	key := GetRedisKeyProfit(userId)
 	if gredis.Exists(key) {
 		return true
