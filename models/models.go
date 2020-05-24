@@ -72,6 +72,10 @@ func initTable() {
 	if !tableExchange {
 		db.CreateTable(Exchange{})
 	}
+	tableProfit := db.HasTable(Profit{})
+	if !tableProfit {
+		db.CreateTable(Profit{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)

@@ -190,7 +190,7 @@ func GetUserInfo(userId int) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("GetUserInfo:userIdnoExist")
 	}
 	fields := []string{"user_id", "nick_name", "avatar_url", "phone", "type", "check_pass",
-		"game_id", "game_server", "game_pos", "game_level", "img_url", "balance"}
+		"game_id", "game_server", "game_pos", "game_level", "img_url", "balance", "agent_id"}
 	data, err := gredis.HMGet(GetRedisKeyUserInfo(userId), fields...)
 	if err != nil {
 		logging.Error("GetUserInfo:" + strconv.Itoa(userId))
@@ -295,12 +295,12 @@ func RemoveUserMargin(userId int, amount int) bool {
 	logging.Info("RemoveUserMargin Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
 	return true
 }
-func AddUserBalance(userId int, amount int) bool {
+func AddUserBalance(userId int, amount int, flag string) bool {
 	userInfo := models.User{
 		UserId: userId,
 	}
 	margin := GetUserParam(userId, "balance")
-	logging.Info("AddUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin))
+	logging.Info("AddUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin) + ",flag-" + flag)
 	margin += amount
 	var db2Info = make(map[string]interface{})
 	db2Info["balance"] = margin
@@ -310,7 +310,7 @@ func AddUserBalance(userId int, amount int) bool {
 		logging.Error("AddUserBalance:db-userInfo-failed-" + string(log))
 		return false
 	}
-	logging.Info("AddUserBalance Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
+	logging.Info("AddUserBalance Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",flag-" + flag)
 	return true
 }
 

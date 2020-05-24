@@ -242,6 +242,12 @@ func TakerWxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
+
+	uId := order_service.GetOrderParam(orderId, "user_id")
+	if uId == userId {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
 	//不是代练不可接单 TODO
 
 	d, ok := order_service.TakerPay(userId, orderId, c.ClientIP())

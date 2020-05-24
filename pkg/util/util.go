@@ -4,6 +4,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 	"regexp"
+	"time"
 )
 
 // Setup Initialize the util
@@ -37,4 +38,14 @@ func SendSMSCode(phone string, code string) {
 	//fmt.Print(err2.Error())
 	//}
 	//fmt.Printf("response is %#v\n", response)
+}
+
+//判断该时间戳是否属于今天
+func IsToday(tick int) bool {
+	currentTime := time.Now()
+	startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, currentTime.Location())
+	if int64(tick) >= startTime.Unix() {
+		return true
+	}
+	return false
 }

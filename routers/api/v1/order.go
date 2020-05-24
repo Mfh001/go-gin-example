@@ -8,8 +8,10 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
+	"github.com/EDDYCJY/go-gin-example/pkg/util"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/EDDYCJY/go-gin-example/service/order_service"
+	"github.com/EDDYCJY/go-gin-example/service/profit_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"net/http"
@@ -234,14 +236,98 @@ func ConfirmOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
-	//收益
 	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
+	//代理逻辑计算
 	add := order_service.GetOrderParam(orderId, "price")
-	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add))
+	if add >= var_const.OrderNeedRate && add < var_const.OrderNeedRateMax {
+		if !profit_service.ExistProfit(userId) {
+			profit := models.Profit{
+				UserId: userId,
+			}
+			if !profit.Insert() {
+				logging.Error("ConfirmOrder:insert Profit -failed-" + c.PostForm("user_id"))
+			}
+		}
+		if !profit_service.ExistProfit(takerId) {
+			profit := models.Profit{
+				UserId: takerId,
+			}
+			if !profit.Insert() {
+				logging.Error("ConfirmOrder:insert takerId Profit -failed-" + strconv.Itoa(takerId))
+			}
+		}
+		//--累计订单统计
+		{
+			userOrderTotalTimes := profit_service.GetProfitParam(userId, "order_total_times")
+			userOrderTotalTimes++
+			userProfit := models.Profit{
+				UserId: userId,
+			}
+			m := make(map[string]interface{})
+			m["order_total_times"] = userOrderTotalTimes
+			userProfit.Updates(m)
+		}
+		{
+			takerOrderTotalTimes := profit_service.GetProfitParam(takerId, "order_total_times")
+			takerOrderTotalTimes++
+			userProfit := models.Profit{
+				UserId: takerId,
+			}
+			m := make(map[string]interface{})
+			m["order_total_times"] = takerOrderTotalTimes
+			userProfit.Updates(m)
+		}
+		{
+			//今天下级发单统计
+			agentId := auth_service.GetUserParam(userId, "agent_id")
+			if agentId > 0 && auth_service.ExistUserInfo(agentId) {
+				resetTime := profit_service.GetProfitParam(agentId, "reset_time")
+				if !util.IsToday(resetTime) {
+					//计算返利 重置当日数据
+					profit_service.CalDailyProfit(agentId)
+				}
+				//今天发单统计
+				orderTodayPublishTimes := profit_service.GetProfitParam(agentId, "order_today_publish_times")
+				orderTodayPublishTimes++
+				userProfit := models.Profit{
+					UserId: agentId,
+				}
+				m := make(map[string]interface{})
+				m["order_today_publish_times"] = orderTodayPublishTimes
+				//m["reset_time"] = int(time.Now().Unix())
+				userProfit.Updates(m)
+			}
+		}
+		{
+			//今天下级接单统计
+			agentId := auth_service.GetUserParam(takerId, "agent_id")
+			if agentId > 0 && auth_service.ExistUserInfo(agentId) {
+				resetTime := profit_service.GetProfitParam(agentId, "reset_time")
+				if !util.IsToday(resetTime) {
+					//计算返利 重置当日数据
+					profit_service.CalDailyProfit(agentId)
+				}
+				//今天发单统计
+				orderTodayTakerTimes := profit_service.GetProfitParam(agentId, "order_today_taker_times")
+				orderTodayTakerTimes++
+				userProfit := models.Profit{
+					UserId: agentId,
+				}
+				m := make(map[string]interface{})
+				m["order_today_taker_times"] = orderTodayTakerTimes
+				//m["reset_time"] = int(time.Now().Unix())
+				userProfit.Updates(m)
+			}
+		}
+	}
+
+	//
+	//收益
+	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add) + " order_id" + strconv.Itoa(orderId))
 	if add >= var_const.OrderNeedRate && add < var_const.OrderNeedRateMax {
 		add = add * (100 - var_const.OrderRate) / 100
 	}
-	if !auth_service.AddUserBalance(takerId, add) {
+	if !auth_service.AddUserBalance(takerId, add, "ConfirmOrder") {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
