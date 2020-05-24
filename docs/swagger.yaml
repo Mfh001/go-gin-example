@@ -1065,6 +1065,28 @@ paths:
       summary: Get 管理员获取提现审核列表
       tags:
       - 提现
+  /exchange/bank:
+    get:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 获取银行卡
+      tags:
+      - 提现
   /exchange/check:
     post:
       parameters:

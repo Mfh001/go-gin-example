@@ -44,6 +44,7 @@ func InitRouter() *gin.Engine {
 	//管理员进行审核
 	r.PUT("/check/admin/:id", v1.AdminCheck)
 	r.POST("/exchange/check", v1.ExchangeCheck)
+	r.GET("/exchange/bank", v1.GetExchangeBank)
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())

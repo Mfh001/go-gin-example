@@ -8,6 +8,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
+	"github.com/EDDYCJY/go-gin-example/service/bank_service"
 	"github.com/EDDYCJY/go-gin-example/service/exchange_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
@@ -121,4 +122,27 @@ func ExchangeCheck(c *gin.Context) {
 		return
 	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
+}
+
+// @Summary Get 获取银行卡
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /exchange/bank [get]
+// @Tags 提现
+func GetExchangeBank(c *gin.Context) {
+	appG := app.Gin{C: c}
+	userId := com.StrTo(c.Query("user_id")).MustInt()
+
+	if !bank_service.ExistBank(userId) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	m := make(map[string]interface{})
+	m["bank_name"] = bank_service.GetBankParamString(userId, "bank_name")
+	m["Bank_branch_name"] = bank_service.GetBankParamString(userId, "Bank_branch_name")
+	m["bank_card"] = bank_service.GetBankParamString(userId, "bank_card")
+	m["user_name"] = bank_service.GetBankParamString(userId, "user_name")
+	appG.Response(http.StatusOK, e.SUCCESS, m)
 }

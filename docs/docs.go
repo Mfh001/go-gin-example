@@ -1698,6 +1698,41 @@ var doc = `{
                 }
             }
         },
+        "/exchange/bank": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "提现"
+                ],
+                "summary": "Get 获取银行卡",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/exchange/check": {
             "post": {
                 "produces": [
