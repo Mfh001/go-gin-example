@@ -22,6 +22,7 @@ import (
 // @Param game_server body int false "game_server"
 // @Param game_pos body int false "game_pos"
 // @Param game_level body string false "game_level"
+// @Param game_level_id body string false "game_level_id"
 // @Param img_url body string false "img_url"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
@@ -139,17 +140,17 @@ func AdminCheck(c *gin.Context) {
 	var dbInfo = make(map[string]interface{})
 	dbInfo["check_pass"] = state
 	if state == var_const.CheckPass {
-		data, err := check_service.GetUserCheckInfo(userId)
-		if err != nil {
-			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-			return
-		}
+		//data, err := check_service.GetUserCheckInfo(userId)
+		//if err != nil {
+		//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		//	return
+		//}
 		dbInfo["type"] = var_const.UserTypeInstead
-		dbInfo["game_id"] = data["game_id"]
-		dbInfo["game_server"] = data["game_server"]
-		dbInfo["game_pos"] = data["game_pos"]
-		dbInfo["game_level"] = data["game_level"]
-		dbInfo["img_url"] = data["img_url"]
+		dbInfo["game_id"] = check_service.GetCheckParamString(userId, "game_id")
+		dbInfo["game_server"] = check_service.GetCheckParam(userId, "game_server")
+		dbInfo["game_pos"] = check_service.GetCheckParam(userId, "game_pos")
+		dbInfo["game_level"] = check_service.GetCheckParam(userId, "game_level_id")
+		dbInfo["img_url"] = check_service.GetCheckParamString(userId, "img_url")
 	}
 	if !userInfo.Updates(dbInfo) {
 		logInfo, _ := json.Marshal(dbInfo)

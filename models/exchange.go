@@ -28,6 +28,9 @@ func (info Exchange) Insert() bool {
 //update
 
 func (info Exchange) Updates(m map[string]interface{}) bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	err := db.Model(&info).Updates(m).Error
 	if err != nil {
 		return false

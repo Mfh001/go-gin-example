@@ -340,6 +340,14 @@ var doc = `{
                         }
                     },
                     {
+                        "description": "game_level_id",
+                        "name": "game_level_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "description": "img_url",
                         "name": "img_url",
                         "in": "body",

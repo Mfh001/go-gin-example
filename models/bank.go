@@ -35,6 +35,9 @@ func (info BankCardInfo) Insert() bool {
 }
 
 func (info BankCardInfo) UpdateByOneColumn(name string, val interface{}) bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Model(&info).Update(name, val)
 	if create.Error != nil {
 		return false

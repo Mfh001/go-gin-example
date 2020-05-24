@@ -102,3 +102,34 @@ func GetCheckList(checks *[]models.Check) {
 	}
 	return
 }
+
+func GetCheckParam(userId int, param string) int {
+	if !ExistUserCheck(userId) {
+		return 0
+	}
+	strParam, err := gredis.HGet(GetRedisKeyUserCheck(userId), param)
+	if err != nil {
+		logging.Error("GetCheckParam:" + strconv.Itoa(userId))
+		return 0
+	}
+	if strParam == "" {
+		strParam = "0"
+	}
+	p, err := strconv.Atoi(strParam)
+	if err != nil {
+		logging.Error("GetCheckParam:" + strParam)
+		return 0
+	}
+	return p
+}
+func GetCheckParamString(userId int, param string) string {
+	if !ExistUserCheck(userId) {
+		return ""
+	}
+	strParam, err := gredis.HGet(GetRedisKeyUserCheck(userId), param)
+	if err != nil {
+		logging.Error("GetCheckParamString:" + strconv.Itoa(userId))
+		return ""
+	}
+	return strParam
+}

@@ -209,6 +209,11 @@ paths:
         name: game_level
         schema:
           type: string
+      - description: game_level_id
+        in: body
+        name: game_level_id
+        schema:
+          type: string
       - description: img_url
         in: body
         name: img_url
