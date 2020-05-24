@@ -24,6 +24,9 @@ type RequestBankCardInfo struct {
 }
 
 func (info BankCardInfo) Insert() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Create(&info)
 	if create.Error != nil {
 		return false
@@ -40,6 +43,9 @@ func (info BankCardInfo) UpdateByOneColumn(name string, val interface{}) bool {
 }
 
 func (info BankCardInfo) Save() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Save(&info)
 	if create.Error != nil {
 		return false

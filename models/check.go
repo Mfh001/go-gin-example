@@ -1,6 +1,9 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"fmt"
+	"github.com/jinzhu/gorm"
+)
 
 type Check struct {
 	UserId     int    `gorm:"primary_key;type:int(12);not null" form:"user_id" json:"user_id" valid:"Required;Range(1, 1000000000)"`
@@ -14,6 +17,9 @@ type Check struct {
 
 //insert
 func (info Check) Insert() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Create(&info)
 	if create.Error != nil {
 		return false
@@ -24,6 +30,9 @@ func (info Check) Insert() bool {
 //update
 
 func (info Check) Updates(m map[string]interface{}) bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	err := db.Model(&info).Updates(m).Error
 	if err != nil {
 		return false
@@ -33,6 +42,9 @@ func (info Check) Updates(m map[string]interface{}) bool {
 
 //insert and update
 func (info Check) Save() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Save(&info)
 	if create.Error != nil {
 		return false
@@ -42,6 +54,9 @@ func (info Check) Save() bool {
 
 //select
 func (info *Check) First() (int, error) {
+	if info.UserId <= 0 {
+		return -1, fmt.Errorf("First:ChecknoExist")
+	}
 	err := db.First(&info).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return 0, nil
@@ -67,6 +82,9 @@ func FindChecks(infos *[]Check) (bool, error) {
 // Delete
 func (info *Check) Delete() bool {
 	//err := db.Where("id = ?", id).Delete(&Tag{}).Error
+	if info.UserId <= 0 {
+		return false
+	}
 	if err := db.Delete(info).Error; err != nil {
 		return false
 	}

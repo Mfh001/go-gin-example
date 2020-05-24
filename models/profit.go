@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -21,6 +22,9 @@ type Profit struct {
 
 //insert
 func (info Profit) Insert() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Create(&info)
 	if create.Error != nil {
 		return false
@@ -30,6 +34,9 @@ func (info Profit) Insert() bool {
 
 //update
 func (info Profit) Updates(shop map[string]interface{}) bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	err := db.Model(&info).Updates(shop).Error
 	if err != nil {
 		return false
@@ -39,6 +46,9 @@ func (info Profit) Updates(shop map[string]interface{}) bool {
 
 //insert and update
 func (info Profit) Save() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Save(&info)
 	if create.Error != nil {
 		return false
@@ -49,6 +59,9 @@ func (info Profit) Save() bool {
 //select
 func (info *Profit) First() (int, error) {
 	//err := db.Where("user_id=?",info.UserId).Find(&info)
+	if info.UserId <= 0 {
+		return -1, fmt.Errorf("First:ProfitnoExist")
+	}
 	err := db.First(&info).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return 0, nil

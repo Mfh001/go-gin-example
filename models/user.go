@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -36,6 +37,9 @@ type WXCode struct {
 
 //insert
 func (info User) Insert() bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	create := db.Create(&info)
 	if create.Error != nil {
 		return false
@@ -45,6 +49,9 @@ func (info User) Insert() bool {
 
 //update
 func (info User) Updates(shop map[string]interface{}) bool {
+	if info.UserId <= 0 {
+		return false
+	}
 	err := db.Model(&info).Updates(shop).Error
 	if err != nil {
 		return false
@@ -55,6 +62,9 @@ func (info User) Updates(shop map[string]interface{}) bool {
 //select
 func (info *User) First() (int, error) {
 	//err := db.Where("user_id=?",info.UserId).Find(&info)
+	if info.UserId <= 0 {
+		return -1, fmt.Errorf("First:UsernoExist")
+	}
 	err := db.First(&info).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return 0, nil

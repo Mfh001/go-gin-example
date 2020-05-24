@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/jinzhu/gorm"
 )
@@ -72,6 +73,9 @@ type Order struct {
 
 //insert
 func (info Order) Insert() bool {
+	if info.OrderId <= 0 {
+		return false
+	}
 	create := db.Create(&info)
 	if create.Error != nil {
 		return false
@@ -81,6 +85,9 @@ func (info Order) Insert() bool {
 
 //update
 func (info Order) Updates(m map[string]interface{}) bool {
+	if info.OrderId <= 0 {
+		return false
+	}
 	err := db.Model(&info).Updates(m).Error
 	if err != nil {
 		return false
@@ -90,6 +97,9 @@ func (info Order) Updates(m map[string]interface{}) bool {
 
 //insert and update
 func (info Order) Save() bool {
+	if info.OrderId <= 0 {
+		return false
+	}
 	create := db.Save(&info)
 	if create.Error != nil {
 		return false
@@ -99,6 +109,9 @@ func (info Order) Save() bool {
 
 //select
 func (info *Order) First() (int, error) {
+	if info.OrderId <= 0 {
+		return -1, fmt.Errorf("First:ProfitnoExist")
+	}
 	err := db.First(&info).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return 0, nil
