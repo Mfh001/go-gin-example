@@ -237,9 +237,22 @@ func ConfirmOrder(c *gin.Context) {
 		return
 	}
 	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
-	//代理逻辑计算
 	add := order_service.GetOrderParam(orderId, "price")
+	//收益
+	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add) + " order_id" + strconv.Itoa(orderId))
 	if add >= var_const.OrderNeedRate && add < var_const.OrderNeedRateMax {
+		add = add * (100 - var_const.OrderRate) / 100
+	}
+	if !auth_service.AddUserBalance(takerId, add, "ConfirmOrder") {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("ConfirmOrder: end")
+	order_service.Refund(orderId)
+
+	//代理逻辑计算
+	price := order_service.GetOrderParam(orderId, "price")
+	if price >= var_const.OrderNeedRate && price < var_const.OrderNeedRateMax {
 		if !profit_service.ExistProfit(userId) {
 			profit := models.Profit{
 				UserId: userId,
@@ -256,6 +269,29 @@ func ConfirmOrder(c *gin.Context) {
 				logging.Error("ConfirmOrder:insert takerId Profit -failed-" + strconv.Itoa(takerId))
 			}
 		}
+		{
+			agentId := auth_service.GetUserParam(userId, "agent_id")
+			if agentId > 0 && !profit_service.ExistProfit(agentId) {
+				profit := models.Profit{
+					UserId: agentId,
+				}
+				if !profit.Insert() {
+					logging.Error("ConfirmOrder:insert takerId Profit -failed-" + strconv.Itoa(agentId))
+				}
+			}
+		}
+		{
+			agentId := auth_service.GetUserParam(takerId, "agent_id")
+			if agentId > 0 && !profit_service.ExistProfit(agentId) {
+				profit := models.Profit{
+					UserId: agentId,
+				}
+				if !profit.Insert() {
+					logging.Error("ConfirmOrder:insert takerId Profit -failed-" + strconv.Itoa(agentId))
+				}
+			}
+		}
+
 		//--累计订单统计
 		{
 			userOrderTotalTimes := profit_service.GetProfitParam(userId, "order_total_times")
@@ -322,18 +358,6 @@ func ConfirmOrder(c *gin.Context) {
 	}
 
 	//
-	//收益
-	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add) + " order_id" + strconv.Itoa(orderId))
-	if add >= var_const.OrderNeedRate && add < var_const.OrderNeedRateMax {
-		add = add * (100 - var_const.OrderRate) / 100
-	}
-	if !auth_service.AddUserBalance(takerId, add, "ConfirmOrder") {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	logging.Info("ConfirmOrder: end")
-	//order_service.Refund(13)
-	order_service.Refund(orderId)
 
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
