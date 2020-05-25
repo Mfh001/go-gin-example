@@ -193,7 +193,7 @@ func GetUserInfo(userId int) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("GetUserInfo:userIdnoExist")
 	}
 	fields := []string{"user_id", "nick_name", "avatar_url", "phone", "type", "check_pass",
-		"game_id", "game_server", "game_pos", "game_level", "img_url", "balance", "agent_id"}
+		"game_id", "game_server", "game_pos", "game_level", "img_url", "balance", "agent_id", "deposit"}
 	data, err := gredis.HMGet(GetRedisKeyUserInfo(userId), fields...)
 	if err != nil {
 		logging.Error("GetUserInfo:" + strconv.Itoa(userId))

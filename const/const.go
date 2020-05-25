@@ -45,6 +45,7 @@ const (
 	ExchangeRate        = 1     //订单抽成费率%
 
 	AccessTokenExpireTime = 1.8 * 60 * 60
+	Deposit               = 8000 //保证金80元
 
 	//满意度
 	OrderSatisfied    = 1 //满意

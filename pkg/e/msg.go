@@ -7,6 +7,7 @@ var MsgFlags = map[int]string{
 	ERROR_EXIST_PHONE:               "手机号已存在",
 	SMSCODE_ERROR:                   "验证码错误",
 	CHECK_NO_PASS:                   "审核未通过",
+	NO_DEPOSIT:                      "请先交押金",
 	ERROR_CHECK_PASSED:              "审核已通过",
 	ERROR_EXIST_TAG_FAIL:            "获取已存在标签失败",
 	ERROR_NOT_EXIST_TAG:             "该标签不存在",

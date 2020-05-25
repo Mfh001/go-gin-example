@@ -197,6 +197,134 @@ func WxNotify(c *gin.Context) {
 	return
 }
 
+// @Summary 代练交平台押金
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/pay/deposit [post]
+// @Tags 微信支付
+func DepositWxPay(c *gin.Context) {
+	appG := app.Gin{C: c}
+
+	userId, err := strconv.Atoi(c.PostForm("user_id"))
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if auth_service.GetUserParam(userId, "deposit") <= 0 {
+		appG.Response(http.StatusBadRequest, e.NO_DEPOSIT, nil)
+		return
+	}
+
+	d, ok := order_service.DepositPay(userId, c.ClientIP())
+	if !ok {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, d)
+	return
+}
+
+// 支付回调接口
+func DepositWxNotify(c *gin.Context) {
+	//logging.Info("--------pay")
+	var resMap = make(map[string]interface{}, 0)
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+
+	valueXml, _ := ioutil.ReadAll(c.Request.Body) //获取post的数据
+	//logging.Info("--------pay:" + string(valueXml))
+	values := util.Xml2Map(string(valueXml))
+
+	if retCode, ok := values["result_code"]; retCode != "SUCCESS" || !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "result_code错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if _, ok := values["out_trade_no"]; !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if _, ok := values["sign"]; !ok {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//微信提交过来的签名
+	postSign := values["sign"]
+	delete(values, "sign")
+	//根据提交过来的值，和我的商户支付秘钥，生成的签名
+	userSign := order_service.WxPayCalcSign(values, var_const.WXMchKey)
+	//验证提交过来的签名是否正确
+	if userSign != postSign {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "sign错误"
+		//logging.Info("--------pay-userSign")
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//判断订单存在
+	payOrderId := values["out_trade_no"].(string)
+	info := models.User{
+		DepositTradeNo: payOrderId,
+	}
+	_, err := info.GetUserInfoByDepositTradeNo()
+	if err != nil {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+	if info.Deposit > 0 {
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	//
+	//order信息更新
+	//保存支付订单 TODO
+	dbInfo := models.User{
+		UserId: info.UserId,
+	}
+	var m = make(map[string]interface{})
+	m["deposit"] = var_const.Deposit
+	m["deposit_time"] = int(time.Now().Unix())
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("DepositWxNotify:db-failed-" + string(log))
+		resMap["return_code"] = "FAIL"
+		resMap["return_msg"] = "out_trade_no错误"
+		resStr := util.Map2Xml(resMap)
+		c.JSON(http.StatusOK, resStr)
+		return
+	}
+
+	resMap["return_code"] = "SUCCESS"
+	resMap["return_msg"] = "OK"
+	resStr := util.Map2Xml(resMap)
+	c.JSON(http.StatusOK, resStr)
+	return
+}
+
 // @Summary 微信接单 获取发起微信支付所需的数据
 // @Produce  json
 // @Param user_id body int false "user_id"
@@ -215,6 +343,10 @@ func TakerWxPay(c *gin.Context) {
 	}
 	if !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if auth_service.GetUserParam(userId, "deposit") <= 0 {
+		appG.Response(http.StatusBadRequest, e.NO_DEPOSIT, nil)
 		return
 	}
 	orderId, err := strconv.Atoi(c.PostForm("order_id"))
