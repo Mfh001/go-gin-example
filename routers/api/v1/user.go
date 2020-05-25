@@ -117,7 +117,7 @@ func GetUserTotalOrderTimes(c *gin.Context) {
 // @Summary Get 领取累计订单奖励
 // @Produce  json
 // @Param user_id body int false "user_id"
-// @Param award_id body int false "award_id"
+// @Param award_id body int false "award_id： 1 2 3 4 5"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/orderaward [get]
