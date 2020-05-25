@@ -33,7 +33,7 @@ func (info Exchange) Insert() bool {
 //update
 
 func (info Exchange) Updates(m map[string]interface{}) bool {
-	if info.UserId <= 0 || info.Id <= 0 {
+	if info.Id <= 0 {
 		return false
 	}
 	err := db.Model(&info).Updates(m).Error

@@ -121,7 +121,7 @@ func ExchangeCheck(c *gin.Context) {
 	m := make(map[string]interface{})
 	m["status"] = state
 	m["upd_time"] = int(time.Now().Unix())
-
+	m["remarks"] = c.PostForm("remarks")
 	if !exchange.Updates(m) {
 		logging.Error("ExchangeCheck-db: id-" + c.PostForm("id") + ",state-" + c.PostForm("state"))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
