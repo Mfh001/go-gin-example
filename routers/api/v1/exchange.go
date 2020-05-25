@@ -127,6 +127,10 @@ func ExchangeCheck(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	if state == -1 {
+		//退回钱包
+		auth_service.AddUserBalance(exchange_service.GetExchangeParam(id, "user_id"), exchange_service.GetExchangeParam(id, "money"), "审核拒绝")
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 }
 

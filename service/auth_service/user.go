@@ -305,7 +305,7 @@ func RemoveUserMargin(userId int, amount int) bool {
 	return true
 }
 func AddUserBalance(userId int, amount int, flag string) bool {
-	if userId <= 0 || !ExistUserInfo(userId) {
+	if userId <= 0 || amount <= 0 || !ExistUserInfo(userId) {
 		return false
 	}
 	userInfo := models.User{
