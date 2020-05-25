@@ -96,12 +96,12 @@ func GetAdminExchanges(c *gin.Context) {
 // @Param remarks body string false "备注"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /exchange/check [post]
+// @Router /exchange/check [get]
 // @Tags 提现
 func ExchangeCheck(c *gin.Context) {
 	appG := app.Gin{C: c}
-	id := com.StrTo(c.PostForm("id")).MustInt()
-	state := com.StrTo(c.PostForm("state")).MustInt()
+	id := com.StrTo(c.Query("id")).MustInt()
+	state := com.StrTo(c.Query("state")).MustInt()
 	if state != -1 && state != 1 {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
@@ -121,9 +121,9 @@ func ExchangeCheck(c *gin.Context) {
 	m := make(map[string]interface{})
 	m["status"] = state
 	m["upd_time"] = int(time.Now().Unix())
-	m["remarks"] = c.PostForm("remarks")
+	m["remarks"] = c.Query("remarks")
 	if !exchange.Updates(m) {
-		logging.Error("ExchangeCheck-db: id-" + c.PostForm("id") + ",state-" + c.PostForm("state"))
+		logging.Error("ExchangeCheck-db: id-" + c.Query("id") + ",state-" + c.Query("state"))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
