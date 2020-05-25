@@ -91,6 +91,28 @@ func GetUserBalance(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, m)
 }
 
+// @Summary Get 用户获取累计订单次数和领取状态
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/totalordertimes [get]
+// @Tags 用户
+func GetUserTotalOrderTimes(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.Query("user_id")).MustInt()
+	)
+	if userId <= 0 || !auth_service.ExistUserInfo(userId) || !profit_service.ExistProfit(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	m := make(map[string]interface{})
+	m["order_total_times"] = profit_service.GetProfitParam(userId, "order_total_times")
+	m["order_total_times_status"] = profit_service.GetProfitParam(userId, "order_total_times_status")
+	appG.Response(http.StatusOK, e.SUCCESS, m)
+}
+
 // @Summary 绑定上级
 // @Produce  json
 // @Param user_id body int false "user_id"

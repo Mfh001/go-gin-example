@@ -1022,6 +1022,28 @@ paths:
       summary: 微信下单 获取发起微信支付所需的数据
       tags:
       - 微信支付
+  /api/v1/totalordertimes:
+    get:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 用户获取累计订单次数和领取状态
+      tags:
+      - 用户
   /check/admin:
     get:
       produces:
