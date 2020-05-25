@@ -308,6 +308,8 @@ func DepositWxNotify(c *gin.Context) {
 	var m = make(map[string]interface{})
 	m["deposit"] = var_const.Deposit
 	m["deposit_time"] = int(time.Now().Unix())
+	m["type"] = var_const.UserTypeInstead
+	m["check_pass"] = var_const.CheckPass
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
 		logging.Error("DepositWxNotify:db-failed-" + string(log))
