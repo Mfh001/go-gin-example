@@ -47,6 +47,12 @@ const (
 	AccessTokenExpireTime = 1.8 * 60 * 60
 	Deposit               = 8000 //保证金80元
 
+	OrderTotalTimesStatus100   = 1 //100已领取
+	OrderTotalTimesStatus500   = 2 //500已领取
+	OrderTotalTimesStatus1000  = 3 //1000已领取
+	OrderTotalTimesStatus2000  = 4 //2000已领取
+	OrderTotalTimesStatus10000 = 5 //10000已领取
+
 	//满意度
 	OrderSatisfied    = 1 //满意
 	OrderOrdinary     = 2 //一般

@@ -55,6 +55,8 @@ func InitRouter() *gin.Engine {
 		//用户获取提交的审核信息
 		apiV1.GET("/check", v1.GetCheckInfo)
 
+		apiV1.GET("/orderaward", v1.GetUserTotalOrderTimesAward)
+
 		//下单
 		apiV1.POST("/order", v1.AddOrder)
 

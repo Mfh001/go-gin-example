@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
@@ -110,6 +111,102 @@ func GetUserTotalOrderTimes(c *gin.Context) {
 	m := make(map[string]interface{})
 	m["order_total_times"] = profit_service.GetProfitParam(userId, "order_total_times")
 	m["order_total_times_status"] = profit_service.GetProfitParam(userId, "order_total_times_status")
+	appG.Response(http.StatusOK, e.SUCCESS, m)
+}
+
+// @Summary Get 领取累计订单奖励
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param award_id body int false "award_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/orderaward [get]
+// @Tags 用户
+func GetUserTotalOrderTimesAward(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.Query("user_id")).MustInt()
+		awardId = com.StrTo(c.Query("award_id")).MustInt()
+	)
+	if userId <= 0 || !auth_service.ExistUserInfo(userId) || !profit_service.ExistProfit(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	orderTotalTimesStatus := profit_service.GetProfitParam(userId, "order_total_times_status")
+	orderTotalTimes := profit_service.GetProfitParam(userId, "order_total_times")
+	profit := models.Profit{
+		UserId: userId,
+	}
+	m := make(map[string]interface{})
+	if awardId == 1 {
+		if orderTotalTimesStatus != 0 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		if orderTotalTimes < 100 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		auth_service.AddUserBalance(userId, 3000, "累计100笔")
+		m["order_total_times_status"] = var_const.OrderTotalTimesStatus100
+		m["order_total_times"] = 0
+	} else if awardId == 2 {
+		if orderTotalTimesStatus != var_const.OrderTotalTimesStatus100 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		if orderTotalTimes < 500 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		auth_service.AddUserBalance(userId, 15000, "累计500笔")
+		m["order_total_times_status"] = var_const.OrderTotalTimesStatus500
+		m["order_total_times"] = 0
+	} else if awardId == 3 {
+		if orderTotalTimesStatus != var_const.OrderTotalTimesStatus500 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		if orderTotalTimes < 1000 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		auth_service.AddUserBalance(userId, 30000, "累计1000笔")
+		m["order_total_times_status"] = var_const.OrderTotalTimesStatus1000
+		m["order_total_times"] = 0
+	} else if awardId == 4 {
+		if orderTotalTimesStatus != var_const.OrderTotalTimesStatus1000 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		if orderTotalTimes < 2000 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		auth_service.AddUserBalance(userId, 60000, "累计2000笔")
+		m["order_total_times_status"] = var_const.OrderTotalTimesStatus2000
+		m["order_total_times"] = 0
+	} else if awardId == 5 {
+		if orderTotalTimesStatus != var_const.OrderTotalTimesStatus2000 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		if orderTotalTimes < 10000 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		}
+		auth_service.AddUserBalance(userId, 300000, "累计10000笔")
+		m["order_total_times"] = 0
+		m["order_total_times_status"] = var_const.OrderTotalTimesStatus2000
+	} else {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	logging.Info("GetUserTotalOrderTimesAward user_id:" + c.Query("user_id") + " award_id:" + c.Query("award_id"))
+	if !profit.Updates(m) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, m)
 }
 
