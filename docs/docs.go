@@ -434,6 +434,14 @@ var doc = `{
                         }
                     },
                     {
+                        "description": "标题",
+                        "name": "title",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "description": "游戏",
                         "name": "game_type",
                         "in": "body",

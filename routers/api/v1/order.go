@@ -22,6 +22,7 @@ import (
 // @Summary 下单
 // @Produce  json
 // @Param user_id body int false "user_id"
+// @Param title body string false "标题"
 // @Param game_type body int false "游戏"
 // @Param price body int false "价格"
 // @Param time_limit body int false "时限"
