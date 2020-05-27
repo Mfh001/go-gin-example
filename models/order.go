@@ -16,7 +16,7 @@ type Order struct {
 	StarPerPrice  int    `json:"star_per_price" form:"-" gorm:"type:int(12);not null;default:0"`
 	TradeNo       string `json:"trade_no" gorm:"type:varchar(50);not null;default:''"`
 	UserId        int    `json:"user_id" form:"user_id" gorm:"type:int(12);not null" valid:"Required;Range(1, 1000000000)"`
-	Title         string `json:"title" gorm:"type:varchar(100);not null;default:''"`
+	Title         string `json:"title" form:"title" gorm:"type:varchar(100);not null;default:''"`
 	NickName      string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
 	GameType      int    `json:"game_type" form:"game_type" gorm:"type:int(2);not null" valid:"Range(0, 1)"`
 	OrderType     int    `json:"order_type" form:"order_type" gorm:"type:int(2);not null" valid:"Range(0, 1)"`
