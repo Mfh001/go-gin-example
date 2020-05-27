@@ -601,7 +601,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 完成订单
+      summary: 上传订单截图
       tags:
       - 订单
   /api/v1/order/userlist:

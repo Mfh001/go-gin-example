@@ -913,7 +913,7 @@ var doc = `{
                 "tags": [
                     "订单"
                 ],
-                "summary": "完成订单",
+                "summary": "上传订单截图",
                 "parameters": [
                     {
                         "description": "user_id",

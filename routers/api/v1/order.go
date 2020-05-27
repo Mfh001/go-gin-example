@@ -368,7 +368,7 @@ func ConfirmOrder(c *gin.Context) {
 	return
 }
 
-// @Summary 完成订单
+// @Summary 上传订单截图
 // @Produce  json
 // @Param user_id body int false "user_id"
 // @Param order_id body int false "order_id"
