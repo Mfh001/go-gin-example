@@ -45,7 +45,7 @@ const (
 	ExchangeRate        = 1     //订单抽成费率%
 
 	AccessTokenExpireTime = 1.8 * 60 * 60
-	Deposit               = 8000 //保证金80元
+	Deposit               = 1 //保证金80元
 
 	OrderTotalTimesStatus100   = 1 //100已领取
 	OrderTotalTimesStatus500   = 2 //500已领取
