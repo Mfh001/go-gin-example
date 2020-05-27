@@ -71,8 +71,10 @@ type Order struct {
 	TeamCardNum int `json:"team_card_num" form:"-" gorm:"type:int(12);not null;default:0"`
 	RealPrice   int `json:"real_price" form:"-" gorm:"type:int(12);not null;default:0"`
 
-	RegTime int `json:"reg_time" gorm:"type:int(12);not null;default:0"`
-	UpdTime int `json:"upd_time" gorm:"type:int(12);not null;default:0"`
+	RegTime      int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
+	UpdTime      int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
+	ImgTakeUrl   string `gorm:"type:varchar(100);not null;default:''" json:"img_take_url"  valid:"Required;MaxSize(500)"`
+	ImgFinishUrl string `gorm:"type:varchar(100);not null;default:''" json:"img_finish_url"  valid:"Required;MaxSize(500)"`
 }
 
 //insert

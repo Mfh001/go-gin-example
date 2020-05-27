@@ -68,6 +68,7 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order/finish", v1.FinishOrder)
 		//确认完成订单
 		apiV1.POST("/order/confirm", v1.ConfirmOrder)
+		apiV1.POST("/order/updorderimg", v1.UpdateOrderImg)
 		//pay
 		apiV1.POST("/pay", v1.WxPay)
 

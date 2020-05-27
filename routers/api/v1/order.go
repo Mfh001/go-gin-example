@@ -367,3 +367,46 @@ func ConfirmOrder(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
+
+// @Summary 完成订单
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Param img_url body string false "img_url"
+// @Param img_type body int false "img_type 1接单的图片 2完成订单的图片"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/updorderimg [post]
+// @Tags 订单
+func UpdateOrderImg(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		imgUrl  = c.PostForm("img_url")
+		imgType = com.StrTo(c.PostForm("type")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) || !order_service.ExistOrder(orderId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	logging.Info("ConfirmOrder: begin order_id-" + strconv.Itoa(orderId))
+	var m = make(map[string]interface{})
+	if imgType == 1 {
+		m["img_take_url"] = imgUrl
+	} else {
+		m["img_finish_url"] = imgUrl
+	}
+
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("ConfirmOrder:db1-failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
