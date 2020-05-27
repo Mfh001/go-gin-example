@@ -54,7 +54,7 @@ const (
 	OrderTotalTimesStatus10000 = 5     //10000已领取
 	MarginArbPrice             = 30000 //300的订单 上下仲裁保证金不同
 	MarginArbPriceA            = 500   //300元以下的订单 仲裁保证金5块
-	MarginArbPriceB            = 5000  //300元以上的订单 仲裁保证金50块
+	MarginArbPriceB            = 30000 //300元以上的订单 仲裁保证金50块
 
 	//满意度
 	OrderSatisfied    = 1 //满意
