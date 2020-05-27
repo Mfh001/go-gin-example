@@ -47,11 +47,14 @@ const (
 	AccessTokenExpireTime = 1.8 * 60 * 60
 	Deposit               = 1 //保证金80元
 
-	OrderTotalTimesStatus100   = 1 //100已领取
-	OrderTotalTimesStatus500   = 2 //500已领取
-	OrderTotalTimesStatus1000  = 3 //1000已领取
-	OrderTotalTimesStatus2000  = 4 //2000已领取
-	OrderTotalTimesStatus10000 = 5 //10000已领取
+	OrderTotalTimesStatus100   = 1     //100已领取
+	OrderTotalTimesStatus500   = 2     //500已领取
+	OrderTotalTimesStatus1000  = 3     //1000已领取
+	OrderTotalTimesStatus2000  = 4     //2000已领取
+	OrderTotalTimesStatus10000 = 5     //10000已领取
+	MarginArbPrice             = 30000 //300的订单 上下仲裁保证金不同
+	MarginArbPriceA            = 500   //300元以下的订单 仲裁保证金5块
+	MarginArbPriceB            = 5000  //300元以上的订单 仲裁保证金50块
 
 	//满意度
 	OrderSatisfied    = 1 //满意

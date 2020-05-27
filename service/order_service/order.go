@@ -93,6 +93,12 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 			form.StarPerPrice = form.Price / starNum
 		}
 	}
+	if form.Price < var_const.MarginArbPrice {
+		form.MarginArb = var_const.MarginArbPriceA
+	} else {
+		form.MarginArb = var_const.MarginArbPriceB
+	}
+	form.Margin = form.MarginArb + form.MarginEff + form.MarginSafe
 	orderId, err := IncrOrderId()
 	if err != nil {
 		return false
