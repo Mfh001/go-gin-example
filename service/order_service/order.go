@@ -61,6 +61,13 @@ func GenerateNonceStr() string {
 	return newId
 }
 
+func GenerateOrderNo() string {
+	t := time.Now().UnixNano()
+	r := util.RandomStringNoUp(2)
+	newId := strconv.FormatInt(t, 16) + r
+	return newId
+}
+
 func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	if form.InsteadType == 0 {
 		//等级idx*1000 + star
@@ -104,6 +111,7 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 		return false
 	}
 	form.OrderId = orderId
+	form.OrderNo = GenerateOrderNo()
 	form.TeamId = teamId
 	nickName, _ := auth_service.GetUserNickName(form.UserId)
 	form.NickName = nickName
