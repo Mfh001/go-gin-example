@@ -384,7 +384,7 @@ func UpdateOrderImg(c *gin.Context) {
 		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
 		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
 		imgUrl  = c.PostForm("img_url")
-		imgType = com.StrTo(c.PostForm("type")).MustInt()
+		imgType = com.StrTo(c.PostForm("img_type")).MustInt()
 	)
 	if userId == 0 || !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) || !order_service.ExistOrder(orderId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
