@@ -38,6 +38,7 @@ func InitRouter() *gin.Engine {
 	r.Any("/pay/urgentteamnotify", v1.TeamUrgentWxNotify)
 	r.Any("/pay/team/urgentrefundnotify", v1.UrgentRefundCallback)
 	r.Any("/pay/taker/depositnotify", v1.DepositWxNotify)
+	r.Any("/pay/order/refundnotify", v1.OrderCancelRefundCallback)
 
 	//管理员获取审核列表
 	r.GET("/check/admin", v1.GetAdminChecks)
@@ -69,6 +70,8 @@ func InitRouter() *gin.Engine {
 		//确认完成订单
 		apiV1.POST("/order/confirm", v1.ConfirmOrder)
 		apiV1.POST("/order/updorderimg", v1.UpdateOrderImg)
+
+		apiV1.POST("/order/cancel", v1.CancelOrder)
 		//pay
 		apiV1.POST("/pay", v1.WxPay)
 

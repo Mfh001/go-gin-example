@@ -159,11 +159,6 @@ func FinishOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	//必须是代练 TODO
-	//if !check_service.ExistUserCheck(userId) {
-	//	appG.Response(http.StatusBadRequest, e.CHECK_NO_PASS, nil)
-	//	return
-	//}
 	status := order_service.GetOrderParam(orderId, "status")
 	if status != var_const.OrderStatusTakerPaid {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
@@ -407,6 +402,52 @@ func UpdateOrderImg(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 取消订单
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/cancel [post]
+// @Tags 订单
+func CancelOrder(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if userId != order_service.GetOrderParam(orderId, "user_id") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusPaidPay {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	order_service.OrderCancelRefund(orderId)
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusTakerFinishedNeedConfirm
+	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("FinishOrder: begin order_id-" + strconv.Itoa(orderId))
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("TakerFinish:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("FinishOrder: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }

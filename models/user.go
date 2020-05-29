@@ -12,7 +12,7 @@ type User struct {
 	Margin         int    `json:"margin" gorm:"type:int(12);not null;default:0"`
 	TeamCardNum    int    `json:"team_card_num" form:"-" gorm:"type:int(12);not null;default:0"`
 	NickName       string `json:"nick_name" gorm:"type:varchar(32);not null;default:''"`
-	AvatarUrl      string `json:"avatar_url" gorm:"type:varchar(100);not null;default:''"`
+	AvatarUrl      string `json:"avatar_url" gorm:"type:varchar(300);not null;default:''"`
 	Phone          string `json:"phone" gorm:"type:varchar(11);not null;default:''"`
 	Gender         int    `json:"gender" gorm:"type:int(2);not null;default:1"`
 	Type           int    `json:"type" gorm:"type:int(2);not null;default:1"`

@@ -855,3 +855,76 @@ func GetUserOrderList(userId int, orders *[]models.Order, index int, count int) 
 	}
 	return
 }
+
+func OrderCancelRefund(orderId int) bool {
+	totalFee := GetOrderParam(orderId, "real_price")
+	outTradeNo := GetOrderParamString(orderId, "trade_no")
+	payOrderId := GeneratePayOrderId()
+
+	var payReq RefundReq
+	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+	payReq.MchId = var_const.WXMchID
+	payReq.NonceStr = GenerateNonceStr()
+	payReq.OutTradeNo = outTradeNo
+	payReq.OutRefundNo = payOrderId
+	payReq.TotalFee = totalFee
+	payReq.RefundFee = totalFee
+	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/refundnotify"
+
+	var reqMap = make(map[string]interface{}, 0)
+	reqMap["appid"] = payReq.AppId        //微信小程序appid
+	reqMap["mch_id"] = payReq.MchId       //商户号
+	reqMap["nonce_str"] = payReq.NonceStr //随机数
+	reqMap["out_refund_no"] = payReq.OutRefundNo
+	reqMap["out_trade_no"] = payReq.OutTradeNo
+	reqMap["total_fee"] = payReq.TotalFee
+	reqMap["refund_fee"] = payReq.RefundFee
+	reqMap["notify_url"] = payReq.NotifyUrl
+	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+
+	// 调用支付统一下单API
+	bytesReq, err := xml.Marshal(payReq)
+	if err != nil {
+		return false
+	}
+	strReq := string(bytesReq)
+
+	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+	bytesReq = []byte(strReq)
+
+	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	if err2 != nil {
+		return false
+	}
+	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+	//client := &http.Client{}
+	//resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	body2, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return false
+	}
+	var resp1 RefundResp
+	err = xml.Unmarshal(body2, &resp1)
+	if err != nil {
+		return false
+	}
+	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+		dbInfo := models.Order{
+			OrderId: orderId,
+		}
+		var m = make(map[string]interface{})
+		m["pay_refund_trade_no"] = payReq.OutRefundNo
+		m["pay_refund_amount"] = payReq.RefundFee
+		m["pay_refund_time"] = int(time.Now().Unix())
+		mlog, _ := json.Marshal(m)
+		logging.Info("OrderCancelRefund: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+		if !dbInfo.Updates(m) {
+			logging.Error("OrderCancelRefund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+			return false
+		}
+		return true
+	}
+	return false
+}

@@ -398,3 +398,13 @@ func IsUserTypeInstead(userId int) bool {
 	}
 	return false
 }
+
+func IsUserTypeNormal(userId int) bool {
+	if userId <= 0 {
+		return false
+	}
+	if var_const.UserTypeNormal == GetUserParam(userId, "type") {
+		return true
+	}
+	return false
+}
