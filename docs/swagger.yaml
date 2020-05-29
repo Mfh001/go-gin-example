@@ -535,6 +535,53 @@ paths:
       summary: 完成订单
       tags:
       - 订单
+  /api/v1/order/sortall1:
+    get:
+      parameters:
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
+        schema:
+          type: integer
+      - description: 排位赛/巅峰赛
+        in: body
+        name: instead_type
+        schema:
+          type: integer
+      - description: 区服
+        in: body
+        name: zoom
+        schema:
+          type: integer
+      - description: 最低铭文等级
+        in: body
+        name: min_runes
+        schema:
+          type: integer
+      - description: 最高铭文等级
+        in: body
+        name: max_runes
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 获取订单列表
+      tags:
+      - 接单
   /api/v1/order/take:
     post:
       parameters:

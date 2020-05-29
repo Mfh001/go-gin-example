@@ -837,6 +837,81 @@
                 }
             }
         },
+        "/api/v1/order/sortall1": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "接单"
+                ],
+                "summary": "Get 获取订单列表",
+                "parameters": [
+                    {
+                        "description": "index",
+                        "name": "index",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "count",
+                        "name": "count",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "排位赛/巅峰赛",
+                        "name": "instead_type",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "区服",
+                        "name": "zoom",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最低铭文等级",
+                        "name": "min_runes",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "最高铭文等级",
+                        "name": "max_runes",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/order/take": {
             "post": {
                 "produces": [

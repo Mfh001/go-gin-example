@@ -141,6 +141,44 @@ func GetAllOrders(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, list)
 }
 
+// @Summary Get 获取订单列表
+// @Produce  json
+// @Param index body int false "index"
+// @Param count body int false "count"
+// @Param instead_type body int false "排位赛/巅峰赛"
+// @Param zoom body int false "区服"
+// @Param min_runes body int false "最低铭文等级"
+// @Param max_runes body int false "最高铭文等级"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/sortall1 [get]
+// @Tags 接单
+func GetAllOrdersB(c *gin.Context) {
+	appG := app.Gin{C: c}
+	index := com.StrTo(c.Query("index")).MustInt()
+	count := com.StrTo(c.Query("count")).MustInt()
+	insteadType := com.StrTo(c.Query("instead_type")).MustInt()
+	zoom := com.StrTo(c.Query("zoom")).MustInt()
+	minRunes := com.StrTo(c.Query("min_runes")).MustInt()
+	maxRunes := com.StrTo(c.Query("max_runes")).MustInt()
+
+	var list []models.Order
+
+	where := " "
+	if minRunes <= maxRunes && minRunes >= 0 {
+		where = fmt.Sprintf(where+"and runes_level >=%d and runes_level <=%d ", minRunes, maxRunes)
+	}
+	if zoom >= 0 {
+		where = fmt.Sprintf(where+"and game_zone >=%d and game_zone <%d ", zoom*1000, (zoom+1)*1000)
+	}
+	if insteadType == 1 || insteadType == 0 {
+		where = fmt.Sprintf(where+"and instead_type =%d ", insteadType)
+	}
+	logging.Info("where:" + where + ";index:" + c.Query("index") + ";count:" + c.Query("count"))
+	order_service.GetNeedTakeOrderList(&list, where, index, count)
+	appG.Response(http.StatusOK, e.SUCCESS, list)
+}
+
 // @Summary 完成订单
 // @Produce  json
 // @Param user_id body int false "user_id"
