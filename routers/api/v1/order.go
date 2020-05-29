@@ -99,6 +99,10 @@ func TakeOrder(c *gin.Context) {
 // @Param star_price_e body int false "最高每颗星平均价格"
 // @Param level_b body int false "最低段位"
 // @Param level_e body int false "最高段位"
+// @Param instead_type body int false "排位赛/巅峰赛"
+// @Param zoom body int false "区服"
+// @Param min_runes body int false "最低铭文等级"
+// @Param max_runes body int false "最高铭文等级"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/order/all [get]
@@ -117,6 +121,10 @@ func GetAllOrders(c *gin.Context) {
 	starPriceE := com.StrTo(c.Query("star_price_e")).MustInt()
 	levelB := com.StrTo(c.Query("level_b")).MustInt()
 	levelE := com.StrTo(c.Query("level_e")).MustInt()
+	insteadType := com.StrTo(c.Query("instead_type")).MustInt()
+	zoom := com.StrTo(c.Query("zoom")).MustInt()
+	minRunes := com.StrTo(c.Query("min_runes")).MustInt()
+	maxRunes := com.StrTo(c.Query("max_runes")).MustInt()
 
 	var list []models.Order
 
@@ -136,6 +144,16 @@ func GetAllOrders(c *gin.Context) {
 	if levelB <= levelE && levelE > 0 {
 		where = fmt.Sprintf(where+"and cur_level >=%d and target_level <=%d ", levelB, levelE)
 	}
+	if minRunes <= maxRunes && minRunes >= 0 {
+		where = fmt.Sprintf(where+"and runes_level >=%d and runes_level <=%d ", minRunes, maxRunes)
+	}
+	if zoom >= 0 {
+		where = fmt.Sprintf(where+"and game_zone >=%d and game_zone <%d ", zoom*1000, (zoom+1)*1000)
+	}
+	if insteadType == 1 || insteadType == 0 {
+		where = fmt.Sprintf(where+"and instead_type =%d ", insteadType)
+	}
+
 	logging.Info("where:" + where + ";index:" + c.Query("index") + ";count:" + c.Query("count"))
 	order_service.GetNeedTakeOrderList(&list, where, index, count)
 	appG.Response(http.StatusOK, e.SUCCESS, list)
