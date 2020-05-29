@@ -151,7 +151,7 @@ func GetAllOrders(c *gin.Context) {
 // @Param max_runes body int false "最高铭文等级"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
-// @Router /api/v1/order/sortall1 [get]
+// @Router /api/v1/order/sortall [get]
 // @Tags 接单
 func GetAllOrdersB(c *gin.Context) {
 	appG := app.Gin{C: c}

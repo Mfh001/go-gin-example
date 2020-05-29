@@ -854,7 +854,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/order/sortall1": {
+        "/api/v1/order/sortall": {
             "get": {
                 "produces": [
                     "application/json"

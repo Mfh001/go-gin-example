@@ -535,7 +535,7 @@ paths:
       summary: 完成订单
       tags:
       - 订单
-  /api/v1/order/sortall1:
+  /api/v1/order/sortall:
     get:
       parameters:
       - description: index
