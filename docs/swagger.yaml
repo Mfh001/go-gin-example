@@ -440,6 +440,26 @@ paths:
         name: level_e
         schema:
           type: integer
+      - description: 排位赛/巅峰赛
+        in: body
+        name: instead_type
+        schema:
+          type: integer
+      - description: 区服
+        in: body
+        name: zoom
+        schema:
+          type: integer
+      - description: 最低铭文等级
+        in: body
+        name: min_runes
+        schema:
+          type: integer
+      - description: 最高铭文等级
+        in: body
+        name: max_runes
+        schema:
+          type: integer
       produces:
       - application/json
       responses:
