@@ -7,6 +7,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
+	"github.com/EDDYCJY/go-gin-example/pkg/gredis"
 	"github.com/EDDYCJY/go-gin-example/pkg/logging"
 	"github.com/EDDYCJY/go-gin-example/pkg/util"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
@@ -505,5 +506,92 @@ func CancelOrder(c *gin.Context) {
 	}
 	logging.Info("FinishOrder: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+type Message struct {
+	UserId        int    `json:"user_id"`
+	NickName      string `json:"nick_name"`
+	TakerUserId   int    `json:"taker_user_id"`
+	TakerNickName string `json:"taker_nick_name"`
+	OrderId       int    `json:"order_id"`
+	Time          int    `json:"time"`
+	Msg           string `json:"msg"`
+}
+
+// @Summary 订单留言
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Param message body string false "message"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/message [post]
+// @Tags 订单留言
+func MessageOrder(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		message = c.PostForm("message")
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	u := order_service.GetOrderParam(orderId, "user_id")
+	tu := order_service.GetOrderParam(orderId, "taker_user_id")
+	if userId != u && userId != tu {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	msgUserId := u
+	if userId == u {
+		msgUserId = tu
+	}
+	//status := order_service.GetOrderParam(orderId, "status")
+	//if status != var_const.OrderStatusPaidPay {
+	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	//	return
+	//}
+	msg := Message{
+		UserId:        u,
+		NickName:      auth_service.GetUserParamString(u, "nick_name"),
+		TakerUserId:   tu,
+		TakerNickName: auth_service.GetUserParamString(tu, "nick_name"),
+		OrderId:       orderId,
+		Time:          int(time.Now().Unix()),
+		Msg:           message,
+	}
+	jsonData, _ := json.Marshal(msg)
+	_ = gredis.LPush(order_service.GetRedisKeyMessageOrder(orderId), string(jsonData))
+	_ = gredis.LPush(order_service.GetRedisKeyMessageUser(msgUserId), string(jsonData))
+	_, _ = gredis.HSet(order_service.GetRedisKeyMessageNoRead(), strconv.Itoa(msgUserId), "1")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 获取某一订单的消息/留言
+// @Produce  json
+// @Param user_id body int false "order_id"
+// @Param index body int false "index"
+// @Param count body int false "count"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/getmessage [post]
+// @Tags 订单留言
+func GetOrderMessage(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		index   = com.StrTo(c.PostForm("index")).MustInt()
+		count   = com.StrTo(c.PostForm("count")).MustInt()
+	)
+	if orderId == 0 || !order_service.ExistOrder(orderId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	res, _ := gredis.LRange(order_service.GetRedisKeyMessageOrder(orderId), index, index+count)
+	appG.Response(http.StatusOK, e.SUCCESS, res)
 	return
 }

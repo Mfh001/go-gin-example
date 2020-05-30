@@ -87,6 +87,19 @@ func HGet(key string, field string) (string, error) {
 	return reply, nil
 }
 
+func HSet(key string, field string, value string) (bool, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	_, err := redis.Int(conn.Do("HSET", key, field, value))
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // SetNX a key/value
 func SetNX(key string, value interface{}, time int) (bool, error) {
 	conn := RedisConn.Get()
@@ -240,4 +253,30 @@ func GetTTL(key string) (int, error) {
 	defer conn.Close()
 
 	return redis.Int(conn.Do("TTL", key))
+}
+
+//
+func LPush(key string, value string) error {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	_, err := redis.Strings(conn.Do("LPUSH", key, value))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//获取列表指定范围内的元素
+func LRange(key string, start, stop int) ([]string, error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	res, err := redis.Strings(conn.Do("LRANGE", key, start, stop))
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

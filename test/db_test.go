@@ -33,4 +33,6 @@ func TestDBFind(t *testing.T) {
 	//if sm1 == sm2 {
 	//	fmt.Println("sm1== sm2")
 	//}
+
+	//gredis.LPush("message:1", "9999999999")
 }

@@ -59,13 +59,16 @@ func InitRouter() *gin.Engine {
 
 		apiV1.GET("/orderaward", v1.GetUserTotalOrderTimesAward)
 
-		//下单
+		//订单
 		apiV1.POST("/order", v1.AddOrder)
 
 		apiV1.GET("/order/all", v1.GetAllOrders)
 		apiV1.GET("/order/sortall", v1.GetAllOrdersB)
 		apiV1.GET("/order/takelist", v1.GetTakerOrders)
 		apiV1.GET("/order/userlist", v1.GetUserOrders)
+		apiV1.POST("/order/message", v1.MessageOrder)
+		apiV1.POST("/order/getmessage", v1.GetOrderMessage)
+
 		//完成订单
 		apiV1.POST("/order/finish", v1.FinishOrder)
 		//确认完成订单
@@ -90,6 +93,9 @@ func InitRouter() *gin.Engine {
 
 		apiV1.GET("/balance", v1.GetUserBalance)
 		apiV1.GET("/totalordertimes", v1.GetUserTotalOrderTimes)
+
+		apiV1.POST("/user/getmessage", v1.GetUserMessage)
+		apiV1.POST("/user/msgnoread", v1.GetUserMessageNoRead)
 
 		//车队
 		apiV1.POST("/team", v1.AddTeam)

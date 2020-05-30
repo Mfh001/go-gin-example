@@ -366,3 +366,50 @@ func GetAgentProfit(c *gin.Context) {
 	m["tProfit"] = tProfit
 	appG.Response(http.StatusOK, e.SUCCESS, m)
 }
+
+// @Summary 获取用户的订单消息/留言
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param index body int false "index"
+// @Param count body int false "count"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/user/getmessage [post]
+// @Tags 订单留言
+func GetUserMessage(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+		index  = com.StrTo(c.PostForm("index")).MustInt()
+		count  = com.StrTo(c.PostForm("count")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	res, _ := gredis.LRange(order_service.GetRedisKeyMessageUser(userId), index, index+count)
+	_, _ = gredis.HSet(order_service.GetRedisKeyMessageNoRead(), c.PostForm("user_id"), "0")
+	appG.Response(http.StatusOK, e.SUCCESS, res)
+	return
+}
+
+// @Summary 是否有未读订单消息/留言
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/user/msgnoread [post]
+// @Tags 订单留言
+func GetUserMessageNoRead(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	res, _ := gredis.HGet(order_service.GetRedisKeyMessageNoRead(), c.PostForm("user_id"))
+	appG.Response(http.StatusOK, e.SUCCESS, res)
+	return
+}

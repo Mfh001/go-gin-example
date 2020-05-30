@@ -29,6 +29,16 @@ func GetRedisKeyOrder(orderId int) string {
 	return "game_order:" + strconv.Itoa(orderId)
 }
 
+func GetRedisKeyMessageOrder(orderId int) string {
+	return "message_order:" + strconv.Itoa(orderId)
+}
+func GetRedisKeyMessageUser(userId int) string {
+	return "message_user:" + strconv.Itoa(userId)
+}
+func GetRedisKeyMessageNoRead() string {
+	return "newMessage"
+}
+
 func getRedisKeyOrderIncr() string {
 	return "max_order"
 }
