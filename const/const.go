@@ -24,6 +24,7 @@ const (
 	OrderStatusConfirmFinished          = 6  //订单 确认完成 状态
 	OrderStatusRefundFinished           = 7  //订单 保证金已退 状态
 	OrderStatusCancel                   = -1 //订单 取消 状态
+	OrderStatusUndoRequest              = 8  //订单 请求撤销
 
 	TeamCreate              = 0 //创建车队未支付
 	TeamCanShow             = 1 //车队可展示出来，供用户加入或者代练接单

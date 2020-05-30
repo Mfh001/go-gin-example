@@ -725,6 +725,65 @@ paths:
       summary: Get 代练获取已接单列表
       tags:
       - 接单
+  /api/v1/order/undo:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      - description: agree
+        in: body
+        name: agree
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 用户回应代练的撤销订单请求
+      tags:
+      - 订单
+  /api/v1/order/undorequest:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 代练请求撤销订单
+      tags:
+      - 订单
   /api/v1/order/updorderimg:
     post:
       parameters:

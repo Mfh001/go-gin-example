@@ -920,3 +920,88 @@ func OrderCancelRefundCallback(c *gin.Context) {
 		return
 	}
 }
+
+//订单取消退款回调
+func OrderUndoUserRefundCallback(c *gin.Context) {
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var mr RefundNotify
+	_ = xml.Unmarshal(body, &mr)
+	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
+	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
+	plaintext, _ := gocrypto.AesECBDecrypt(b)
+
+	var mnr RefundNotify
+	_ = xml.Unmarshal(plaintext, &mnr)
+
+	if mnr.Refund_status == "SUCCESS" {
+		//f(mnr.Out_trade_no)
+		dbInfo := models.Order{
+			PayRefundTradeNo: mnr.Out_refund_no,
+		}
+		_, _ = dbInfo.GetOrderInfoByPayRefundTradeNo()
+		if order_service.GetOrderParam(dbInfo.OrderId, "pay_refund_time") > 0 {
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		var m = make(map[string]interface{})
+		m["status"] = var_const.OrderStatusCancel
+		m["pay_refund_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("OrderUndoUserRefundCallback:failed-" + string(log))
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		logging.Info("refund finish OrderUndoUserRefundCallback:" + mnr.Out_refund_no)
+		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
+
+		c.JSON(http.StatusOK, resStr)
+		return
+	} else {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+}
+
+func OrderUndoTakerRefundCallback(c *gin.Context) {
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var mr RefundNotify
+	_ = xml.Unmarshal(body, &mr)
+	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
+	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
+	plaintext, _ := gocrypto.AesECBDecrypt(b)
+
+	var mnr RefundNotify
+	_ = xml.Unmarshal(plaintext, &mnr)
+
+	if mnr.Refund_status == "SUCCESS" {
+		//f(mnr.Out_trade_no)
+		dbInfo := models.Order{
+			RefundTradeNo: mnr.Out_refund_no,
+		}
+		_, _ = dbInfo.GetOrderInfoByRefundTradeNo()
+		if order_service.GetOrderParam(dbInfo.OrderId, "taker_refund_time") > 0 {
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		var m = make(map[string]interface{})
+		m["status"] = var_const.OrderStatusCancel
+		m["taker_refund_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("OrderUndoTakerRefundCallback:failed-" + string(log))
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		logging.Info("refund finish OrderUndoTakerRefundCallback:" + mnr.Out_refund_no)
+		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
+
+		c.JSON(http.StatusOK, resStr)
+		return
+	} else {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+}

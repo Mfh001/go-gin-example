@@ -491,20 +491,20 @@ func CancelOrder(c *gin.Context) {
 		return
 	}
 	order_service.OrderCancelRefund(orderId)
-	dbInfo := models.Order{
-		OrderId: orderId,
-	}
-	var m = make(map[string]interface{})
-	m["status"] = var_const.OrderStatusTakerFinishedNeedConfirm
-	m["upd_time"] = int(time.Now().Unix())
-	logging.Info("FinishOrder: begin order_id-" + strconv.Itoa(orderId))
-	if !dbInfo.Updates(m) {
-		log, _ := json.Marshal(m)
-		logging.Error("TakerFinish:failed-" + string(log))
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	logging.Info("FinishOrder: end")
+	//dbInfo := models.Order{
+	//	OrderId: orderId,
+	//}
+	//var m = make(map[string]interface{})
+	//m["status"] = var_const.OrderStatusTakerFinishedNeedConfirm
+	//m["upd_time"] = int(time.Now().Unix())
+	//logging.Info("FinishOrder: begin order_id-" + strconv.Itoa(orderId))
+	//if !dbInfo.Updates(m) {
+	//	log, _ := json.Marshal(m)
+	//	logging.Error("TakerFinish:failed-" + string(log))
+	//	appG.Response(http.StatusBadRequest, e.ERROR, nil)
+	//	return
+	//}
+	//logging.Info("FinishOrder: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
@@ -593,5 +593,103 @@ func GetOrderMessage(c *gin.Context) {
 	}
 	res, _ := gredis.LRange(order_service.GetRedisKeyMessageOrder(orderId), index, index+count)
 	appG.Response(http.StatusOK, e.SUCCESS, res)
+	return
+}
+
+// @Summary 代练请求撤销订单
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/undorequest [post]
+// @Tags 订单
+func UndoRequestOrder(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if userId != order_service.GetOrderParam(orderId, "taker_user_id") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusTakerPaid {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusUndoRequest
+	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("UndoRequestOrder: begin order_id-" + strconv.Itoa(orderId))
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("UndoRequestOrder:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("UndoRequestOrder: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 用户回应代练的撤销订单请求
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Param agree body int false "agree"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/undo [post]
+// @Tags 订单
+func UndoOrder(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		agree   = com.StrTo(c.PostForm("agree")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if userId != order_service.GetOrderParam(orderId, "user_id") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusUndoRequest {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	if agree == 1 {
+		order_service.OrderUndoRefundUser(orderId)
+		order_service.OrderUndoRefundTaker(orderId)
+	} else {
+		m["status"] = var_const.OrderStatusTakerPaid
+	}
+	m["status"] = var_const.OrderStatusUndoRequest
+	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("UndoRequestOrder: begin order_id-" + strconv.Itoa(orderId))
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("UndoRequestOrder:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("UndoRequestOrder: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
