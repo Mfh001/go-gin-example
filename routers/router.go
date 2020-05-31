@@ -72,6 +72,7 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order/getmessage", v1.GetOrderMessage)
 		apiV1.POST("/order/undorequest", v1.UndoRequestOrder)
 		apiV1.POST("/order/undo", v1.UndoOrder)
+		apiV1.POST("/order/addtime", v1.AddTimeOrder)
 
 		//完成订单
 		apiV1.POST("/order/finish", v1.FinishOrder)
