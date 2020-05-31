@@ -51,7 +51,7 @@ func AddExchange(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !auth_service.RemoveUserBalance(form.UserId, form.Money) {
+	if !auth_service.RemoveUserBalance(form.UserId, form.Money, "提现") {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}

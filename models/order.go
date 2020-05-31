@@ -72,10 +72,13 @@ type Order struct {
 	TeamCardNum int `json:"team_card_num" form:"-" gorm:"type:int(12);not null;default:0"`
 	RealPrice   int `json:"real_price" form:"-" gorm:"type:int(12);not null;default:0"`
 
-	RegTime      int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
-	UpdTime      int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
-	ImgTakeUrl   string `gorm:"type:varchar(100);not null;default:''" json:"img_take_url"`
-	ImgFinishUrl string `gorm:"type:varchar(100);not null;default:''" json:"img_finish_url"`
+	RegTime       int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
+	UpdTime       int    `json:"upd_time" gorm:"type:int(12);not null;default:0"`
+	ImgTakeUrl    string `gorm:"type:varchar(100);not null;default:''" json:"img_take_url"`
+	ImgFinishUrl  string `gorm:"type:varchar(100);not null;default:''" json:"img_finish_url"`
+	AdjudgeUserId int    `json:"adjudge_user_id" form:"-" gorm:"type:int(12);not null;default:0"`
+	AdjudgeMsg    string `gorm:"type:varchar(1000);not null;default:''" json:"adjudge_msg"`
+	ImgAdjudgeUrl string `gorm:"type:varchar(1200);not null;default:''" json:"img_adjudge_url"`
 }
 
 //insert
@@ -198,6 +201,18 @@ func GetTakeOrders(takerId int, infos *[]Order, index int, count int) (bool, err
 
 func GetUserOrders(userId int, infos *[]Order, index int, count int) (bool, error) {
 	err := db.Select("order_no, img_take_url, img_finish_url, star_num, title, time_limit, star_per_price, channel_type, order_id, price, status, user_id, nick_name, game_type, description, order_type, instead_type, game_zone, runes_level, hero_num, cur_level, target_level, margin_safe, margin_eff, margin_arb, anti_addiction, designate_hero, hero_name, upd_time, contact, qq").Where("status >= ? and user_id = ?", var_const.OrderStatusWaitPay, userId).Limit(count).Offset(index).Find(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []Order{}
+		return true, nil
+	} else if err != nil {
+		*infos = []Order{}
+		return false, err
+	}
+	return true, nil
+}
+
+func GetNeedAdjudgeOrders(infos *[]Order, where string, index int, count int) (bool, error) {
+	err := db.Select("*").Where("status = ? and team_id = 0 "+where, var_const.OrderStatusAdjudgeRequest).Limit(count).Offset(index).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil

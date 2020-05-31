@@ -41,6 +41,8 @@ func InitRouter() *gin.Engine {
 	r.Any("/pay/order/refundnotify", v1.OrderCancelRefundCallback)
 	r.Any("/pay/order/undo/userrefundnotify", v1.OrderUndoUserRefundCallback)
 	r.Any("/pay/order/undo/takerrefundnotify", v1.OrderUndoTakerRefundCallback)
+	r.Any("/pay/order/admin/userrefundnotify", v1.AdminRefundUserCallback)
+	r.Any("/pay/order/admin/takerrefundnotify", v1.AdminRefundTakerCallback)
 
 	//管理员获取审核列表
 	r.GET("/check/admin", v1.GetAdminChecks)
@@ -50,6 +52,12 @@ func InitRouter() *gin.Engine {
 	r.GET("/exchange/check", v1.ExchangeCheck)
 	r.POST("/exchange/check", v1.ExchangeCheckPost)
 	r.GET("/exchange/bank", v1.GetExchangeBank)
+	r.POST("/admin/order/refund/user", v1.AdminRefundPay)
+	r.POST("/admin/order/refund/taker", v1.AdminRefundTaker)
+	r.POST("/admin/money/add", v1.AdminAddBalance)
+	r.POST("/admin/money/remove", v1.AdminRemBalance)
+	r.POST("/admin/margin/remove", v1.AdminRemMargin)
+	r.POST("/admin/order/adjudge/all", v1.GetAdminAdjudgeList)
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())
@@ -74,6 +82,7 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order/undo", v1.UndoOrder)
 		apiV1.POST("/order/addtime", v1.AddTimeOrder)
 		apiV1.POST("/order/info", v1.GetOrderInfo)
+		apiV1.POST("/order/adjudgerequest", v1.AdjudgeRequestOrder)
 
 		//完成订单
 		apiV1.POST("/order/finish", v1.FinishOrder)

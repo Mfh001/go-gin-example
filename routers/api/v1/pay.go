@@ -476,7 +476,7 @@ func TakerWxNotify(c *gin.Context) {
 		return
 	}
 
-	if !auth_service.AddUserMargin(info.TakerUserId, info.TakerPayAmount) {
+	if !auth_service.AddUserMargin(info.TakerUserId, info.TakerPayAmount, "成功支付保证金") {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)
@@ -718,7 +718,7 @@ func TeamWxNotify(c *gin.Context) {
 		return
 	}
 
-	if !auth_service.AddUserMargin(info.TakerUserId, info.TakerPayAmount) {
+	if !auth_service.AddUserMargin(info.TakerUserId, info.TakerPayAmount, "车队成功支付保证金") {
 		resMap["return_code"] = "FAIL"
 		resMap["return_msg"] = "out_trade_no错误"
 		resStr := util.Map2Xml(resMap)
@@ -996,6 +996,88 @@ func OrderUndoTakerRefundCallback(c *gin.Context) {
 			return
 		}
 		logging.Info("refund finish OrderUndoTakerRefundCallback:" + mnr.Out_refund_no)
+		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
+
+		c.JSON(http.StatusOK, resStr)
+		return
+	} else {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+}
+
+//订单取消退款回调
+func AdminRefundUserCallback(c *gin.Context) {
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var mr RefundNotify
+	_ = xml.Unmarshal(body, &mr)
+	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
+	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
+	plaintext, _ := gocrypto.AesECBDecrypt(b)
+
+	var mnr RefundNotify
+	_ = xml.Unmarshal(plaintext, &mnr)
+
+	if mnr.Refund_status == "SUCCESS" {
+		//f(mnr.Out_trade_no)
+		dbInfo := models.Order{
+			PayRefundTradeNo: mnr.Out_refund_no,
+		}
+		_, _ = dbInfo.GetOrderInfoByPayRefundTradeNo()
+		if order_service.GetOrderParam(dbInfo.OrderId, "pay_refund_time") > 0 {
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		var m = make(map[string]interface{})
+		m["pay_refund_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("AdminRefundUserCallback:failed-" + string(log))
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		logging.Info("refund finish AdminRefundUserCallback:" + mnr.Out_refund_no)
+		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
+
+		c.JSON(http.StatusOK, resStr)
+		return
+	} else {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+}
+func AdminRefundTakerCallback(c *gin.Context) {
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var mr RefundNotify
+	_ = xml.Unmarshal(body, &mr)
+	key := "t7v5TMsxhW6VH2f231NaB1BGL33CRjt3"
+	b, _ := base64.StdEncoding.DecodeString(mr.Req_info)
+	gocrypto.SetAesKey(strings.ToLower(gocrypto.Md5(key)))
+	plaintext, _ := gocrypto.AesECBDecrypt(b)
+
+	var mnr RefundNotify
+	_ = xml.Unmarshal(plaintext, &mnr)
+
+	if mnr.Refund_status == "SUCCESS" {
+		//f(mnr.Out_trade_no)
+		dbInfo := models.Order{
+			RefundTradeNo: mnr.Out_refund_no,
+		}
+		_, _ = dbInfo.GetOrderInfoByRefundTradeNo()
+		if order_service.GetOrderParam(dbInfo.OrderId, "taker_refund_time") > 0 {
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		var m = make(map[string]interface{})
+		m["taker_refund_time"] = int(time.Now().Unix())
+		if !dbInfo.Updates(m) {
+			log, _ := json.Marshal(m)
+			logging.Error("AdminRefundTakerCallback:failed-" + string(log))
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		logging.Info("refund finish AdminRefundTakerCallback:" + mnr.Out_refund_no)
 		resStr := "<xml><return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>"
 
 		c.JSON(http.StatusOK, resStr)

@@ -223,7 +223,7 @@ func GetOrderParamString(orderId int, param string) string {
 	}
 	strParam, err := gredis.HGet(GetRedisKeyOrder(orderId), param)
 	if err != nil {
-		logging.Error("GetOrderTeamId:" + strconv.Itoa(orderId))
+		logging.Error("GetOrderParamString:" + strconv.Itoa(orderId))
 		return ""
 	}
 	return strParam
@@ -776,7 +776,7 @@ func Refund(orderId int) bool {
 		}
 		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
 
-		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount)
+		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "订单完成，取消保证金")
 	}
 	return true
 }
@@ -847,6 +847,13 @@ func GetNeedTakeOrderList(orders *[]models.Order, where string, index int, count
 	_, err := models.GetNeedTakeOrders(orders, where, index, count)
 	if err != nil {
 		logging.Error("GetNeedTakeOrderList:db-GetNeedTakeOrders")
+	}
+	return
+}
+func GetNeedAdjudgeOrderList(orders *[]models.Order, where string, index int, count int) {
+	_, err := models.GetNeedAdjudgeOrders(orders, where, index, count)
+	if err != nil {
+		logging.Error("GetNeedAdjudgeOrderList:db-GetNeedAdjudgeOrderList")
 	}
 	return
 }
@@ -1090,7 +1097,161 @@ func OrderUndoRefundTaker(orderId int) bool {
 		}
 		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
 
-		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount)
+		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "用户撤销订单完成，取消保证金")
+	}
+	return true
+}
+
+func AdminRefundUser(orderId int, money int) bool {
+	totalFee := money
+	outTradeNo := GetOrderParamString(orderId, "trade_no")
+	payOrderId := GeneratePayOrderId()
+
+	var payReq RefundReq
+	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+	payReq.MchId = var_const.WXMchID
+	payReq.NonceStr = GenerateNonceStr()
+	payReq.OutTradeNo = outTradeNo
+	payReq.OutRefundNo = payOrderId
+	payReq.TotalFee = totalFee
+	payReq.RefundFee = totalFee
+	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/admin/userrefundnotify"
+
+	var reqMap = make(map[string]interface{}, 0)
+	reqMap["appid"] = payReq.AppId        //微信小程序appid
+	reqMap["mch_id"] = payReq.MchId       //商户号
+	reqMap["nonce_str"] = payReq.NonceStr //随机数
+	reqMap["out_refund_no"] = payReq.OutRefundNo
+	reqMap["out_trade_no"] = payReq.OutTradeNo
+	reqMap["total_fee"] = payReq.TotalFee
+	reqMap["refund_fee"] = payReq.RefundFee
+	reqMap["notify_url"] = payReq.NotifyUrl
+	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+
+	// 调用支付统一下单API
+	bytesReq, err := xml.Marshal(payReq)
+	if err != nil {
+		return false
+	}
+	strReq := string(bytesReq)
+
+	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+	bytesReq = []byte(strReq)
+
+	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	if err2 != nil {
+		return false
+	}
+	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+	//client := &http.Client{}
+	//resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	body2, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return false
+	}
+	var resp1 RefundResp
+	err = xml.Unmarshal(body2, &resp1)
+	if err != nil {
+		return false
+	}
+	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+		dbInfo := models.Order{
+			OrderId: orderId,
+		}
+		var m = make(map[string]interface{})
+		m["pay_refund_trade_no"] = payReq.OutRefundNo
+		m["pay_refund_amount"] = payReq.RefundFee
+		m["pay_refund_time"] = 0
+		mlog, _ := json.Marshal(m)
+		logging.Info("AdminRefundUser: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+		if !dbInfo.Updates(m) {
+			logging.Error("AdminRefundUser: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+func AdminRefundTaker(orderId int, money int) bool {
+	totalFee := money
+	outTradeNo, err := GetOrderTakerTradeNo(orderId)
+	if err != nil {
+		return false
+	}
+	payOrderId := GeneratePayOrderId()
+
+	var payReq RefundReq
+	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+	payReq.MchId = var_const.WXMchID
+	payReq.NonceStr = GenerateNonceStr()
+	payReq.OutTradeNo = outTradeNo
+	payReq.OutRefundNo = payOrderId
+	payReq.TotalFee = totalFee
+	payReq.RefundFee = totalFee
+	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/admin/takerrefundnotify"
+
+	var reqMap = make(map[string]interface{}, 0)
+	reqMap["appid"] = payReq.AppId        //微信小程序appid
+	reqMap["mch_id"] = payReq.MchId       //商户号
+	reqMap["nonce_str"] = payReq.NonceStr //随机数
+	reqMap["out_refund_no"] = payReq.OutRefundNo
+	reqMap["out_trade_no"] = payReq.OutTradeNo
+	reqMap["total_fee"] = payReq.TotalFee
+	reqMap["refund_fee"] = payReq.RefundFee
+	reqMap["notify_url"] = payReq.NotifyUrl
+	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+
+	// 调用支付统一下单API
+	bytesReq, err := xml.Marshal(payReq)
+	if err != nil {
+		return false
+	}
+	strReq := string(bytesReq)
+
+	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+	bytesReq = []byte(strReq)
+
+	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	if err2 != nil {
+		return false
+	}
+	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+	//client := &http.Client{}
+	//resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	body2, err3 := ioutil.ReadAll(resp.Body)
+	if err3 != nil {
+		return false
+	}
+	var resp1 RefundResp
+	err = xml.Unmarshal(body2, &resp1)
+	if err != nil {
+		return false
+	}
+	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+		dbInfo := models.Order{
+			OrderId: orderId,
+		}
+		var m = make(map[string]interface{})
+		m["refund_trade_no"] = payReq.OutRefundNo
+		m["refund_amount"] = payReq.RefundFee
+		m["upd_time"] = 0
+		log, _ := json.Marshal(m)
+		logging.Info("AdminRefundTaker: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
+		if !dbInfo.Updates(m) {
+			logging.Error("AdminRefundTaker: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
+			return false
+		}
+		db2Info := models.Order{
+			RefundTradeNo: payReq.OutRefundNo,
+		}
+		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
+
+		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "客服仲裁完成，取消保证金")
 	}
 	return true
 }

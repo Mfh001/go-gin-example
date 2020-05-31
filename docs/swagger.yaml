@@ -15,6 +15,183 @@ info:
   title: Golang Gin API
   version: "1.0"
 paths:
+  /admin/margin/remove:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: money 金额单位是分
+        in: body
+        name: money
+        schema:
+          type: integer
+      - description: 备注
+        in: body
+        name: msg
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 客服扣除代练保证金
+      tags:
+      - 客服
+  /admin/money/add:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: money 金额单位是分
+        in: body
+        name: money
+        schema:
+          type: integer
+      - description: 备注
+        in: body
+        name: msg
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 客服添加用户余额
+      tags:
+      - 客服
+  /admin/money/remove:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: money 金额单位是分
+        in: body
+        name: money
+        schema:
+          type: integer
+      - description: 备注
+        in: body
+        name: msg
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 客服扣除用户余额
+      tags:
+      - 客服
+  /admin/order/adjudge/all:
+    post:
+      parameters:
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 客服获取需要仲裁列表
+      tags:
+      - 客服
+  /admin/order/refund/taker:
+    post:
+      parameters:
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      - description: money 金额单位是分
+        in: body
+        name: money
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 客服退回代练的部分保证金
+      tags:
+      - 客服
+  /admin/order/refund/user:
+    post:
+      parameters:
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      - description: money 金额单位是分
+        in: body
+        name: money
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 客服退回订单的部分金额
+      tags:
+      - 客服
   /api/v1/agent/bind:
     post:
       parameters:
@@ -407,6 +584,43 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 订单加时
+      tags:
+      - 订单
+  /api/v1/order/adjudgerequest:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      - description: msg
+        in: body
+        name: msg
+        schema:
+          type: string
+      - description: imgurl
+        in: body
+        name: imgurl
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 申请仲裁
       tags:
       - 订单
   /api/v1/order/all:

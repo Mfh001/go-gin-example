@@ -679,8 +679,6 @@ func UndoOrder(c *gin.Context) {
 	}
 	var m = make(map[string]interface{})
 	if agree == 1 {
-		order_service.OrderUndoRefundUser(orderId)
-		order_service.OrderUndoRefundTaker(orderId)
 		m["status"] = var_const.OrderStatusUndoRequest
 	} else {
 		m["status"] = var_const.OrderStatusTakerPaid
@@ -692,6 +690,10 @@ func UndoOrder(c *gin.Context) {
 		logging.Error("UndoRequestOrder:failed-" + string(log))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
+	}
+	if agree == 1 {
+		order_service.OrderUndoRefundUser(orderId)
+		order_service.OrderUndoRefundTaker(orderId)
 	}
 	logging.Info("UndoRequestOrder: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
@@ -778,4 +780,254 @@ func GetOrderInfo(c *gin.Context) {
 	_, _ = dbInfo.First()
 	appG.Response(http.StatusOK, e.SUCCESS, dbInfo)
 	return
+}
+
+// @Summary 申请仲裁
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Param msg body string false "msg"
+// @Param imgurl body string false "imgurl"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/adjudgerequest [post]
+// @Tags 订单
+func AdjudgeRequestOrder(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		msg     = c.PostForm("msg")
+		imgUrl  = c.PostForm("imgurl")
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if userId != order_service.GetOrderParam(orderId, "taker_user_id") && userId != order_service.GetOrderParam(orderId, "user_id") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusTakerPaid {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusAdjudgeRequest
+	m["adjudge_user_id"] = userId
+	m["adjudge_msg"] = msg
+	m["img_adjudge_url"] = imgUrl
+	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("AdjudgeRequestOrder: begin order_id-" + strconv.Itoa(orderId))
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("AdjudgeRequestOrder:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("AdjudgeRequestOrder: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 客服退回订单的部分金额
+// @Produce  json
+// @Param order_id body int false "order_id"
+// @Param money body int false "money 金额单位是分"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/order/refund/user [post]
+// @Tags 客服
+func AdminRefundPay(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		money   = com.StrTo(c.PostForm("money")).MustInt()
+	)
+	if orderId == 0 || !order_service.ExistOrder(orderId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if money <= 0 || money > order_service.GetOrderParam(orderId, "pay_amount") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusAdjudgeRequest {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if order_service.GetOrderParamString(orderId, "pay_refund_trade_no") != "" {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	logging.Info("AdminRefundPay: begin order_id-" + strconv.Itoa(orderId))
+	order_service.AdminRefundUser(orderId, money)
+	logging.Info("AdminRefundPay: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 客服退回代练的部分保证金
+// @Produce  json
+// @Param order_id body int false "order_id"
+// @Param money body int false "money 金额单位是分"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/order/refund/taker [post]
+// @Tags 客服
+func AdminRefundTaker(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		money   = com.StrTo(c.PostForm("money")).MustInt()
+	)
+	if orderId == 0 || !order_service.ExistOrder(orderId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if money <= 0 || money > order_service.GetOrderParam(orderId, "taker_pay_amount") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusAdjudgeRequest {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if order_service.GetOrderParamString(orderId, "refund_trade_no") != "" {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	logging.Info("AdminRefundTaker: begin order_id-" + strconv.Itoa(orderId))
+	order_service.AdminRefundTaker(orderId, money)
+	logging.Info("AdminRefundTaker: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 客服添加用户余额
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param money body int false "money 金额单位是分"
+// @Param msg body int false "备注"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/money/add [post]
+// @Tags 客服
+func AdminAddBalance(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+		money  = com.StrTo(c.PostForm("money")).MustInt()
+		msg    = c.PostForm("msg")
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if money <= 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	logging.Info("AdminAddBalance: begin userId-" + strconv.Itoa(money))
+	if !auth_service.AddUserBalance(userId, money, "客服添加余额:"+msg) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("AdminAddBalance: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 客服扣除用户余额
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param money body int false "money 金额单位是分"
+// @Param msg body int false "备注"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/money/remove [post]
+// @Tags 客服
+func AdminRemBalance(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+		money  = com.StrTo(c.PostForm("money")).MustInt()
+		msg    = c.PostForm("msg")
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if money <= 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	logging.Info("AdminRemBalance: begin userId-" + strconv.Itoa(money))
+	if !auth_service.RemoveUserBalance(userId, money, "客服扣除余额:"+msg) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("AdminRemBalance: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary 客服扣除代练保证金
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param money body int false "money 金额单位是分"
+// @Param msg body int false "备注"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/margin/remove [post]
+// @Tags 客服
+func AdminRemMargin(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+		money  = com.StrTo(c.PostForm("money")).MustInt()
+		msg    = c.PostForm("msg")
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if money <= 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	logging.Info("AdminRemMargin: begin userId-" + strconv.Itoa(money))
+	if !auth_service.RemoveUserMargin(userId, money, "客服扣除保证金:"+msg) {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("AdminRemMargin: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
+
+// @Summary Get 客服获取需要仲裁列表
+// @Produce  json
+// @Param index body int false "index"
+// @Param count body int false "count"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/order/adjudge/all [post]
+// @Tags 客服
+func GetAdminAdjudgeList(c *gin.Context) {
+	appG := app.Gin{C: c}
+	index := com.StrTo(c.PostForm("index")).MustInt()
+	count := com.StrTo(c.PostForm("count")).MustInt()
+	var list []models.Order
+	order_service.GetNeedAdjudgeOrderList(&list, "", index, count)
+	m := make(map[string]interface{})
+	m["list"] = list
+	m["count"] = len(list)
+	appG.Response(http.StatusOK, e.SUCCESS, m)
 }

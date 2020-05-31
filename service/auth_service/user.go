@@ -258,7 +258,7 @@ func GetUserPhone(userId int) (string, error) {
 	return phone, nil
 }
 
-func AddUserMargin(userId int, amount int) bool {
+func AddUserMargin(userId int, amount int, flag string) bool {
 	if userId <= 0 || !ExistUserInfo(userId) {
 		return false
 	}
@@ -266,7 +266,7 @@ func AddUserMargin(userId int, amount int) bool {
 		UserId: userId,
 	}
 	margin := GetUserParam(userId, "margin")
-	logging.Info("AddUserMargin:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",margin-" + strconv.Itoa(margin))
+	logging.Info("AddUserMargin:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",margin-" + strconv.Itoa(margin) + ",flag-" + flag)
 	margin += amount
 	var db2Info = make(map[string]interface{})
 	db2Info["margin"] = margin
@@ -276,11 +276,22 @@ func AddUserMargin(userId int, amount int) bool {
 		logging.Error("AddUserMargin:db-userInfo-failed-" + string(log))
 		return false
 	}
+	logDB := models.BalanceLog{
+		UserId:     userId,
+		NickName:   GetUserParamString(userId, "nick_name"),
+		TotalMoney: margin,
+		Money:      amount,
+		LogType:    1,
+		Status:     1,
+		Remarks:    flag,
+		RegTime:    int(time.Now().Unix()),
+	}
+	logDB.Insert()
 	logging.Info("AddUserMargin Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
 	return true
 }
 
-func RemoveUserMargin(userId int, amount int) bool {
+func RemoveUserMargin(userId int, amount int, flag string) bool {
 	if userId <= 0 || !ExistUserInfo(userId) {
 		return false
 	}
@@ -288,7 +299,7 @@ func RemoveUserMargin(userId int, amount int) bool {
 		UserId: userId,
 	}
 	margin := GetUserParam(userId, "margin")
-	logging.Info("RemoveUserMargin:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",margin-" + strconv.Itoa(margin))
+	logging.Info("RemoveUserMargin:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",margin-" + strconv.Itoa(margin) + ",flag-" + flag)
 	margin -= amount
 	if margin < 0 {
 		margin = 0
@@ -301,6 +312,17 @@ func RemoveUserMargin(userId int, amount int) bool {
 		logging.Error("RemoveUserMargin:db-userInfo-failed-" + string(log))
 		return false
 	}
+	logDB := models.BalanceLog{
+		UserId:     userId,
+		NickName:   GetUserParamString(userId, "nick_name"),
+		TotalMoney: margin,
+		Money:      amount,
+		LogType:    1,
+		Status:     -1,
+		Remarks:    flag,
+		RegTime:    int(time.Now().Unix()),
+	}
+	logDB.Insert()
 	logging.Info("RemoveUserMargin Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
 	return true
 }
@@ -322,11 +344,22 @@ func AddUserBalance(userId int, amount int, flag string) bool {
 		logging.Error("AddUserBalance:db-userInfo-failed-" + string(log))
 		return false
 	}
+	logDB := models.BalanceLog{
+		UserId:     userId,
+		NickName:   GetUserParamString(userId, "nick_name"),
+		TotalMoney: margin,
+		Money:      amount,
+		LogType:    2,
+		Status:     1,
+		Remarks:    flag,
+		RegTime:    int(time.Now().Unix()),
+	}
+	logDB.Insert()
 	logging.Info("AddUserBalance Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",flag-" + flag)
 	return true
 }
 
-func RemoveUserBalance(userId int, amount int) bool {
+func RemoveUserBalance(userId int, amount int, flag string) bool {
 	if userId <= 0 || !ExistUserInfo(userId) {
 		return false
 	}
@@ -334,7 +367,7 @@ func RemoveUserBalance(userId int, amount int) bool {
 		UserId: userId,
 	}
 	margin := GetUserParam(userId, "balance")
-	logging.Info("RemoveUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin))
+	logging.Info("RemoveUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin) + ",flag-" + flag)
 	margin -= amount
 	if margin < 0 {
 		margin = 0
@@ -347,6 +380,17 @@ func RemoveUserBalance(userId int, amount int) bool {
 		logging.Error("RemoveUserBalance:db-userInfo-failed-" + string(log))
 		return false
 	}
+	logDB := models.BalanceLog{
+		UserId:     userId,
+		NickName:   GetUserParamString(userId, "nick_name"),
+		TotalMoney: margin,
+		Money:      amount,
+		LogType:    2,
+		Status:     -1,
+		Remarks:    flag,
+		RegTime:    int(time.Now().Unix()),
+	}
+	logDB.Insert()
 	logging.Info("RemoveUserBalance Success:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount))
 	return true
 }

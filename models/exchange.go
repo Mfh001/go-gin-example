@@ -20,7 +20,7 @@ type Exchange struct {
 
 //insert
 func (info Exchange) Insert() bool {
-	if info.UserId <= 0 || info.Id <= 0 {
+	if info.UserId <= 0 {
 		return false
 	}
 	create := db.Create(&info)
