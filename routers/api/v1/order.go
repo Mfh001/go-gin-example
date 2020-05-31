@@ -515,6 +515,8 @@ type Message struct {
 	TakerUserId   int    `json:"taker_user_id"`
 	TakerNickName string `json:"taker_nick_name"`
 	OrderId       int    `json:"order_id"`
+	OrderNo       string `json:"order_no"`
+	OrderTitle    string `json:"order_title"`
 	Time          int    `json:"time"`
 	Msg           string `json:"msg"`
 }
@@ -560,6 +562,8 @@ func MessageOrder(c *gin.Context) {
 		TakerUserId:   tu,
 		TakerNickName: auth_service.GetUserParamString(tu, "nick_name"),
 		OrderId:       orderId,
+		OrderNo:       order_service.GetOrderParamString(orderId, "order_no"),
+		OrderTitle:    order_service.GetOrderParamString(orderId, "title"),
 		Time:          int(time.Now().Unix()),
 		Msg:           message,
 	}
