@@ -619,6 +619,33 @@ paths:
       summary: 获取某一订单的消息/留言
       tags:
       - 订单留言
+  /api/v1/order/info:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 获取订单信息
+      tags:
+      - 订单
   /api/v1/order/message:
     post:
       parameters:

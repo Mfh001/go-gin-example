@@ -744,3 +744,38 @@ func AddTimeOrder(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
+
+// @Summary 获取订单信息
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/info [post]
+// @Tags 订单
+func GetOrderInfo(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if userId != order_service.GetOrderParam(orderId, "user_id") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	//status := order_service.GetOrderParam(orderId, "status")
+	//if status != var_const.OrderStatusUndoRequest {
+	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	//	return
+	//}
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	_, _ = dbInfo.First()
+	appG.Response(http.StatusOK, e.SUCCESS, dbInfo)
+	return
+}
