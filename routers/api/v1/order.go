@@ -763,10 +763,10 @@ func GetOrderInfo(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if userId != order_service.GetOrderParam(orderId, "user_id") {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	//if userId != order_service.GetOrderParam(orderId, "user_id") {
+	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	//	return
+	//}
 	//status := order_service.GetOrderParam(orderId, "status")
 	//if status != var_const.OrderStatusUndoRequest {
 	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
