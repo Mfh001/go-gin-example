@@ -486,7 +486,7 @@ func CancelOrder(c *gin.Context) {
 		return
 	}
 	status := order_service.GetOrderParam(orderId, "status")
-	if status != var_const.OrderStatusPaidPay {
+	if status != var_const.OrderStatusPaidPay && status != var_const.OrderStatusWaitPay {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
