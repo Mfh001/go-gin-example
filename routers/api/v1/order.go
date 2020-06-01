@@ -511,6 +511,7 @@ func CancelOrder(c *gin.Context) {
 
 type Message struct {
 	UserId        int    `json:"user_id"`
+	SendId        int    `json:"send_id"`
 	NickName      string `json:"nick_name"`
 	TakerUserId   int    `json:"taker_user_id"`
 	TakerNickName string `json:"taker_nick_name"`
@@ -558,6 +559,7 @@ func MessageOrder(c *gin.Context) {
 	//}
 	msg := Message{
 		UserId:        u,
+		SendId:        userId,
 		NickName:      auth_service.GetUserParamString(u, "nick_name"),
 		TakerUserId:   tu,
 		TakerNickName: auth_service.GetUserParamString(tu, "nick_name"),
