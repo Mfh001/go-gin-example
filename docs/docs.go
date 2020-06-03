@@ -1192,6 +1192,49 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/order/canceltake": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "订单"
+                ],
+                "summary": "接单未支付保证金，取消接单",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "order_id",
+                        "name": "order_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/order/confirm": {
             "post": {
                 "produces": [

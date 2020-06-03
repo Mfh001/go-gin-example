@@ -298,7 +298,30 @@ func ConfirmOrder(c *gin.Context) {
 	//收益
 	logging.Info("ConfirmOrder: price-" + strconv.Itoa(add) + " order_id" + strconv.Itoa(orderId))
 	if add >= var_const.OrderNeedRate && add < var_const.OrderNeedRateMax {
-		add = add * (100 - var_const.OrderRate) / 100
+		if add >= 30 && add <= 40 {
+			add = add * (1000 - 15) / 1000
+		} else if add > 40 && add <= 50 {
+			add = add * (1000 - 20) / 1000
+		} else if add > 50 && add <= 60 {
+			add = add * (1000 - 25) / 1000
+		} else if add > 60 && add <= 70 {
+			add = add * (1000 - 30) / 1000
+		} else if add > 70 && add <= 80 {
+			add = add * (1000 - 35) / 1000
+		} else if add > 80 && add <= 90 {
+			add = add * (1000 - 40) / 1000
+		} else if add > 90 && add <= 100 {
+			add = add * (1000 - 45) / 1000
+		} else if add > 100 && add <= 120 {
+			add = add * (1000 - 50) / 1000
+		} else if add > 120 && add <= 150 {
+			add = add * (1000 - 55) / 1000
+		} else if add > 150 && add <= 200 {
+			add = add * (1000 - 60) / 1000
+		} else if add > 200 && add <= 300 {
+			add = add * (1000 - 80) / 1000
+		}
+		//add = add * (100 - var_const.OrderRate) / 100
 	}
 	if !auth_service.AddUserBalance(takerId, add, "ConfirmOrder") {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
@@ -1032,4 +1055,50 @@ func GetAdminAdjudgeList(c *gin.Context) {
 	m["list"] = list
 	m["count"] = len(list)
 	appG.Response(http.StatusOK, e.SUCCESS, m)
+}
+
+// @Summary 接单未支付保证金，取消接单
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Param order_id body int false "order_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/v1/order/canceltake [post]
+// @Tags 订单
+func CancelTakeOrder(c *gin.Context) {
+	var (
+		appG    = app.Gin{C: c}
+		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusTakerWaitPay {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	takerId := order_service.GetOrderParam(orderId, "taker_user_id")
+	if takerId != userId {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusPaidPay
+	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("CancelTakeOrder: begin order_id-" + strconv.Itoa(orderId))
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("CancelTakeOrder:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	logging.Info("CancelTakeOrder: end")
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
 }

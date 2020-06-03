@@ -91,6 +91,7 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order/updorderimg", v1.UpdateOrderImg)
 
 		apiV1.POST("/order/cancel", v1.CancelOrder)
+		apiV1.POST("/order/canceltake", v1.CancelTakeOrder)
 		//pay
 		apiV1.POST("/pay", v1.WxPay)
 

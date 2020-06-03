@@ -747,6 +747,33 @@ paths:
       summary: 取消订单
       tags:
       - 订单
+  /api/v1/order/canceltake:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      - description: order_id
+        in: body
+        name: order_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 接单未支付保证金，取消接单
+      tags:
+      - 订单
   /api/v1/order/confirm:
     post:
       parameters:
