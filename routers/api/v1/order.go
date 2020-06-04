@@ -373,6 +373,45 @@ func ConfirmOrder(c *gin.Context) {
 		}
 
 		//--累计订单统计
+
+		//用户完成首单  给推荐人6块   然后代练首次完成5单 给8块。（一次性得）限制得订单就是30-300范围之内得订单
+		if price >= var_const.OrderNeedRate && price < var_const.OrderNeedRateMax {
+			{
+				userOrderTotalPublishTimes := profit_service.GetProfitParam(uId, "order_total_publish_times")
+				userOrderTotalPublishTimes++
+				if userOrderTotalPublishTimes == 1 {
+					//给推荐人钱
+					agentId := auth_service.GetUserParam(uId, "agent_id")
+					if agentId > 0 && auth_service.ExistUserInfo(agentId) {
+						auth_service.AddUserBalance(agentId, var_const.UserFirstOrderGiveAgentMoney, "用户完成首单给推荐人6块")
+					}
+				}
+				userProfit := models.Profit{
+					UserId: uId,
+				}
+				m := make(map[string]interface{})
+				m["order_total_publish_times"] = userOrderTotalPublishTimes
+				userProfit.Updates(m)
+			}
+			{
+				userOrderTotalTakeTimes := profit_service.GetProfitParam(takerId, "order_total_taker_times")
+				userOrderTotalTakeTimes++
+				if userOrderTotalTakeTimes == 5 {
+					//给推荐人钱
+					agentId := auth_service.GetUserParam(takerId, "agent_id")
+					if agentId > 0 && auth_service.ExistUserInfo(agentId) {
+						auth_service.AddUserBalance(agentId, var_const.TakerFiveOrderGiveAgentMoney, "代练首次完成5单给8块")
+					}
+				}
+				userProfit := models.Profit{
+					UserId: takerId,
+				}
+				m := make(map[string]interface{})
+				m["order_total_taker_times"] = userOrderTotalTakeTimes
+				userProfit.Updates(m)
+			}
+		}
+
 		{
 			userOrderTotalTimes := profit_service.GetProfitParam(userId, "order_total_times")
 			userOrderTotalTimes++

@@ -39,12 +39,14 @@ const (
 	TeamUrgentPrice    = 1   //加急费用
 	RunesAddPriceLevel = 120 //铭文等级低于该等级，附加费用
 
-	ChannelTypePlatform = 1     //平台频道
-	OrderRate           = 10    //订单抽成费率%
-	OrderNeedRate       = 3000  //订单金额大于等于 需要抽成
-	OrderNeedRateMax    = 30000 //订单金额大于 不需要抽成
-	ExchangeMinMoney    = 10000 //每次最少提现100元
-	ExchangeRate        = 1     //订单抽成费率%
+	ChannelTypePlatform          = 1     //平台频道
+	OrderRate                    = 10    //订单抽成费率%
+	OrderNeedRate                = 3000  //订单金额大于等于 需要抽成
+	OrderNeedRateMax             = 30000 //订单金额大于 不需要抽成
+	ExchangeMinMoney             = 10000 //每次最少提现100元
+	ExchangeRate                 = 1     //订单抽成费率%
+	UserFirstOrderGiveAgentMoney = 600   //用户完成首单  给推荐人6块
+	TakerFiveOrderGiveAgentMoney = 800   //代练首次完成5单 给8块
 
 	AccessTokenExpireTime = 1.8 * 60 * 60
 	Deposit               = 1 //保证金80元

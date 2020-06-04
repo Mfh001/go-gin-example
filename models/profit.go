@@ -8,6 +8,8 @@ import (
 type Profit struct {
 	UserId                           int `json:"user_id" gorm:"primary_key;type:int(12);not null"`
 	OrderTotalTimes                  int `json:"order_total_times" gorm:"type:int(12);not null;default:0"`                    //累计订单次数
+	OrderTotalPublishTimes           int `json:"order_total_publish_times" gorm:"type:int(12);not null;default:0"`            //累计发布订单次数
+	OrderTotalTakerTimes             int `json:"order_total_taker_times" gorm:"type:int(12);not null;default:0"`              //累计接订单次数
 	OrderTotalTimesStatus            int `json:"order_total_times_status" gorm:"type:int(12);not null;default:0"`             //累计订单领取状态
 	OrderYesterdayPublishTimes       int `json:"order_yesterday_publish_times" gorm:"type:int(12);not null;default:0"`        //昨日下级总发单次数
 	OrderYesterdayTakerTimes         int `json:"order_yesterday_taker_times" gorm:"type:int(12);not null;default:0"`          //昨日下级总接单次数
