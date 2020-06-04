@@ -454,7 +454,7 @@ func IsUserTypeNormal(userId int) bool {
 }
 
 func GetUserList(infos *[]models.User, where string, index int, count int) {
-	_, err := models.GetNeedAdjudgeOrders(infos, where, index, count)
+	_, err := models.GetUserList(infos, where, index, count)
 	if err != nil {
 		logging.Error("GetNeedAdjudgeOrderList:db-GetNeedAdjudgeOrderList")
 	}
