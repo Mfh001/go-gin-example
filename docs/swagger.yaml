@@ -192,6 +192,55 @@ paths:
       summary: 客服退回订单的部分金额
       tags:
       - 客服
+  /admin/user/all:
+    post:
+      parameters:
+      - description: index
+        in: body
+        name: index
+        schema:
+          type: integer
+      - description: count
+        in: body
+        name: count
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: Get 客服获取用户列表
+      tags:
+      - 客服
+  /admin/user/canpublish:
+    post:
+      parameters:
+      - description: user_id
+        in: body
+        name: user_id
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Response'
+      summary: 客服 设置/取消 用户发布订单权限
+      tags:
+      - 客服
   /api/v1/agent/bind:
     post:
       parameters:

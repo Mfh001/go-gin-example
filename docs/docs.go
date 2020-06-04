@@ -307,6 +307,84 @@ var doc = `{
                 }
             }
         },
+        "/admin/user/all": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "客服"
+                ],
+                "summary": "Get 客服获取用户列表",
+                "parameters": [
+                    {
+                        "description": "index",
+                        "name": "index",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "count",
+                        "name": "count",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/user/canpublish": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "客服"
+                ],
+                "summary": "客服 设置/取消 用户发布订单权限",
+                "parameters": [
+                    {
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/agent/bind": {
             "post": {
                 "produces": [

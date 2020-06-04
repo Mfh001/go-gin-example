@@ -16,6 +16,7 @@ type User struct {
 	Phone          string `json:"phone" gorm:"type:varchar(11);not null;default:''"`
 	Gender         int    `json:"gender" gorm:"type:int(2);not null;default:1"`
 	Type           int    `json:"type" gorm:"type:int(2);not null;default:1"`
+	CanPublish     int    `json:"can_publish" gorm:"type:int(2);not null;default:0"`
 	City           string `json:"city" gorm:"type:varchar(8);not null;default:''"`
 	Province       string `json:"province" gorm:"type:varchar(8);not null;default:''"`
 	RegTime        int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
@@ -113,6 +114,18 @@ func (info User) FindPhone() (int, error) {
 func (info *User) GetUserInfoByDepositTradeNo() (bool, error) {
 	err := db.Select("user_id, deposit").Where("deposit_trade_no = ?", info.DepositTradeNo).First(&info).Error
 	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func GetUserList(infos *[]User, where string, index int, count int) (bool, error) {
+	err := db.Select("*").Limit(count).Offset(index).Find(&infos).Error
+	if gorm.IsRecordNotFoundError(err) {
+		*infos = []User{}
+		return true, nil
+	} else if err != nil {
+		*infos = []User{}
 		return false, err
 	}
 	return true, nil

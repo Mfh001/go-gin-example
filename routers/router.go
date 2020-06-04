@@ -58,6 +58,8 @@ func InitRouter() *gin.Engine {
 	r.POST("/admin/money/remove", v1.AdminRemBalance)
 	r.POST("/admin/margin/remove", v1.AdminRemMargin)
 	r.POST("/admin/order/adjudge/all", v1.GetAdminAdjudgeList)
+	r.POST("/admin/user/all", v1.GetAdminUserList)
+	r.POST("/admin/user/canpublish", v1.AdminSetUserCanPublish)
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(jwt.JWT())

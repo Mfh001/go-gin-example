@@ -413,3 +413,59 @@ func GetUserMessageNoRead(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, res)
 	return
 }
+
+// @Summary Get 客服获取用户列表
+// @Produce  json
+// @Param index body int false "index"
+// @Param count body int false "count"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/user/all [post]
+// @Tags 客服
+func GetAdminUserList(c *gin.Context) {
+	appG := app.Gin{C: c}
+	index := com.StrTo(c.PostForm("index")).MustInt()
+	count := com.StrTo(c.PostForm("count")).MustInt()
+	var list []models.User
+	auth_service.GetUserList(&list, "", index, count)
+	m := make(map[string]interface{})
+	m["list"] = list
+	m["count"] = len(list)
+	appG.Response(http.StatusOK, e.SUCCESS, m)
+}
+
+// @Summary 客服 设置/取消 用户发布订单权限
+// @Produce  json
+// @Param user_id body int false "user_id"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /admin/user/canpublish [post]
+// @Tags 客服
+func AdminSetUserCanPublish(c *gin.Context) {
+	var (
+		appG   = app.Gin{C: c}
+		userId = com.StrTo(c.PostForm("user_id")).MustInt()
+	)
+	if userId == 0 || !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	canPublish := auth_service.GetUserParam(userId, "can_publish")
+	user := models.User{
+		UserId: userId,
+	}
+	if canPublish == 1 {
+		canPublish = 0
+	} else {
+		canPublish = 1
+	}
+	m := make(map[string]interface{})
+	m["can_publish"] = canPublish
+	if !user.Updates(m) {
+		logging.Error("AdminSetUserCanPublish-db: user_id-" + c.PostForm("user_id"))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
+}
