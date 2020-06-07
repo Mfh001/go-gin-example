@@ -10,6 +10,7 @@ const (
 	CHECK_NO_PASS     = 602
 	TEAM_FULL         = 603
 	NO_DEPOSIT        = 604
+	HAS_DEPOSIT       = 605
 	MONEY_NO_ENOUGH   = 700
 
 	ERROR_CHECK_PASSED    = 10001
