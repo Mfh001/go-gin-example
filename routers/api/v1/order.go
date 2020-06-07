@@ -604,7 +604,7 @@ func CancelOrder(c *gin.Context) {
 	if order_service.OrderCancelRefund(orderId) {
 		if status == var_const.OrderStatusPaidPay {
 			amount := order_service.GetOrderParam(orderId, "price")
-			auth_service.RemoveUserBalance(userId, amount, "取消订单")
+			auth_service.AddUserBalance(userId, amount, "取消订单")
 		}
 	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
