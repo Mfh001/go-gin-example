@@ -5,9 +5,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/models"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
-	"github.com/EDDYCJY/go-gin-example/pkg/setting"
 	"github.com/EDDYCJY/go-gin-example/service/auth_service"
-	"github.com/EDDYCJY/go-gin-example/service/order_service"
 	"github.com/EDDYCJY/go-gin-example/service/team_service"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
@@ -32,116 +30,116 @@ import (
 // @Failure 500 {object} app.Response
 // @Router /api/v1/team [post]
 // @Tags 车队
-func AddTeam(c *gin.Context) {
-	var (
-		appG = app.Gin{C: c}
-		form models.Team
-	)
-	httpCode, errCode := app.BindAndValid(c, &form)
-	if errCode != e.SUCCESS {
-		appG.Response(httpCode, errCode, nil)
-		return
-	}
-	if !auth_service.ExistUserInfo(form.OwnerId) {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	//不能多于5颗星
-	count := 0
-	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
-		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
-			count++
-		}
-	}
-	if count > 5 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	ownType := auth_service.GetUserParam(form.OwnerId, "type")
-	if ownType == 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	//if ownType != var_const.UserTypeNormal {
-	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-	//	return
-	//}
-	form.OwnerType = ownType
-	nickName, _ := auth_service.GetUserNickName(form.OwnerId)
-	form.NickName = nickName
-	teamId, err := team_service.IncrTeamId()
-	if err != nil {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	form.TeamId = teamId
-	if ownType == var_const.UserTypeNormal {
-		form.NeedNum = 1
-		form.Num = 1
-		form.UserId1 = form.OwnerId
-		form.NickName1 = nickName
-		//创建order订单
-		order := models.Order{
-			CurLevel:    form.CurLevel,
-			TargetLevel: form.TargetLevel,
-			UserId:      form.OwnerId,
-			GameType:    form.GameType,
-			GameZone:    form.BigZone,
-			Contact:     form.Contact,
-			Qq:          form.Qq,
-			Description: form.Description,
-		}
-		teamCardNum := auth_service.GetUserParam(form.OwnerId, "team_card_num")
-		if form.TeamCardNum > teamCardNum {
-			form.TeamCardNum = teamCardNum
-		}
-		if form.TeamCardNum > var_const.TeamCardMax {
-			form.TeamCardNum = var_const.TeamCardMax
-		}
-		if !order_service.CreateOrder(&order, form.TeamId, form.TeamCardNum) {
-			appG.Response(http.StatusBadRequest, e.ERROR, nil)
-			return
-		}
-		if form.TeamCardNum > 0 {
-			user := models.User{
-				UserId: form.OwnerId,
-			}
-			m := make(map[string]interface{})
-			m["team_card_num"] = teamCardNum - form.TeamCardNum
-			user.Updates(m)
-		}
-
-		form.OrderId1 = order.OrderId
-		form.PayAmount1 = order.Price
-		form.Price = order.Price
-		if !team_service.CreateTeam(&form) {
-			appG.Response(http.StatusBadRequest, e.ERROR, nil)
-			return
-		}
-		data := gin.H{}
-		data["order_id"] = form.OrderId1
-		appG.Response(http.StatusOK, e.SUCCESS, data)
-		return
-	} else {
-		if form.NeedNum > 2 {
-			form.NeedNum = 2
-		}
-		form.Num = 0
-		if !team_service.CreateTeam(&form) {
-			appG.Response(http.StatusBadRequest, e.ERROR, nil)
-			return
-		}
-		data := gin.H{}
-		data["team_id"] = form.TeamId
-		appG.Response(http.StatusOK, e.SUCCESS, data)
-		return
-	}
-
-}
+//func AddTeam(c *gin.Context) {
+//	var (
+//		appG = app.Gin{C: c}
+//		form models.Team
+//	)
+//	httpCode, errCode := app.BindAndValid(c, &form)
+//	if errCode != e.SUCCESS {
+//		appG.Response(httpCode, errCode, nil)
+//		return
+//	}
+//	if !auth_service.ExistUserInfo(form.OwnerId) {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	//不能多于5颗星
+//	count := 0
+//	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
+//		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
+//			count++
+//		}
+//	}
+//	if count > 5 {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	ownType := auth_service.GetUserParam(form.OwnerId, "type")
+//	if ownType == 0 {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	//if ownType != var_const.UserTypeNormal {
+//	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//	//	return
+//	//}
+//	form.OwnerType = ownType
+//	nickName, _ := auth_service.GetUserNickName(form.OwnerId)
+//	form.NickName = nickName
+//	teamId, err := team_service.IncrTeamId()
+//	if err != nil {
+//		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+//		return
+//	}
+//	form.TeamId = teamId
+//	if ownType == var_const.UserTypeNormal {
+//		form.NeedNum = 1
+//		form.Num = 1
+//		form.UserId1 = form.OwnerId
+//		form.NickName1 = nickName
+//		//创建order订单
+//		order := models.Order{
+//			CurLevel:    form.CurLevel,
+//			TargetLevel: form.TargetLevel,
+//			UserId:      form.OwnerId,
+//			GameType:    form.GameType,
+//			GameZone:    form.BigZone,
+//			Contact:     form.Contact,
+//			Qq:          form.Qq,
+//			Description: form.Description,
+//		}
+//		teamCardNum := auth_service.GetUserParam(form.OwnerId, "team_card_num")
+//		if form.TeamCardNum > teamCardNum {
+//			form.TeamCardNum = teamCardNum
+//		}
+//		if form.TeamCardNum > var_const.TeamCardMax {
+//			form.TeamCardNum = var_const.TeamCardMax
+//		}
+//		if !order_service.CreateOrder(&order) {
+//			appG.Response(http.StatusBadRequest, e.ERROR, nil)
+//			return
+//		}
+//		if form.TeamCardNum > 0 {
+//			user := models.User{
+//				UserId: form.OwnerId,
+//			}
+//			m := make(map[string]interface{})
+//			m["team_card_num"] = teamCardNum - form.TeamCardNum
+//			user.Updates(m)
+//		}
+//
+//		form.OrderId1 = order.OrderId
+//		form.PayAmount1 = order.Price
+//		form.Price = order.Price
+//		if !team_service.CreateTeam(&form) {
+//			appG.Response(http.StatusBadRequest, e.ERROR, nil)
+//			return
+//		}
+//		data := gin.H{}
+//		data["order_id"] = form.OrderId1
+//		appG.Response(http.StatusOK, e.SUCCESS, data)
+//		return
+//	} else {
+//		if form.NeedNum > 2 {
+//			form.NeedNum = 2
+//		}
+//		form.Num = 0
+//		if !team_service.CreateTeam(&form) {
+//			appG.Response(http.StatusBadRequest, e.ERROR, nil)
+//			return
+//		}
+//		data := gin.H{}
+//		data["team_id"] = form.TeamId
+//		appG.Response(http.StatusOK, e.SUCCESS, data)
+//		return
+//	}
+//
+//}
 
 // @Summary 验证密码 用户是否可以加入车队
 // @Produce  json
@@ -188,105 +186,105 @@ func JoinTeamCheckPwd(c *gin.Context) {
 // @Failure 500 {object} app.Response
 // @Router /api/v1/team/join [post]
 // @Tags 车队
-func JoinTeam(c *gin.Context) {
-	var (
-		appG        = app.Gin{C: c}
-		userId      = com.StrTo(c.PostForm("user_id")).MustInt()
-		teamId      = com.StrTo(c.PostForm("team_id")).MustInt()
-		curLevel    = com.StrTo(c.PostForm("cur_level")).MustInt()
-		targetLevel = com.StrTo(c.PostForm("target_level")).MustInt()
-		cardNum     = com.StrTo(c.PostForm("team_card_num")).MustInt()
-		contact     = c.PostForm("contact")
-		qq          = c.PostForm("qq")
-		description = c.PostForm("description")
-	)
-	if teamId <= 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if team_service.GetTeamParam(teamId, "cur_level") > curLevel {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if team_service.GetTeamParam(teamId, "target_level") < targetLevel {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if !auth_service.ExistUserInfo(userId) || !team_service.ExistTeam(teamId) || team_service.GetTeamParam(teamId, "status") != var_const.TeamCanShow {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	//不能多于5颗星
-	count := 0
-	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
-		if setting.PlatFormLevelAll[i].Idx > curLevel && setting.PlatFormLevelAll[i].Idx <= targetLevel {
-			count++
-		}
-	}
-	if count > 5 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if team_service.GetTeamParam(teamId, "user_id1") > 0 && team_service.GetTeamParam(teamId, "user_id2") > 0 {
-		appG.Response(http.StatusBadRequest, e.TEAM_FULL, nil)
-		return
-	}
-	//创建order订单
-	order := models.Order{
-		CurLevel:    curLevel,
-		TargetLevel: targetLevel,
-		UserId:      userId,
-		GameType:    team_service.GetTeamParam(teamId, "game_type"),
-		GameZone:    team_service.GetTeamParam(teamId, "big_zone"),
-		Contact:     contact,
-		Qq:          qq,
-		Description: description,
-	}
-
-	teamCardNum := auth_service.GetUserParam(userId, "team_card_num")
-	if cardNum < teamCardNum {
-		cardNum = teamCardNum
-	}
-	if cardNum > var_const.TeamCardMax {
-		cardNum = var_const.TeamCardMax
-	}
-	if !order_service.CreateOrder(&order, teamId, cardNum) {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	if cardNum > 0 {
-		user := models.User{
-			UserId: userId,
-		}
-		m := make(map[string]interface{})
-		m["team_card_num"] = teamCardNum - cardNum
-		user.Updates(m)
-	}
-
-	team := models.Team{
-		TeamId: teamId,
-	}
-	m := make(map[string]interface{})
-	if team_service.GetTeamParam(teamId, "num") == 0 || team_service.GetTeamParam(teamId, "user_id1") == 0 {
-		m["user_id1"] = userId
-		m["nick_name1"] = auth_service.GetUserParamString(userId, "nick_name")
-		m["pay_amount1"] = order.Price
-	}
-	if team_service.GetTeamParam(teamId, "num") == 1 || team_service.GetTeamParam(teamId, "user_id2") == 0 {
-		m["user_id2"] = userId
-		m["nick_name2"] = auth_service.GetUserParamString(userId, "nick_name")
-		m["pay_amount2"] = order.Price
-	}
-
-	if !team.Updates(m) {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
-	}
-	data := gin.H{}
-	data["order_id"] = order.OrderId
-	appG.Response(http.StatusOK, e.SUCCESS, data)
-	return
-}
+//func JoinTeam(c *gin.Context) {
+//	var (
+//		appG        = app.Gin{C: c}
+//		userId      = com.StrTo(c.PostForm("user_id")).MustInt()
+//		teamId      = com.StrTo(c.PostForm("team_id")).MustInt()
+//		curLevel    = com.StrTo(c.PostForm("cur_level")).MustInt()
+//		targetLevel = com.StrTo(c.PostForm("target_level")).MustInt()
+//		cardNum     = com.StrTo(c.PostForm("team_card_num")).MustInt()
+//		contact     = c.PostForm("contact")
+//		qq          = c.PostForm("qq")
+//		description = c.PostForm("description")
+//	)
+//	if teamId <= 0 {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	if team_service.GetTeamParam(teamId, "cur_level") > curLevel {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	if team_service.GetTeamParam(teamId, "target_level") < targetLevel {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	if !auth_service.ExistUserInfo(userId) || !team_service.ExistTeam(teamId) || team_service.GetTeamParam(teamId, "status") != var_const.TeamCanShow {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	//不能多于5颗星
+//	count := 0
+//	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
+//		if setting.PlatFormLevelAll[i].Idx > curLevel && setting.PlatFormLevelAll[i].Idx <= targetLevel {
+//			count++
+//		}
+//	}
+//	if count > 5 {
+//		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+//		return
+//	}
+//	if team_service.GetTeamParam(teamId, "user_id1") > 0 && team_service.GetTeamParam(teamId, "user_id2") > 0 {
+//		appG.Response(http.StatusBadRequest, e.TEAM_FULL, nil)
+//		return
+//	}
+//	//创建order订单
+//	order := models.Order{
+//		CurLevel:    curLevel,
+//		TargetLevel: targetLevel,
+//		UserId:      userId,
+//		GameType:    team_service.GetTeamParam(teamId, "game_type"),
+//		GameZone:    team_service.GetTeamParam(teamId, "big_zone"),
+//		Contact:     contact,
+//		Qq:          qq,
+//		Description: description,
+//	}
+//
+//	teamCardNum := auth_service.GetUserParam(userId, "team_card_num")
+//	if cardNum < teamCardNum {
+//		cardNum = teamCardNum
+//	}
+//	if cardNum > var_const.TeamCardMax {
+//		cardNum = var_const.TeamCardMax
+//	}
+//	if !order_service.CreateOrder(&order, teamId, cardNum) {
+//		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+//		return
+//	}
+//	if cardNum > 0 {
+//		user := models.User{
+//			UserId: userId,
+//		}
+//		m := make(map[string]interface{})
+//		m["team_card_num"] = teamCardNum - cardNum
+//		user.Updates(m)
+//	}
+//
+//	team := models.Team{
+//		TeamId: teamId,
+//	}
+//	m := make(map[string]interface{})
+//	if team_service.GetTeamParam(teamId, "num") == 0 || team_service.GetTeamParam(teamId, "user_id1") == 0 {
+//		m["user_id1"] = userId
+//		m["nick_name1"] = auth_service.GetUserParamString(userId, "nick_name")
+//		m["pay_amount1"] = order.Price
+//	}
+//	if team_service.GetTeamParam(teamId, "num") == 1 || team_service.GetTeamParam(teamId, "user_id2") == 0 {
+//		m["user_id2"] = userId
+//		m["nick_name2"] = auth_service.GetUserParamString(userId, "nick_name")
+//		m["pay_amount2"] = order.Price
+//	}
+//
+//	if !team.Updates(m) {
+//		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+//		return
+//	}
+//	data := gin.H{}
+//	data["order_id"] = order.OrderId
+//	appG.Response(http.StatusOK, e.SUCCESS, data)
+//	return
+//}
 
 //加急
 // @Summary 加急

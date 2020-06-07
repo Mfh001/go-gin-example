@@ -80,6 +80,10 @@ func initTable() {
 	if !tableBalanceLog {
 		db.CreateTable(BalanceLog{})
 	}
+	tablePay := db.HasTable(Pay{})
+	if !tablePay {
+		db.CreateTable(Pay{})
+	}
 }
 
 // CloseDB closes database connection (unnecessary)

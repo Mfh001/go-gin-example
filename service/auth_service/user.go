@@ -370,7 +370,7 @@ func RemoveUserBalance(userId int, amount int, flag string) bool {
 	logging.Info("RemoveUserBalance:userId-" + strconv.Itoa(userId) + ",amount-" + strconv.Itoa(amount) + ",balance-" + strconv.Itoa(margin) + ",flag-" + flag)
 	margin -= amount
 	if margin < 0 {
-		margin = 0
+		return false
 	}
 	var db2Info = make(map[string]interface{})
 	db2Info["balance"] = margin

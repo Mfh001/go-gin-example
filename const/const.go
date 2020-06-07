@@ -46,7 +46,7 @@ const (
 	ExchangeMinMoney             = 10000 //每次最少提现100元
 	ExchangeRate                 = 1     //订单抽成费率%
 	UserFirstOrderGiveAgentMoney = 600   //用户完成首单  给推荐人6块
-	TakerFiveOrderGiveAgentMoney = 800   //代练首次完成5单 给8块
+	TakerFiveOrderGiveAgentMoney = 1800  //代练首次完成5单 给8块
 
 	AccessTokenExpireTime = 1.8 * 60 * 60
 	Deposit               = 1 //保证金80元
@@ -59,6 +59,9 @@ const (
 	MarginArbPrice             = 30000 //300的订单 上下仲裁保证金不同
 	MarginArbPriceA            = 500   //300元以下的订单 仲裁保证金5块
 	MarginArbPriceB            = 30000 //300元以上的订单 仲裁保证金50块
+
+	PayOrderStatusBegin  = 0
+	PayOrderStatusFinish = 1
 
 	//满意度
 	OrderSatisfied    = 1 //满意

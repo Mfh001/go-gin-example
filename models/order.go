@@ -8,9 +8,9 @@ import (
 
 type Order struct {
 	OrderId       int    `json:"order_id" form:"-" gorm:"primary_key;type:int(12);not null"`
-	OrderNo       string `json:"order_no" gorm:"type:varchar(1000);not null;default:''"`                                                 //订单编号 显示用
-	Price         int    `json:"price" form:"price" gorm:"type:int(12);not null;default:0" valid:"Required;Range(0, 100000000)"`         //订单价格 单位分
-	TimeLimit     int    `json:"time_limit" form:"time_limit" gorm:"type:int(12);not null;default:0" valid:"Required;Range(0, 1000000)"` //时限 小时
+	OrderNo       string `json:"order_no" gorm:"type:varchar(1000);not null;default:''"`                                         //订单编号 显示用
+	Price         int    `json:"price" form:"price" gorm:"type:int(12);not null;default:0" valid:"Required;Range(0, 100000000)"` //订单价格 单位分
+	TimeLimit     int    `json:"time_limit" form:"time_limit" gorm:"type:int(12);not null;default:0"`                            //时限 小时
 	TeamId        int    `json:"team_id" form:"-" gorm:"type:int(12);not null;default:0"`
 	Status        int    `json:"status" form:"-" gorm:"type:int(12);not null;default:0"`
 	StarNum       int    `json:"star_num" form:"-" gorm:"type:int(12);not null;default:0"`       //星数
@@ -131,49 +131,49 @@ func (info *Order) First() (int, error) {
 	return 1, nil
 }
 
-func (info *Order) GetOrderInfoByTradeNo() (bool, error) {
-	err := db.Select("user_id, order_id, status").Where("trade_no = ?", info.TradeNo).First(&info).Error
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
+//func (info *Order) GetOrderInfoByTradeNo() (bool, error) {
+//	err := db.Select("user_id, order_id, status").Where("trade_no = ?", info.TradeNo).First(&info).Error
+//	if err != nil {
+//		return false, err
+//	}
+//	return true, nil
+//}
+//
+//func (info *Order) GetOrderInfoByTakerTradeNo() (bool, error) {
+//	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).First(&info).Error
+//	if err != nil {
+//		return false, err
+//	}
+//	return true, nil
+//}
+//func (info *Order) GetOrderInfoByRefundTradeNo() (bool, error) {
+//	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("refund_trade_no = ?", info.RefundTradeNo).First(&info).Error
+//	if err != nil {
+//		return false, err
+//	}
+//	return true, nil
+//}
+//func (info *Order) GetOrderInfoByPayRefundTradeNo() (bool, error) {
+//	err := db.Select("order_id, status").Where("pay_refund_trade_no = ?", info.PayRefundTradeNo).First(&info).Error
+//	if err != nil {
+//		return false, err
+//	}
+//	return true, nil
+//}
 
-func (info *Order) GetOrderInfoByTakerTradeNo() (bool, error) {
-	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("taker_trade_no = ?", info.TakerTradeNo).First(&info).Error
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-func (info *Order) GetOrderInfoByRefundTradeNo() (bool, error) {
-	err := db.Select("taker_user_id, taker_pay_amount, order_id, status").Where("refund_trade_no = ?", info.RefundTradeNo).First(&info).Error
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-func (info *Order) GetOrderInfoByPayRefundTradeNo() (bool, error) {
-	err := db.Select("order_id, status").Where("pay_refund_trade_no = ?", info.PayRefundTradeNo).First(&info).Error
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
-	var article Article
-	err := db.Select("user_id, status").Where("order_id = ?", orderId).First(&article).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return false, err
-	}
-
-	if article.ID > 0 {
-		return true, nil
-	}
-
-	return false, nil
-}
+//func GetUserIdAndStatusByOrderId(orderId int) (bool, error) {
+//	var article Article
+//	err := db.Select("user_id, status").Where("order_id = ?", orderId).First(&article).Error
+//	if err != nil && err != gorm.ErrRecordNotFound {
+//		return false, err
+//	}
+//
+//	if article.ID > 0 {
+//		return true, nil
+//	}
+//
+//	return false, nil
+//}
 
 //select all
 func GetNeedTakeOrders(infos *[]Order, where string, index int, count int) (bool, error) {
@@ -212,7 +212,7 @@ func GetUserOrders(userId int, infos *[]Order, index int, count int) (bool, erro
 }
 
 func GetNeedAdjudgeOrders(infos *[]Order, where string, index int, count int) (bool, error) {
-	err := db.Select("*").Where("status = ? and team_id = 0 "+where, var_const.OrderStatusAdjudgeRequest).Limit(count).Offset(index).Find(&infos).Error
+	err := db.Select("*").Where("status = ? "+where, var_const.OrderStatusAdjudgeRequest).Limit(count).Offset(index).Find(&infos).Error
 	if gorm.IsRecordNotFoundError(err) {
 		*infos = []Order{}
 		return true, nil

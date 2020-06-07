@@ -221,49 +221,6 @@ var doc = `{
                 }
             }
         },
-        "/admin/order/refund/taker": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "客服"
-                ],
-                "summary": "客服退回代练的部分保证金",
-                "parameters": [
-                    {
-                        "description": "order_id",
-                        "name": "order_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "money 金额单位是分",
-                        "name": "money",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/order/refund/user": {
             "post": {
                 "produces": [
@@ -283,8 +240,16 @@ var doc = `{
                         }
                     },
                     {
-                        "description": "money 金额单位是分",
-                        "name": "money",
+                        "description": "用户的退回金额 金额单位是分",
+                        "name": "user_money",
+                        "in": "body",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "代练的退回金额 金额单位是分",
+                        "name": "taker_money",
                         "in": "body",
                         "schema": {
                             "type": "integer"
@@ -1938,7 +1903,7 @@ var doc = `{
                 "tags": [
                     "微信支付"
                 ],
-                "summary": "微信下单 获取发起微信支付所需的数据",
+                "summary": "余额充值 获取发起微信支付所需的数据",
                 "parameters": [
                     {
                         "description": "user_id",
@@ -1973,7 +1938,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/pay/deposit": {
+        "/api/v1/pay/order": {
             "post": {
                 "produces": [
                     "application/json"
@@ -1981,42 +1946,7 @@ var doc = `{
                 "tags": [
                     "微信支付"
                 ],
-                "summary": "代练交平台押金",
-                "parameters": [
-                    {
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/pay/taker": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "微信支付"
-                ],
-                "summary": "微信接单 获取发起微信支付所需的数据",
+                "summary": "支付下单",
                 "parameters": [
                     {
                         "description": "user_id",
@@ -2027,8 +1957,8 @@ var doc = `{
                         }
                     },
                     {
-                        "description": "order_id",
-                        "name": "order_id",
+                        "description": "价格 单位分",
+                        "name": "pay_amount",
                         "in": "body",
                         "schema": {
                             "type": "integer"
@@ -2231,129 +2161,6 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/team": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "车队"
-                ],
-                "summary": "下单",
-                "parameters": [
-                    {
-                        "description": "owner_id",
-                        "name": "owner_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "游戏",
-                        "name": "game_type",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "游戏大区",
-                        "name": "big_zone",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "起始段位",
-                        "name": "cur_level",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "结束段位",
-                        "name": "target_level",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "使用车队卡的数量",
-                        "name": "team_card_num",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "代练发布最多2人，用户发布只能1人",
-                        "name": "need_num",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "代练发布可以设置是否需要密码",
-                        "name": "need_pwd",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "密码",
-                        "name": "pwd",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "contact",
-                        "name": "contact",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "微信",
-                        "name": "qq",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "description",
-                        "name": "description",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/team/cancelurgent": {
             "post": {
                 "produces": [
@@ -2375,97 +2182,6 @@ var doc = `{
                     {
                         "description": "team_id",
                         "name": "team_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/team/join": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "车队"
-                ],
-                "summary": "加入车队",
-                "parameters": [
-                    {
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "team_id",
-                        "name": "team_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "起始段位",
-                        "name": "cur_level",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "结束段位",
-                        "name": "target_level",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "contact",
-                        "name": "contact",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "微信",
-                        "name": "qq",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "description",
-                        "name": "description",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "使用车队卡的数量",
-                        "name": "team_card_num",
                         "in": "body",
                         "schema": {
                             "type": "integer"
@@ -2577,49 +2293,6 @@ var doc = `{
                     {
                         "description": "team_id",
                         "name": "team_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/app.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/teampay": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "微信支付"
-                ],
-                "summary": "微信下单 获取发起微信支付所需的数据",
-                "parameters": [
-                    {
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "team_id",
-                        "name": "order_id",
                         "in": "body",
                         "schema": {
                             "type": "integer"

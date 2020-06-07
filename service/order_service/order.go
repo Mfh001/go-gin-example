@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	var_const "github.com/EDDYCJY/go-gin-example/const"
 	"github.com/EDDYCJY/go-gin-example/models"
@@ -78,7 +77,7 @@ func GenerateOrderNo() string {
 	return newId
 }
 
-func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
+func CreateOrder(form *models.Order, teamId int, teamCardNum int) int {
 	if form.InsteadType == 0 {
 		//等级idx*1000 + star
 		price := 0
@@ -116,9 +115,12 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 		form.MarginArb = var_const.MarginArbPriceB
 	}
 	form.Margin = form.MarginArb + form.MarginEff + form.MarginSafe
+	if !auth_service.RemoveUserBalance(form.UserId, form.Price, "发布订单") {
+		return 1
+	}
 	orderId, err := IncrOrderId()
 	if err != nil {
-		return false
+		return 3
 	}
 	form.OrderId = orderId
 	form.OrderNo = GenerateOrderNo()
@@ -127,14 +129,14 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) bool {
 	form.NickName = nickName
 	form.RealPrice = form.Price
 	form.TeamCardNum = teamCardNum
-	form.Status = var_const.OrderStatusAddOrder
+	form.Status = var_const.OrderStatusPaidPay
 	form.RegTime = int(time.Now().Unix())
 	if !form.Save() {
 		log, _ := json.Marshal(form)
 		logging.Error("CreateOrder:form-" + string(log))
-		return false
+		return 2
 	}
-	return true
+	return 0
 }
 
 func ExistOrder(orderId int) bool {
@@ -271,54 +273,54 @@ func GetTakerOrderPrice(orderId int) (int, error) {
 	return margin, nil
 }
 
-func GetOrderTakerPayAmount(orderId int) (int, error) {
-	if !ExistOrder(orderId) {
-		return 0, fmt.Errorf("GetOrderTakerPayAmount:OrderIdnoExist")
-	}
-	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "taker_pay_amount")
-	if err != nil {
-		logging.Error("GetOrderTakerPayAmount:" + strconv.Itoa(orderId))
-		return 0, err
-	}
-	takerPayAmount, err := strconv.Atoi(strTaker)
-	if err != nil {
-		logging.Error("GetOrderPrice:" + strTaker)
-		return 0, err
-	}
-	return takerPayAmount, nil
-}
+//func GetOrderTakerPayAmount(orderId int) (int, error) {
+//	if !ExistOrder(orderId) {
+//		return 0, fmt.Errorf("GetOrderTakerPayAmount:OrderIdnoExist")
+//	}
+//	strTaker, err := gredis.HGet(GetRedisKeyOrder(orderId), "taker_pay_amount")
+//	if err != nil {
+//		logging.Error("GetOrderTakerPayAmount:" + strconv.Itoa(orderId))
+//		return 0, err
+//	}
+//	takerPayAmount, err := strconv.Atoi(strTaker)
+//	if err != nil {
+//		logging.Error("GetOrderPrice:" + strTaker)
+//		return 0, err
+//	}
+//	return takerPayAmount, nil
+//}
 
-func GetOrderTakerTradeNo(orderId int) (string, error) {
-	if !ExistOrder(orderId) {
-		return "", fmt.Errorf("GetOrderTakerTradeNo:OrderIdnoExist")
-	}
-	strTakerTradeNo, err := gredis.HGet(GetRedisKeyOrder(orderId), "taker_trade_no")
-	if err != nil {
-		logging.Error("GetOrderTakerTradeNo:" + strconv.Itoa(orderId))
-		return "", err
-	}
-	return strTakerTradeNo, nil
-}
+//func GetOrderTakerTradeNo(orderId int) (string, error) {
+//	if !ExistOrder(orderId) {
+//		return "", fmt.Errorf("GetOrderTakerTradeNo:OrderIdnoExist")
+//	}
+//	strTakerTradeNo, err := gredis.HGet(GetRedisKeyOrder(orderId), "taker_trade_no")
+//	if err != nil {
+//		logging.Error("GetOrderTakerTradeNo:" + strconv.Itoa(orderId))
+//		return "", err
+//	}
+//	return strTakerTradeNo, nil
+//}
 
-func GetOrderTeamId(orderId int) (int, error) {
-	if !ExistOrder(orderId) {
-		return 0, fmt.Errorf("GetOrderTeamId:OrderIdnoExist")
-	}
-	strTeamId, err := gredis.HGet(GetRedisKeyOrder(orderId), "team_id")
-	if err != nil {
-		logging.Error("GetOrderTeamId:" + strconv.Itoa(orderId))
-		return 0, err
-	}
-	if strTeamId == "" {
-		strTeamId = "0"
-	}
-	teamId, err := strconv.Atoi(strTeamId)
-	if err != nil {
-		logging.Error("GetOrderTeamId:" + strTeamId)
-		return 0, err
-	}
-	return teamId, nil
-}
+//func GetOrderTeamId(orderId int) (int, error) {
+//	if !ExistOrder(orderId) {
+//		return 0, fmt.Errorf("GetOrderTeamId:OrderIdnoExist")
+//	}
+//	strTeamId, err := gredis.HGet(GetRedisKeyOrder(orderId), "team_id")
+//	if err != nil {
+//		logging.Error("GetOrderTeamId:" + strconv.Itoa(orderId))
+//		return 0, err
+//	}
+//	if strTeamId == "" {
+//		strTeamId = "0"
+//	}
+//	teamId, err := strconv.Atoi(strTeamId)
+//	if err != nil {
+//		logging.Error("GetOrderTeamId:" + strTeamId)
+//		return 0, err
+//	}
+//	return teamId, nil
+//}
 
 type PayOrderReq struct {
 	AppId          string `xml:"appid"`
@@ -349,307 +351,227 @@ type WXPayResp struct {
 	CodeUrl    string `xml:"code_url"`
 }
 
-func Pay(userId int, orderId int, ip string) (map[string]interface{}, bool) {
-	//totalFee, err := GetOrderPrice(orderId)
-	totalFee := GetOrderParam(orderId, "real_price")
-	if totalFee == 0 {
-		return nil, false
+//func Pay(userId int, orderId int, ip string) (map[string]interface{}, bool) {
+//	//totalFee, err := GetOrderPrice(orderId)
+//	totalFee := GetOrderParam(orderId, "real_price")
+//	if totalFee == 0 {
+//		return nil, false
+//	}
+//
+//	openId, err := auth_service.GetUserOpenId(userId)
+//	if err != nil || openId == "" {
+//		return nil, false
+//	}
+//
+//	payOrderId := GeneratePayOrderId()
+//	desc := "费用说明"
+//	tradeType := "JSAPI"
+//
+//	var payReq PayOrderReq
+//	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+//	payReq.Body = desc
+//	payReq.MchId = var_const.WXMchID
+//	payReq.NonceStr = GenerateNonceStr()
+//	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/notify"
+//	payReq.OpenId = openId
+//	payReq.TradeType = tradeType
+//	payReq.SpbillCreateIp = ip
+//	payReq.TotalFee = totalFee
+//	payReq.OutTradeNo = payOrderId
+//
+//	var reqMap = make(map[string]interface{}, 0)
+//	reqMap["appid"] = payReq.AppId                      //微信小程序appid
+//	reqMap["body"] = payReq.Body                        //商品描述
+//	reqMap["mch_id"] = payReq.MchId                     //商户号
+//	reqMap["nonce_str"] = payReq.NonceStr               //随机数
+//	reqMap["notify_url"] = payReq.NotifyUrl             //通知地址
+//	reqMap["out_trade_no"] = payReq.OutTradeNo          //订单号
+//	reqMap["openid"] = payReq.OpenId                    //openid
+//	reqMap["spbill_create_ip"] = payReq.SpbillCreateIp  //用户端ip   //订单生成的机器 IP
+//	reqMap["total_fee"] = strconv.Itoa(payReq.TotalFee) //订单总金额，单位为分
+//	reqMap["trade_type"] = payReq.TradeType             //trade_type=JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
+//	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+//
+//	// 调用支付统一下单API
+//	bytesReq, err := xml.Marshal(payReq)
+//	if err != nil {
+//		return nil, false
+//	}
+//	strReq := string(bytesReq)
+//	//wxpay的unifiedorder接口需要http body中xmldoc的根节点是<xml></xml>这种，所以这里需要replace一下
+//	strReq = strings.Replace(strReq, "PayOrderReq", "xml", -1)
+//	bytesReq = []byte(strReq)
+//
+//	req, err2 := http.NewRequest("POST", "https://api.mch.weixin.qq.com/pay/unifiedorder", strings.NewReader(string(bytesReq)))
+//	if err2 != nil {
+//		return nil, false
+//	}
+//	req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+//	client := &http.Client{}
+//	resp, _ := client.Do(req)
+//	defer resp.Body.Close()
+//
+//	body2, err3 := ioutil.ReadAll(resp.Body)
+//	if err3 != nil {
+//		return nil, false
+//	}
+//	var resp1 WXPayResp
+//	err = xml.Unmarshal(body2, &resp1)
+//	if err != nil {
+//		return nil, false
+//	}
+//
+//	// 返回预付单信息
+//	if strings.ToUpper(resp1.ReturnCode) == "SUCCESS" && strings.ToUpper(resp1.ResultCode) == "SUCCESS" {
+//		// 再次签名
+//		var resMap = make(map[string]interface{}, 0)
+//		resMap["appId"] = resp1.AppId
+//		resMap["nonceStr"] = resp1.NonceStr                            //商品描述
+//		resMap["package"] = "prepay_id=" + resp1.PrepayId              //商户号
+//		resMap["signType"] = "MD5"                                     //签名类型
+//		resMap["timeStamp"] = strconv.FormatInt(time.Now().Unix(), 10) //当前时间戳
+//
+//		resMap["paySign"] = WxPayCalcSign(resMap, var_const.WXMchKey)
+//		//保存支付订单 TODO
+//		dbInfo := models.Order{
+//			OrderId: orderId,
+//		}
+//		var m = make(map[string]interface{})
+//		m["trade_no"] = payOrderId
+//		m["status"] = var_const.OrderStatusWaitPay
+//		m["pay_amount"] = totalFee
+//		m["pay_desc"] = desc
+//		m["pay_ip"] = ip
+//		m["trade_type"] = tradeType
+//		m["upd_time"] = int(time.Now().Unix())
+//		if !dbInfo.Updates(m) {
+//			log, _ := json.Marshal(m)
+//			logging.Error("Pay:failed-" + string(log))
+//			return nil, false
+//		}
+//		return resMap, true
+//	}
+//	return nil, false
+//}
+
+//func DepositPay(userId int, ip string) (map[string]interface{}, bool) {
+//	if userId <= 0 {
+//		return nil, false
+//	}
+//	totalFee := var_const.Deposit
+//
+//	openId, err := auth_service.GetUserOpenId(userId)
+//	if err != nil || openId == "" {
+//		return nil, false
+//	}
+//
+//	payOrderId := GeneratePayOrderId()
+//	desc := "押金"
+//	tradeType := "JSAPI"
+//
+//	var payReq PayOrderReq
+//	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+//	payReq.Body = desc
+//	payReq.MchId = var_const.WXMchID
+//	payReq.NonceStr = GenerateNonceStr()
+//	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/taker/depositnotify"
+//	payReq.OpenId = openId
+//	payReq.TradeType = tradeType
+//	payReq.SpbillCreateIp = ip
+//	payReq.TotalFee = totalFee
+//	payReq.OutTradeNo = payOrderId
+//
+//	var reqMap = make(map[string]interface{}, 0)
+//	reqMap["appid"] = payReq.AppId                      //微信小程序appid
+//	reqMap["body"] = payReq.Body                        //商品描述
+//	reqMap["mch_id"] = payReq.MchId                     //商户号
+//	reqMap["nonce_str"] = payReq.NonceStr               //随机数
+//	reqMap["notify_url"] = payReq.NotifyUrl             //通知地址
+//	reqMap["out_trade_no"] = payReq.OutTradeNo          //订单号
+//	reqMap["openid"] = payReq.OpenId                    //openid
+//	reqMap["spbill_create_ip"] = payReq.SpbillCreateIp  //用户端ip   //订单生成的机器 IP
+//	reqMap["total_fee"] = strconv.Itoa(payReq.TotalFee) //订单总金额，单位为分
+//	reqMap["trade_type"] = payReq.TradeType             //trade_type=JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
+//	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+//
+//	// 调用支付统一下单API
+//	bytesReq, err := xml.Marshal(payReq)
+//	if err != nil {
+//		return nil, false
+//	}
+//	strReq := string(bytesReq)
+//	//wxpay的unifiedorder接口需要http body中xmldoc的根节点是<xml></xml>这种，所以这里需要replace一下
+//	strReq = strings.Replace(strReq, "PayOrderReq", "xml", -1)
+//	bytesReq = []byte(strReq)
+//
+//	req, err2 := http.NewRequest("POST", "https://api.mch.weixin.qq.com/pay/unifiedorder", strings.NewReader(string(bytesReq)))
+//	if err2 != nil {
+//		return nil, false
+//	}
+//	req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+//	client := &http.Client{}
+//	resp, _ := client.Do(req)
+//	defer resp.Body.Close()
+//
+//	body2, err3 := ioutil.ReadAll(resp.Body)
+//	if err3 != nil {
+//		return nil, false
+//	}
+//	var resp1 WXPayResp
+//	err = xml.Unmarshal(body2, &resp1)
+//	if err != nil {
+//		return nil, false
+//	}
+//
+//	// 返回预付单信息
+//	if strings.ToUpper(resp1.ReturnCode) == "SUCCESS" && strings.ToUpper(resp1.ResultCode) == "SUCCESS" {
+//		// 再次签名
+//		var resMap = make(map[string]interface{}, 0)
+//		resMap["appId"] = resp1.AppId
+//		resMap["nonceStr"] = resp1.NonceStr                            //商品描述
+//		resMap["package"] = "prepay_id=" + resp1.PrepayId              //商户号
+//		resMap["signType"] = "MD5"                                     //签名类型
+//		resMap["timeStamp"] = strconv.FormatInt(time.Now().Unix(), 10) //当前时间戳
+//
+//		resMap["paySign"] = WxPayCalcSign(resMap, var_const.WXMchKey)
+//		//保存支付订单 TODO
+//		dbInfo := models.User{
+//			UserId: userId,
+//		}
+//		var m = make(map[string]interface{})
+//		m["deposit_trade_no"] = payOrderId
+//		m["deposit_time"] = int(time.Now().Unix())
+//		if !dbInfo.Updates(m) {
+//			log, _ := json.Marshal(m)
+//			logging.Error("DepositPay:failed-" + string(log))
+//			return nil, false
+//		}
+//		return resMap, true
+//	}
+//	return nil, false
+//}
+func TakerPay(userId int, orderId int) int {
+	totalFee := GetOrderParam(orderId, "margin")
+	if !auth_service.RemoveUserBalance(userId, totalFee, "接单交保证金") {
+		return 1
 	}
-
-	openId, err := auth_service.GetUserOpenId(userId)
-	if err != nil || openId == "" {
-		return nil, false
+	if !auth_service.AddUserMargin(userId, totalFee, "成功支付保证金") {
+		return 3
 	}
-
-	payOrderId := GeneratePayOrderId()
-	desc := "费用说明"
-	tradeType := "JSAPI"
-
-	var payReq PayOrderReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.Body = desc
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/notify"
-	payReq.OpenId = openId
-	payReq.TradeType = tradeType
-	payReq.SpbillCreateIp = ip
-	payReq.TotalFee = totalFee
-	payReq.OutTradeNo = payOrderId
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId                      //微信小程序appid
-	reqMap["body"] = payReq.Body                        //商品描述
-	reqMap["mch_id"] = payReq.MchId                     //商户号
-	reqMap["nonce_str"] = payReq.NonceStr               //随机数
-	reqMap["notify_url"] = payReq.NotifyUrl             //通知地址
-	reqMap["out_trade_no"] = payReq.OutTradeNo          //订单号
-	reqMap["openid"] = payReq.OpenId                    //openid
-	reqMap["spbill_create_ip"] = payReq.SpbillCreateIp  //用户端ip   //订单生成的机器 IP
-	reqMap["total_fee"] = strconv.Itoa(payReq.TotalFee) //订单总金额，单位为分
-	reqMap["trade_type"] = payReq.TradeType             //trade_type=JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return nil, false
+	dbInfo := models.Order{
+		OrderId: orderId,
 	}
-	strReq := string(bytesReq)
-	//wxpay的unifiedorder接口需要http body中xmldoc的根节点是<xml></xml>这种，所以这里需要replace一下
-	strReq = strings.Replace(strReq, "PayOrderReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	req, err2 := http.NewRequest("POST", "https://api.mch.weixin.qq.com/pay/unifiedorder", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return nil, false
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusTakerPaid
+	m["taker_user_id"] = userId
+	m["taker_nick_name"], _ = auth_service.GetUserNickName(userId)
+	m["upd_time"] = int(time.Now().Unix())
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("TakerPay:failed-" + string(log))
+		return 2
 	}
-	req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	client := &http.Client{}
-	resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return nil, false
-	}
-	var resp1 WXPayResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return nil, false
-	}
-
-	// 返回预付单信息
-	if strings.ToUpper(resp1.ReturnCode) == "SUCCESS" && strings.ToUpper(resp1.ResultCode) == "SUCCESS" {
-		// 再次签名
-		var resMap = make(map[string]interface{}, 0)
-		resMap["appId"] = resp1.AppId
-		resMap["nonceStr"] = resp1.NonceStr                            //商品描述
-		resMap["package"] = "prepay_id=" + resp1.PrepayId              //商户号
-		resMap["signType"] = "MD5"                                     //签名类型
-		resMap["timeStamp"] = strconv.FormatInt(time.Now().Unix(), 10) //当前时间戳
-
-		resMap["paySign"] = WxPayCalcSign(resMap, var_const.WXMchKey)
-		//保存支付订单 TODO
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["trade_no"] = payOrderId
-		m["status"] = var_const.OrderStatusWaitPay
-		m["pay_amount"] = totalFee
-		m["pay_desc"] = desc
-		m["pay_ip"] = ip
-		m["trade_type"] = tradeType
-		m["upd_time"] = int(time.Now().Unix())
-		if !dbInfo.Updates(m) {
-			log, _ := json.Marshal(m)
-			logging.Error("Pay:failed-" + string(log))
-			return nil, false
-		}
-		return resMap, true
-	}
-	return nil, false
-}
-
-func DepositPay(userId int, ip string) (map[string]interface{}, bool) {
-	if userId <= 0 {
-		return nil, false
-	}
-	totalFee := var_const.Deposit
-
-	openId, err := auth_service.GetUserOpenId(userId)
-	if err != nil || openId == "" {
-		return nil, false
-	}
-
-	payOrderId := GeneratePayOrderId()
-	desc := "押金"
-	tradeType := "JSAPI"
-
-	var payReq PayOrderReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.Body = desc
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/taker/depositnotify"
-	payReq.OpenId = openId
-	payReq.TradeType = tradeType
-	payReq.SpbillCreateIp = ip
-	payReq.TotalFee = totalFee
-	payReq.OutTradeNo = payOrderId
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId                      //微信小程序appid
-	reqMap["body"] = payReq.Body                        //商品描述
-	reqMap["mch_id"] = payReq.MchId                     //商户号
-	reqMap["nonce_str"] = payReq.NonceStr               //随机数
-	reqMap["notify_url"] = payReq.NotifyUrl             //通知地址
-	reqMap["out_trade_no"] = payReq.OutTradeNo          //订单号
-	reqMap["openid"] = payReq.OpenId                    //openid
-	reqMap["spbill_create_ip"] = payReq.SpbillCreateIp  //用户端ip   //订单生成的机器 IP
-	reqMap["total_fee"] = strconv.Itoa(payReq.TotalFee) //订单总金额，单位为分
-	reqMap["trade_type"] = payReq.TradeType             //trade_type=JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return nil, false
-	}
-	strReq := string(bytesReq)
-	//wxpay的unifiedorder接口需要http body中xmldoc的根节点是<xml></xml>这种，所以这里需要replace一下
-	strReq = strings.Replace(strReq, "PayOrderReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	req, err2 := http.NewRequest("POST", "https://api.mch.weixin.qq.com/pay/unifiedorder", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return nil, false
-	}
-	req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	client := &http.Client{}
-	resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return nil, false
-	}
-	var resp1 WXPayResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return nil, false
-	}
-
-	// 返回预付单信息
-	if strings.ToUpper(resp1.ReturnCode) == "SUCCESS" && strings.ToUpper(resp1.ResultCode) == "SUCCESS" {
-		// 再次签名
-		var resMap = make(map[string]interface{}, 0)
-		resMap["appId"] = resp1.AppId
-		resMap["nonceStr"] = resp1.NonceStr                            //商品描述
-		resMap["package"] = "prepay_id=" + resp1.PrepayId              //商户号
-		resMap["signType"] = "MD5"                                     //签名类型
-		resMap["timeStamp"] = strconv.FormatInt(time.Now().Unix(), 10) //当前时间戳
-
-		resMap["paySign"] = WxPayCalcSign(resMap, var_const.WXMchKey)
-		//保存支付订单 TODO
-		dbInfo := models.User{
-			UserId: userId,
-		}
-		var m = make(map[string]interface{})
-		m["deposit_trade_no"] = payOrderId
-		m["deposit_time"] = int(time.Now().Unix())
-		if !dbInfo.Updates(m) {
-			log, _ := json.Marshal(m)
-			logging.Error("DepositPay:failed-" + string(log))
-			return nil, false
-		}
-		return resMap, true
-	}
-	return nil, false
-}
-func TakerPay(userId int, orderId int, ip string) (map[string]interface{}, bool) {
-	totalFee, err := GetTakerOrderPrice(orderId)
-	if err != nil || totalFee == 0 {
-		return nil, false
-	}
-
-	openId, err := auth_service.GetUserOpenId(userId)
-	if err != nil || openId == "" {
-		return nil, false
-	}
-
-	payOrderId := GeneratePayOrderId()
-	desc := "保证金"
-	tradeType := "JSAPI"
-
-	var payReq PayOrderReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.Body = desc
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/taker/notify"
-	payReq.OpenId = openId
-	payReq.TradeType = tradeType
-	payReq.SpbillCreateIp = ip
-	payReq.TotalFee = totalFee
-	payReq.OutTradeNo = payOrderId
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId                      //微信小程序appid
-	reqMap["body"] = payReq.Body                        //商品描述
-	reqMap["mch_id"] = payReq.MchId                     //商户号
-	reqMap["nonce_str"] = payReq.NonceStr               //随机数
-	reqMap["notify_url"] = payReq.NotifyUrl             //通知地址
-	reqMap["out_trade_no"] = payReq.OutTradeNo          //订单号
-	reqMap["openid"] = payReq.OpenId                    //openid
-	reqMap["spbill_create_ip"] = payReq.SpbillCreateIp  //用户端ip   //订单生成的机器 IP
-	reqMap["total_fee"] = strconv.Itoa(payReq.TotalFee) //订单总金额，单位为分
-	reqMap["trade_type"] = payReq.TradeType             //trade_type=JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return nil, false
-	}
-	strReq := string(bytesReq)
-	//wxpay的unifiedorder接口需要http body中xmldoc的根节点是<xml></xml>这种，所以这里需要replace一下
-	strReq = strings.Replace(strReq, "PayOrderReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	req, err2 := http.NewRequest("POST", "https://api.mch.weixin.qq.com/pay/unifiedorder", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return nil, false
-	}
-	req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	client := &http.Client{}
-	resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return nil, false
-	}
-	var resp1 WXPayResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return nil, false
-	}
-
-	// 返回预付单信息
-	if strings.ToUpper(resp1.ReturnCode) == "SUCCESS" && strings.ToUpper(resp1.ResultCode) == "SUCCESS" {
-		// 再次签名
-		var resMap = make(map[string]interface{}, 0)
-		resMap["appId"] = resp1.AppId
-		resMap["nonceStr"] = resp1.NonceStr                            //商品描述
-		resMap["package"] = "prepay_id=" + resp1.PrepayId              //商户号
-		resMap["signType"] = "MD5"                                     //签名类型
-		resMap["timeStamp"] = strconv.FormatInt(time.Now().Unix(), 10) //当前时间戳
-
-		resMap["paySign"] = WxPayCalcSign(resMap, var_const.WXMchKey)
-		//保存支付订单 TODO
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["taker_trade_no"] = payOrderId
-		m["status"] = var_const.OrderStatusTakerWaitPay
-		m["taker_pay_amount"] = totalFee
-		m["taker_pay_desc"] = desc
-		m["taker_user_id"] = userId
-		m["taker_nick_name"], _ = auth_service.GetUserNickName(userId)
-		m["taker_pay_ip"] = ip
-		m["taker_trade_type"] = tradeType
-		m["upd_time"] = int(time.Now().Unix())
-		if !dbInfo.Updates(m) {
-			log, _ := json.Marshal(m)
-			logging.Error("TakerPay:failed-" + string(log))
-			return nil, false
-		}
-		return resMap, true
-	}
-	return nil, false
+	return 0
 }
 
 type RefundReq struct {
@@ -697,88 +619,107 @@ type RefundNotify struct {
 	Transaction_id string `xml:"transaction_id"`
 }
 
-func Refund(orderId int) bool {
-	totalFee, err := GetOrderTakerPayAmount(orderId)
-	if err != nil || totalFee == 0 {
-		return false
+func Refund(orderId int) int {
+	totalFee := GetOrderParam(orderId, "margin")
+	TakerId := GetOrderParam(orderId, "taker_user_id")
+	if !auth_service.RemoveUserMargin(TakerId, totalFee, "订单完成，取消保证金") {
+		return 3
 	}
-	outTradeNo, err := GetOrderTakerTradeNo(orderId)
-	if err != nil {
-		return false
+	dbInfo := models.Order{
+		OrderId: orderId,
 	}
-	payOrderId := GeneratePayOrderId()
-
-	var payReq RefundReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.OutTradeNo = outTradeNo
-	payReq.OutRefundNo = payOrderId
-	payReq.TotalFee = totalFee
-	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/taker/refundnotify"
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId        //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId       //商户号
-	reqMap["nonce_str"] = payReq.NonceStr //随机数
-	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo
-	reqMap["total_fee"] = payReq.TotalFee
-	reqMap["refund_fee"] = payReq.RefundFee
-	reqMap["notify_url"] = payReq.NotifyUrl
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return false
+	var m = make(map[string]interface{})
+	m["upd_time"] = int(time.Now().Unix())
+	m["status"] = var_const.OrderStatusRefundFinished
+	logs, _ := json.Marshal(m)
+	logging.Info("refund: begin order_id-" + strconv.Itoa(orderId) + "," + string(logs))
+	if !dbInfo.Updates(m) {
+		logging.Error("refund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(logs))
+		return 2
 	}
-	strReq := string(bytesReq)
 
-	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return false
-	}
-	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	//client := &http.Client{}
-	//resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return false
-	}
-	var resp1 RefundResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return false
-	}
-	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["refund_trade_no"] = payReq.OutRefundNo
-		m["refund_amount"] = payReq.RefundFee
-		m["upd_time"] = int(time.Now().Unix())
-		log, _ := json.Marshal(m)
-		logging.Info("refund: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
-		if !dbInfo.Updates(m) {
-			logging.Error("refund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
-			return false
-		}
-		db2Info := models.Order{
-			RefundTradeNo: payReq.OutRefundNo,
-		}
-		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
-
-		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "订单完成，取消保证金")
-	}
-	return true
+	return 0
+	//totalFee, err := GetOrderTakerPayAmount(orderId)
+	//if err != nil || totalFee == 0 {
+	//	return false
+	//}
+	//outTradeNo, err := GetOrderTakerTradeNo(orderId)
+	//if err != nil {
+	//	return false
+	//}
+	//payOrderId := GeneratePayOrderId()
+	//
+	//var payReq RefundReq
+	//payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+	//payReq.MchId = var_const.WXMchID
+	//payReq.NonceStr = GenerateNonceStr()
+	//payReq.OutTradeNo = outTradeNo
+	//payReq.OutRefundNo = payOrderId
+	//payReq.TotalFee = totalFee
+	//payReq.RefundFee = totalFee
+	//payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/taker/refundnotify"
+	//
+	//var reqMap = make(map[string]interface{}, 0)
+	//reqMap["appid"] = payReq.AppId        //微信小程序appid
+	//reqMap["mch_id"] = payReq.MchId       //商户号
+	//reqMap["nonce_str"] = payReq.NonceStr //随机数
+	//reqMap["out_refund_no"] = payReq.OutRefundNo
+	//reqMap["out_trade_no"] = payReq.OutTradeNo
+	//reqMap["total_fee"] = payReq.TotalFee
+	//reqMap["refund_fee"] = payReq.RefundFee
+	//reqMap["notify_url"] = payReq.NotifyUrl
+	//payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+	//
+	//// 调用支付统一下单API
+	//bytesReq, err := xml.Marshal(payReq)
+	//if err != nil {
+	//	return false
+	//}
+	//strReq := string(bytesReq)
+	//
+	//strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+	//bytesReq = []byte(strReq)
+	//
+	//resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	//if err2 != nil {
+	//	return false
+	//}
+	////req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+	////client := &http.Client{}
+	////resp, _ := client.Do(req)
+	//defer resp.Body.Close()
+	//
+	//body2, err3 := ioutil.ReadAll(resp.Body)
+	//if err3 != nil {
+	//	return false
+	//}
+	//var resp1 RefundResp
+	//err = xml.Unmarshal(body2, &resp1)
+	//if err != nil {
+	//	return false
+	//}
+	//if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+	//	dbInfo := models.Order{
+	//		OrderId: orderId,
+	//	}
+	//	var m = make(map[string]interface{})
+	//	m["refund_trade_no"] = payReq.OutRefundNo
+	//	m["refund_amount"] = payReq.RefundFee
+	//	m["upd_time"] = int(time.Now().Unix())
+	//	log, _ := json.Marshal(m)
+	//	logging.Info("refund: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
+	//	if !dbInfo.Updates(m) {
+	//		logging.Error("refund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
+	//		return false
+	//	}
+	//	db2Info := models.Order{
+	//		RefundTradeNo: payReq.OutRefundNo,
+	//	}
+	//	_, _ = db2Info.GetOrderInfoByRefundTradeNo()
+	//
+	//	return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "订单完成，取消保证金")
+	//}
+	//return true
 }
 
 func KeyHttpsPost(url string, contentType string, body io.Reader) (*http.Response, error) {
@@ -874,384 +815,397 @@ func GetUserOrderList(userId int, orders *[]models.Order, index int, count int) 
 }
 
 func OrderCancelRefund(orderId int) bool {
-	totalFee := GetOrderParam(orderId, "real_price")
-	outTradeNo := GetOrderParamString(orderId, "trade_no")
-	payOrderId := GeneratePayOrderId()
-
-	var payReq RefundReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.OutTradeNo = outTradeNo
-	payReq.OutRefundNo = payOrderId
-	payReq.TotalFee = totalFee
-	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/refundnotify"
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId        //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId       //商户号
-	reqMap["nonce_str"] = payReq.NonceStr //随机数
-	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo
-	reqMap["total_fee"] = payReq.TotalFee
-	reqMap["refund_fee"] = payReq.RefundFee
-	reqMap["notify_url"] = payReq.NotifyUrl
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusCancel
+	m["upd_time"] = int(time.Now().Unix())
+	mlog, _ := json.Marshal(m)
+	logging.Info("OrderCancelRefund: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+	if !dbInfo.Updates(m) {
+		logging.Error("OrderCancelRefund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
 		return false
 	}
-	strReq := string(bytesReq)
 
-	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return false
-	}
-	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	//client := &http.Client{}
-	//resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return false
-	}
-	var resp1 RefundResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return false
-	}
-	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["pay_refund_trade_no"] = payReq.OutRefundNo
-		m["pay_refund_amount"] = payReq.RefundFee
-		m["pay_refund_time"] = int(time.Now().Unix())
-		mlog, _ := json.Marshal(m)
-		logging.Info("OrderCancelRefund: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
-		if !dbInfo.Updates(m) {
-			logging.Error("OrderCancelRefund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
-			return false
-		}
-		return true
-	}
-	return false
-}
-
-func OrderUndoRefundUser(orderId int) bool {
-	totalFee := GetOrderParam(orderId, "real_price")
-	outTradeNo := GetOrderParamString(orderId, "trade_no")
-	payOrderId := GeneratePayOrderId()
-
-	var payReq RefundReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.OutTradeNo = outTradeNo
-	payReq.OutRefundNo = payOrderId
-	payReq.TotalFee = totalFee
-	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/undo/userrefundnotify"
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId        //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId       //商户号
-	reqMap["nonce_str"] = payReq.NonceStr //随机数
-	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo
-	reqMap["total_fee"] = payReq.TotalFee
-	reqMap["refund_fee"] = payReq.RefundFee
-	reqMap["notify_url"] = payReq.NotifyUrl
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return false
-	}
-	strReq := string(bytesReq)
-
-	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return false
-	}
-	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	//client := &http.Client{}
-	//resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return false
-	}
-	var resp1 RefundResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return false
-	}
-	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["pay_refund_trade_no"] = payReq.OutRefundNo
-		m["pay_refund_amount"] = payReq.RefundFee
-		m["pay_refund_time"] = 0
-		mlog, _ := json.Marshal(m)
-		logging.Info("OrderUndoRefundUser: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
-		if !dbInfo.Updates(m) {
-			logging.Error("OrderUndoRefundUser: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
-			return false
-		}
-		return true
-	}
-	return false
-}
-func OrderUndoRefundTaker(orderId int) bool {
-	totalFee, err := GetOrderTakerPayAmount(orderId)
-	if err != nil || totalFee == 0 {
-		return false
-	}
-	outTradeNo, err := GetOrderTakerTradeNo(orderId)
-	if err != nil {
-		return false
-	}
-	payOrderId := GeneratePayOrderId()
-
-	var payReq RefundReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.OutTradeNo = outTradeNo
-	payReq.OutRefundNo = payOrderId
-	payReq.TotalFee = totalFee
-	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/undo/takerrefundnotify"
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId        //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId       //商户号
-	reqMap["nonce_str"] = payReq.NonceStr //随机数
-	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo
-	reqMap["total_fee"] = payReq.TotalFee
-	reqMap["refund_fee"] = payReq.RefundFee
-	reqMap["notify_url"] = payReq.NotifyUrl
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return false
-	}
-	strReq := string(bytesReq)
-
-	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return false
-	}
-	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	//client := &http.Client{}
-	//resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return false
-	}
-	var resp1 RefundResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return false
-	}
-	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["refund_trade_no"] = payReq.OutRefundNo
-		m["refund_amount"] = payReq.RefundFee
-		m["upd_time"] = 0
-		log, _ := json.Marshal(m)
-		logging.Info("OrderUndoRefundTaker: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
-		if !dbInfo.Updates(m) {
-			logging.Error("OrderUndoRefundTaker: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
-			return false
-		}
-		db2Info := models.Order{
-			RefundTradeNo: payReq.OutRefundNo,
-		}
-		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
-
-		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "用户撤销订单完成，取消保证金")
-	}
 	return true
+	//outTradeNo := GetOrderParamString(orderId, "trade_no")
+	//payOrderId := GeneratePayOrderId()
+	//
+	//var payReq RefundReq
+	//payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+	//payReq.MchId = var_const.WXMchID
+	//payReq.NonceStr = GenerateNonceStr()
+	//payReq.OutTradeNo = outTradeNo
+	//payReq.OutRefundNo = payOrderId
+	//payReq.TotalFee = totalFee
+	//payReq.RefundFee = totalFee
+	//payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/refundnotify"
+	//
+	//var reqMap = make(map[string]interface{}, 0)
+	//reqMap["appid"] = payReq.AppId        //微信小程序appid
+	//reqMap["mch_id"] = payReq.MchId       //商户号
+	//reqMap["nonce_str"] = payReq.NonceStr //随机数
+	//reqMap["out_refund_no"] = payReq.OutRefundNo
+	//reqMap["out_trade_no"] = payReq.OutTradeNo
+	//reqMap["total_fee"] = payReq.TotalFee
+	//reqMap["refund_fee"] = payReq.RefundFee
+	//reqMap["notify_url"] = payReq.NotifyUrl
+	//payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+	//
+	//// 调用支付统一下单API
+	//bytesReq, err := xml.Marshal(payReq)
+	//if err != nil {
+	//	return false
+	//}
+	//strReq := string(bytesReq)
+	//
+	//strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+	//bytesReq = []byte(strReq)
+	//
+	//resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+	//if err2 != nil {
+	//	return false
+	//}
+	////req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+	////client := &http.Client{}
+	////resp, _ := client.Do(req)
+	//defer resp.Body.Close()
+	//
+	//body2, err3 := ioutil.ReadAll(resp.Body)
+	//if err3 != nil {
+	//	return false
+	//}
+	//var resp1 RefundResp
+	//err = xml.Unmarshal(body2, &resp1)
+	//if err != nil {
+	//	return false
+	//}
+	//if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+	//	dbInfo := models.Order{
+	//		OrderId: orderId,
+	//	}
+	//	var m = make(map[string]interface{})
+	//	m["pay_refund_trade_no"] = payReq.OutRefundNo
+	//	m["pay_refund_amount"] = payReq.RefundFee
+	//	m["pay_refund_time"] = int(time.Now().Unix())
+	//	mlog, _ := json.Marshal(m)
+	//	logging.Info("OrderCancelRefund: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+	//	if !dbInfo.Updates(m) {
+	//		logging.Error("OrderCancelRefund: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+	//		return false
+	//	}
+	//	return true
+	//}
+	//return false
 }
 
-func AdminRefundUser(orderId int, money int) bool {
-	totalFee := money
-	outTradeNo := GetOrderParamString(orderId, "trade_no")
-	payOrderId := GeneratePayOrderId()
+//func OrderUndoRefundUser(orderId int) bool {
+//	totalFee := GetOrderParam(orderId, "real_price")
+//	outTradeNo := GetOrderParamString(orderId, "trade_no")
+//	payOrderId := GeneratePayOrderId()
+//
+//	var payReq RefundReq
+//	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+//	payReq.MchId = var_const.WXMchID
+//	payReq.NonceStr = GenerateNonceStr()
+//	payReq.OutTradeNo = outTradeNo
+//	payReq.OutRefundNo = payOrderId
+//	payReq.TotalFee = totalFee
+//	payReq.RefundFee = totalFee
+//	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/undo/userrefundnotify"
+//
+//	var reqMap = make(map[string]interface{}, 0)
+//	reqMap["appid"] = payReq.AppId        //微信小程序appid
+//	reqMap["mch_id"] = payReq.MchId       //商户号
+//	reqMap["nonce_str"] = payReq.NonceStr //随机数
+//	reqMap["out_refund_no"] = payReq.OutRefundNo
+//	reqMap["out_trade_no"] = payReq.OutTradeNo
+//	reqMap["total_fee"] = payReq.TotalFee
+//	reqMap["refund_fee"] = payReq.RefundFee
+//	reqMap["notify_url"] = payReq.NotifyUrl
+//	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+//
+//	// 调用支付统一下单API
+//	bytesReq, err := xml.Marshal(payReq)
+//	if err != nil {
+//		return false
+//	}
+//	strReq := string(bytesReq)
+//
+//	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+//	bytesReq = []byte(strReq)
+//
+//	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+//	if err2 != nil {
+//		return false
+//	}
+//	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+//	//client := &http.Client{}
+//	//resp, _ := client.Do(req)
+//	defer resp.Body.Close()
+//
+//	body2, err3 := ioutil.ReadAll(resp.Body)
+//	if err3 != nil {
+//		return false
+//	}
+//	var resp1 RefundResp
+//	err = xml.Unmarshal(body2, &resp1)
+//	if err != nil {
+//		return false
+//	}
+//	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+//		dbInfo := models.Order{
+//			OrderId: orderId,
+//		}
+//		var m = make(map[string]interface{})
+//		m["pay_refund_trade_no"] = payReq.OutRefundNo
+//		m["pay_refund_amount"] = payReq.RefundFee
+//		m["pay_refund_time"] = 0
+//		mlog, _ := json.Marshal(m)
+//		logging.Info("OrderUndoRefundUser: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+//		if !dbInfo.Updates(m) {
+//			logging.Error("OrderUndoRefundUser: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+//			return false
+//		}
+//		return true
+//	}
+//	return false
+//}
+//func OrderUndoRefundTaker(orderId int) bool {
+//	totalFee, err := GetOrderTakerPayAmount(orderId)
+//	if err != nil || totalFee == 0 {
+//		return false
+//	}
+//	outTradeNo, err := GetOrderTakerTradeNo(orderId)
+//	if err != nil {
+//		return false
+//	}
+//	payOrderId := GeneratePayOrderId()
+//
+//	var payReq RefundReq
+//	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+//	payReq.MchId = var_const.WXMchID
+//	payReq.NonceStr = GenerateNonceStr()
+//	payReq.OutTradeNo = outTradeNo
+//	payReq.OutRefundNo = payOrderId
+//	payReq.TotalFee = totalFee
+//	payReq.RefundFee = totalFee
+//	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/undo/takerrefundnotify"
+//
+//	var reqMap = make(map[string]interface{}, 0)
+//	reqMap["appid"] = payReq.AppId        //微信小程序appid
+//	reqMap["mch_id"] = payReq.MchId       //商户号
+//	reqMap["nonce_str"] = payReq.NonceStr //随机数
+//	reqMap["out_refund_no"] = payReq.OutRefundNo
+//	reqMap["out_trade_no"] = payReq.OutTradeNo
+//	reqMap["total_fee"] = payReq.TotalFee
+//	reqMap["refund_fee"] = payReq.RefundFee
+//	reqMap["notify_url"] = payReq.NotifyUrl
+//	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+//
+//	// 调用支付统一下单API
+//	bytesReq, err := xml.Marshal(payReq)
+//	if err != nil {
+//		return false
+//	}
+//	strReq := string(bytesReq)
+//
+//	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+//	bytesReq = []byte(strReq)
+//
+//	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+//	if err2 != nil {
+//		return false
+//	}
+//	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+//	//client := &http.Client{}
+//	//resp, _ := client.Do(req)
+//	defer resp.Body.Close()
+//
+//	body2, err3 := ioutil.ReadAll(resp.Body)
+//	if err3 != nil {
+//		return false
+//	}
+//	var resp1 RefundResp
+//	err = xml.Unmarshal(body2, &resp1)
+//	if err != nil {
+//		return false
+//	}
+//	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+//		dbInfo := models.Order{
+//			OrderId: orderId,
+//		}
+//		var m = make(map[string]interface{})
+//		m["refund_trade_no"] = payReq.OutRefundNo
+//		m["refund_amount"] = payReq.RefundFee
+//		m["upd_time"] = 0
+//		log, _ := json.Marshal(m)
+//		logging.Info("OrderUndoRefundTaker: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
+//		if !dbInfo.Updates(m) {
+//			logging.Error("OrderUndoRefundTaker: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
+//			return false
+//		}
+//		db2Info := models.Order{
+//			RefundTradeNo: payReq.OutRefundNo,
+//		}
+//		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
+//
+//		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "用户撤销订单完成，取消保证金")
+//	}
+//	return true
+//}
 
-	var payReq RefundReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.OutTradeNo = outTradeNo
-	payReq.OutRefundNo = payOrderId
-	payReq.TotalFee = totalFee
-	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/admin/userrefundnotify"
+//func AdminRefundUser(orderId int, money int) bool {
+//	totalFee := money
+//	outTradeNo := GetOrderParamString(orderId, "trade_no")
+//	payOrderId := GeneratePayOrderId()
+//
+//	var payReq RefundReq
+//	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+//	payReq.MchId = var_const.WXMchID
+//	payReq.NonceStr = GenerateNonceStr()
+//	payReq.OutTradeNo = outTradeNo
+//	payReq.OutRefundNo = payOrderId
+//	payReq.TotalFee = totalFee
+//	payReq.RefundFee = totalFee
+//	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/admin/userrefundnotify"
+//
+//	var reqMap = make(map[string]interface{}, 0)
+//	reqMap["appid"] = payReq.AppId        //微信小程序appid
+//	reqMap["mch_id"] = payReq.MchId       //商户号
+//	reqMap["nonce_str"] = payReq.NonceStr //随机数
+//	reqMap["out_refund_no"] = payReq.OutRefundNo
+//	reqMap["out_trade_no"] = payReq.OutTradeNo
+//	reqMap["total_fee"] = payReq.TotalFee
+//	reqMap["refund_fee"] = payReq.RefundFee
+//	reqMap["notify_url"] = payReq.NotifyUrl
+//	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+//
+//	// 调用支付统一下单API
+//	bytesReq, err := xml.Marshal(payReq)
+//	if err != nil {
+//		return false
+//	}
+//	strReq := string(bytesReq)
+//
+//	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+//	bytesReq = []byte(strReq)
+//
+//	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+//	if err2 != nil {
+//		return false
+//	}
+//	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+//	//client := &http.Client{}
+//	//resp, _ := client.Do(req)
+//	defer resp.Body.Close()
+//
+//	body2, err3 := ioutil.ReadAll(resp.Body)
+//	if err3 != nil {
+//		return false
+//	}
+//	var resp1 RefundResp
+//	err = xml.Unmarshal(body2, &resp1)
+//	if err != nil {
+//		return false
+//	}
+//	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+//		dbInfo := models.Order{
+//			OrderId: orderId,
+//		}
+//		var m = make(map[string]interface{})
+//		m["pay_refund_trade_no"] = payReq.OutRefundNo
+//		m["pay_refund_amount"] = payReq.RefundFee
+//		m["pay_refund_time"] = 0
+//		mlog, _ := json.Marshal(m)
+//		logging.Info("AdminRefundUser: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+//		if !dbInfo.Updates(m) {
+//			logging.Error("AdminRefundUser: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
+//			return false
+//		}
+//		return true
+//	}
+//	return false
+//}
 
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId        //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId       //商户号
-	reqMap["nonce_str"] = payReq.NonceStr //随机数
-	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo
-	reqMap["total_fee"] = payReq.TotalFee
-	reqMap["refund_fee"] = payReq.RefundFee
-	reqMap["notify_url"] = payReq.NotifyUrl
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return false
-	}
-	strReq := string(bytesReq)
-
-	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return false
-	}
-	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	//client := &http.Client{}
-	//resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return false
-	}
-	var resp1 RefundResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return false
-	}
-	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["pay_refund_trade_no"] = payReq.OutRefundNo
-		m["pay_refund_amount"] = payReq.RefundFee
-		m["pay_refund_time"] = 0
-		mlog, _ := json.Marshal(m)
-		logging.Info("AdminRefundUser: begin order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
-		if !dbInfo.Updates(m) {
-			logging.Error("AdminRefundUser: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(mlog))
-			return false
-		}
-		return true
-	}
-	return false
-}
-
-func AdminRefundTaker(orderId int, money int) bool {
-	totalFee := money
-	outTradeNo, err := GetOrderTakerTradeNo(orderId)
-	if err != nil {
-		return false
-	}
-	payOrderId := GeneratePayOrderId()
-
-	var payReq RefundReq
-	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
-	payReq.MchId = var_const.WXMchID
-	payReq.NonceStr = GenerateNonceStr()
-	payReq.OutTradeNo = outTradeNo
-	payReq.OutRefundNo = payOrderId
-	payReq.TotalFee = totalFee
-	payReq.RefundFee = totalFee
-	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/admin/takerrefundnotify"
-
-	var reqMap = make(map[string]interface{}, 0)
-	reqMap["appid"] = payReq.AppId        //微信小程序appid
-	reqMap["mch_id"] = payReq.MchId       //商户号
-	reqMap["nonce_str"] = payReq.NonceStr //随机数
-	reqMap["out_refund_no"] = payReq.OutRefundNo
-	reqMap["out_trade_no"] = payReq.OutTradeNo
-	reqMap["total_fee"] = payReq.TotalFee
-	reqMap["refund_fee"] = payReq.RefundFee
-	reqMap["notify_url"] = payReq.NotifyUrl
-	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
-
-	// 调用支付统一下单API
-	bytesReq, err := xml.Marshal(payReq)
-	if err != nil {
-		return false
-	}
-	strReq := string(bytesReq)
-
-	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
-	bytesReq = []byte(strReq)
-
-	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
-	if err2 != nil {
-		return false
-	}
-	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
-	//client := &http.Client{}
-	//resp, _ := client.Do(req)
-	defer resp.Body.Close()
-
-	body2, err3 := ioutil.ReadAll(resp.Body)
-	if err3 != nil {
-		return false
-	}
-	var resp1 RefundResp
-	err = xml.Unmarshal(body2, &resp1)
-	if err != nil {
-		return false
-	}
-	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
-		dbInfo := models.Order{
-			OrderId: orderId,
-		}
-		var m = make(map[string]interface{})
-		m["refund_trade_no"] = payReq.OutRefundNo
-		m["refund_amount"] = payReq.RefundFee
-		m["upd_time"] = 0
-		log, _ := json.Marshal(m)
-		logging.Info("AdminRefundTaker: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
-		if !dbInfo.Updates(m) {
-			logging.Error("AdminRefundTaker: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
-			return false
-		}
-		db2Info := models.Order{
-			RefundTradeNo: payReq.OutRefundNo,
-		}
-		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
-
-		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "客服仲裁完成，取消保证金")
-	}
-	return true
-}
+//func AdminRefundTaker(orderId int, money int) bool {
+//	totalFee := money
+//	outTradeNo, err := GetOrderTakerTradeNo(orderId)
+//	if err != nil {
+//		return false
+//	}
+//	payOrderId := GeneratePayOrderId()
+//
+//	var payReq RefundReq
+//	payReq.AppId = var_const.WXAppID //微信开放平台我们创建出来的app的app id
+//	payReq.MchId = var_const.WXMchID
+//	payReq.NonceStr = GenerateNonceStr()
+//	payReq.OutTradeNo = outTradeNo
+//	payReq.OutRefundNo = payOrderId
+//	payReq.TotalFee = totalFee
+//	payReq.RefundFee = totalFee
+//	payReq.NotifyUrl = "https://www.bafangwangluo.com/pay/order/admin/takerrefundnotify"
+//
+//	var reqMap = make(map[string]interface{}, 0)
+//	reqMap["appid"] = payReq.AppId        //微信小程序appid
+//	reqMap["mch_id"] = payReq.MchId       //商户号
+//	reqMap["nonce_str"] = payReq.NonceStr //随机数
+//	reqMap["out_refund_no"] = payReq.OutRefundNo
+//	reqMap["out_trade_no"] = payReq.OutTradeNo
+//	reqMap["total_fee"] = payReq.TotalFee
+//	reqMap["refund_fee"] = payReq.RefundFee
+//	reqMap["notify_url"] = payReq.NotifyUrl
+//	payReq.Sign = WxPayCalcSign(reqMap, var_const.WXMchKey)
+//
+//	// 调用支付统一下单API
+//	bytesReq, err := xml.Marshal(payReq)
+//	if err != nil {
+//		return false
+//	}
+//	strReq := string(bytesReq)
+//
+//	strReq = strings.Replace(strReq, "RefundReq", "xml", -1)
+//	bytesReq = []byte(strReq)
+//
+//	resp, err2 := KeyHttpsPost("https://api.mch.weixin.qq.com/secapi/pay/refund", "application/xml;charset=utf-8", strings.NewReader(string(bytesReq)))
+//	if err2 != nil {
+//		return false
+//	}
+//	//req.Header.Set("Content-Type", "text/xml;charset=utf-8")
+//	//client := &http.Client{}
+//	//resp, _ := client.Do(req)
+//	defer resp.Body.Close()
+//
+//	body2, err3 := ioutil.ReadAll(resp.Body)
+//	if err3 != nil {
+//		return false
+//	}
+//	var resp1 RefundResp
+//	err = xml.Unmarshal(body2, &resp1)
+//	if err != nil {
+//		return false
+//	}
+//	if resp1.ReturnCode == "SUCCESS" && resp1.ResultCode == "SUCCESS" && resp1.ReturnMsg == "OK" {
+//		dbInfo := models.Order{
+//			OrderId: orderId,
+//		}
+//		var m = make(map[string]interface{})
+//		m["refund_trade_no"] = payReq.OutRefundNo
+//		m["refund_amount"] = payReq.RefundFee
+//		m["upd_time"] = 0
+//		log, _ := json.Marshal(m)
+//		logging.Info("AdminRefundTaker: begin order_id-" + strconv.Itoa(orderId) + "," + string(log))
+//		if !dbInfo.Updates(m) {
+//			logging.Error("AdminRefundTaker: failed-db order_id-" + strconv.Itoa(orderId) + "," + string(log))
+//			return false
+//		}
+//		db2Info := models.Order{
+//			RefundTradeNo: payReq.OutRefundNo,
+//		}
+//		_, _ = db2Info.GetOrderInfoByRefundTradeNo()
+//
+//		return auth_service.RemoveUserMargin(db2Info.TakerUserId, db2Info.TakerPayAmount, "客服仲裁完成，取消保证金")
+//	}
+//	return true
+//}

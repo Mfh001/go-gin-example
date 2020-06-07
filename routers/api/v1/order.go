@@ -64,13 +64,16 @@ func AddOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !order_service.CreateOrder(&form, 0, 0) {
-		appG.Response(http.StatusBadRequest, e.ERROR, nil)
-		return
+	if ok := order_service.CreateOrder(&form, 0, 0); ok > 0 {
+		if ok == 1 {
+			appG.Response(http.StatusBadRequest, e.MONEY_NO_ENOUGH, nil)
+			return
+		} else {
+			appG.Response(http.StatusBadRequest, e.ERROR, nil)
+			return
+		}
 	}
-	data := gin.H{}
-	data["order_id"] = form.OrderId
-	appG.Response(http.StatusOK, e.SUCCESS, data)
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
 
@@ -83,7 +86,53 @@ func AddOrder(c *gin.Context) {
 // @Router /api/v1/order/take [post]
 // @Tags 接单
 func TakeOrder(c *gin.Context) {
+	appG := app.Gin{C: c}
 
+	userId, err := strconv.Atoi(c.PostForm("user_id"))
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !auth_service.ExistUserInfo(userId) || !auth_service.IsUserTypeInstead(userId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if auth_service.GetUserParam(userId, "deposit") <= 0 {
+		appG.Response(http.StatusBadRequest, e.NO_DEPOSIT, nil)
+		return
+	}
+	orderId, err := strconv.Atoi(c.PostForm("order_id"))
+	if err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if !order_service.ExistOrder(orderId) {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+
+	status := order_service.GetOrderParam(orderId, "status")
+	if status != var_const.OrderStatusPaidPay {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+
+	uId := order_service.GetOrderParam(orderId, "user_id")
+	if uId == userId {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+
+	ok := order_service.TakerPay(userId, orderId)
+	if ok == 1 {
+		appG.Response(http.StatusBadRequest, e.MONEY_NO_ENOUGH, nil)
+		return
+	} else if ok == 2 {
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+	return
 }
 
 // @Summary Get 获取订单列表
@@ -552,21 +601,12 @@ func CancelOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	order_service.OrderCancelRefund(orderId)
-	//dbInfo := models.Order{
-	//	OrderId: orderId,
-	//}
-	//var m = make(map[string]interface{})
-	//m["status"] = var_const.OrderStatusTakerFinishedNeedConfirm
-	//m["upd_time"] = int(time.Now().Unix())
-	//logging.Info("FinishOrder: begin order_id-" + strconv.Itoa(orderId))
-	//if !dbInfo.Updates(m) {
-	//	log, _ := json.Marshal(m)
-	//	logging.Error("TakerFinish:failed-" + string(log))
-	//	appG.Response(http.StatusBadRequest, e.ERROR, nil)
-	//	return
-	//}
-	//logging.Info("FinishOrder: end")
+	if order_service.OrderCancelRefund(orderId) {
+		if status == var_const.OrderStatusPaidPay {
+			amount := order_service.GetOrderParam(orderId, "price")
+			auth_service.RemoveUserBalance(userId, amount, "取消订单")
+		}
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
@@ -743,23 +783,27 @@ func UndoOrder(c *gin.Context) {
 	}
 	var m = make(map[string]interface{})
 	if agree == 1 {
-		m["status"] = var_const.OrderStatusUndoRequest
+		m["status"] = var_const.OrderStatusCancel
 	} else {
 		m["status"] = var_const.OrderStatusTakerPaid
 	}
 	m["upd_time"] = int(time.Now().Unix())
-	logging.Info("UndoRequestOrder: begin order_id-" + strconv.Itoa(orderId))
+	logging.Info("UndoOrder: begin order_id-" + strconv.Itoa(orderId))
 	if !dbInfo.Updates(m) {
 		log, _ := json.Marshal(m)
-		logging.Error("UndoRequestOrder:failed-" + string(log))
+		logging.Error("UndoOrder:failed-" + string(log))
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
 	if agree == 1 {
-		order_service.OrderUndoRefundUser(orderId)
-		order_service.OrderUndoRefundTaker(orderId)
+		tId := order_service.GetOrderParam(orderId, "taker_user_id")
+		margin := order_service.GetOrderParam(orderId, "margin")
+		price := order_service.GetOrderParam(orderId, "price")
+		auth_service.RemoveUserMargin(tId, margin, "用户撤销订单完成，取消保证金")
+		auth_service.AddUserBalance(tId, margin, "用户撤销订单完成，返还代练保证金到余额")
+		auth_service.AddUserBalance(userId, price, "用户撤销订单完成，返还到余额")
 	}
-	logging.Info("UndoRequestOrder: end")
+	logging.Info("UndoOrder: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
@@ -873,7 +917,7 @@ func AdjudgeRequestOrder(c *gin.Context) {
 		return
 	}
 	status := order_service.GetOrderParam(orderId, "status")
-	if status != var_const.OrderStatusTakerPaid {
+	if status != var_const.OrderStatusTakerPaid && status != var_const.OrderStatusUndoRequest {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -901,22 +945,28 @@ func AdjudgeRequestOrder(c *gin.Context) {
 // @Summary 客服退回订单的部分金额
 // @Produce  json
 // @Param order_id body int false "order_id"
-// @Param money body int false "money 金额单位是分"
+// @Param user_money body int false "用户的退回金额 金额单位是分"
+// @Param taker_money body int false "代练的退回金额 金额单位是分"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /admin/order/refund/user [post]
 // @Tags 客服
 func AdminRefundPay(c *gin.Context) {
 	var (
-		appG    = app.Gin{C: c}
-		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
-		money   = com.StrTo(c.PostForm("money")).MustInt()
+		appG       = app.Gin{C: c}
+		orderId    = com.StrTo(c.PostForm("order_id")).MustInt()
+		userMoney  = com.StrTo(c.PostForm("user_money")).MustInt()
+		takerMoney = com.StrTo(c.PostForm("taker_money")).MustInt()
 	)
 	if orderId == 0 || !order_service.ExistOrder(orderId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if money <= 0 || money > order_service.GetOrderParam(orderId, "pay_amount") {
+	if userMoney <= 0 || userMoney > order_service.GetOrderParam(orderId, "price") {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+	if takerMoney <= 0 || takerMoney > order_service.GetOrderParam(orderId, "margin") {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
@@ -925,51 +975,27 @@ func AdminRefundPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if order_service.GetOrderParamString(orderId, "pay_refund_trade_no") != "" {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	logging.Info("AdminRefundPay: begin order_id-" + strconv.Itoa(orderId))
-	order_service.AdminRefundUser(orderId, money)
-	logging.Info("AdminRefundPay: end")
-	appG.Response(http.StatusOK, e.SUCCESS, nil)
-	return
-}
 
-// @Summary 客服退回代练的部分保证金
-// @Produce  json
-// @Param order_id body int false "order_id"
-// @Param money body int false "money 金额单位是分"
-// @Success 200 {object} app.Response
-// @Failure 500 {object} app.Response
-// @Router /admin/order/refund/taker [post]
-// @Tags 客服
-func AdminRefundTaker(c *gin.Context) {
-	var (
-		appG    = app.Gin{C: c}
-		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
-		money   = com.StrTo(c.PostForm("money")).MustInt()
-	)
-	if orderId == 0 || !order_service.ExistOrder(orderId) {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	dbInfo := models.Order{
+		OrderId: orderId,
+	}
+	var m = make(map[string]interface{})
+	m["status"] = var_const.OrderStatusCancel
+	m["upd_time"] = int(time.Now().Unix())
+	logging.Info("AdminRefundPay: begin order_id-" + strconv.Itoa(orderId))
+	if !dbInfo.Updates(m) {
+		log, _ := json.Marshal(m)
+		logging.Error("AdminRefundPay:failed-" + string(log))
+		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
-	if money <= 0 || money > order_service.GetOrderParam(orderId, "taker_pay_amount") {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	status := order_service.GetOrderParam(orderId, "status")
-	if status != var_const.OrderStatusAdjudgeRequest {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	if order_service.GetOrderParamString(orderId, "refund_trade_no") != "" {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
-	logging.Info("AdminRefundTaker: begin order_id-" + strconv.Itoa(orderId))
-	order_service.AdminRefundTaker(orderId, money)
-	logging.Info("AdminRefundTaker: end")
+	tId := order_service.GetOrderParam(orderId, "taker_user_id")
+	margin := order_service.GetOrderParam(orderId, "margin")
+	uId := order_service.GetOrderParam(orderId, "user_id")
+	auth_service.RemoveUserMargin(tId, margin, "仲裁订单完成，取消保证金")
+	auth_service.AddUserBalance(tId, takerMoney, "仲裁订单完成，返还代练部分保证金到余额")
+	auth_service.AddUserBalance(uId, userMoney, "仲裁订单完成，返还部分到余额")
+	logging.Info("AdminRefundPay: end")
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
@@ -1128,6 +1154,8 @@ func CancelTakeOrder(c *gin.Context) {
 		OrderId: orderId,
 	}
 	var m = make(map[string]interface{})
+	m["taker_user_id"] = 0
+	m["taker_nick_name"] = ""
 	m["status"] = var_const.OrderStatusPaidPay
 	m["upd_time"] = int(time.Now().Unix())
 	logging.Info("CancelTakeOrder: begin order_id-" + strconv.Itoa(orderId))

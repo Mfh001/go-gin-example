@@ -138,33 +138,6 @@ paths:
       summary: Get 客服获取需要仲裁列表
       tags:
       - 客服
-  /admin/order/refund/taker:
-    post:
-      parameters:
-      - description: order_id
-        in: body
-        name: order_id
-        schema:
-          type: integer
-      - description: money 金额单位是分
-        in: body
-        name: money
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: 客服退回代练的部分保证金
-      tags:
-      - 客服
   /admin/order/refund/user:
     post:
       parameters:
@@ -173,9 +146,14 @@ paths:
         name: order_id
         schema:
           type: integer
-      - description: money 金额单位是分
+      - description: 用户的退回金额 金额单位是分
         in: body
-        name: money
+        name: user_money
+        schema:
+          type: integer
+      - description: 代练的退回金额 金额单位是分
+        in: body
+        name: taker_money
         schema:
           type: integer
       produces:
@@ -1234,15 +1212,20 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 微信下单 获取发起微信支付所需的数据
+      summary: 余额充值 获取发起微信支付所需的数据
       tags:
       - 微信支付
-  /api/v1/pay/deposit:
+  /api/v1/pay/order:
     post:
       parameters:
       - description: user_id
         in: body
         name: user_id
+        schema:
+          type: integer
+      - description: 价格 单位分
+        in: body
+        name: pay_amount
         schema:
           type: integer
       produces:
@@ -1256,34 +1239,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 代练交平台押金
-      tags:
-      - 微信支付
-  /api/v1/pay/taker:
-    post:
-      parameters:
-      - description: user_id
-        in: body
-        name: user_id
-        schema:
-          type: integer
-      - description: order_id
-        in: body
-        name: order_id
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: 微信接单 获取发起微信支付所需的数据
+      summary: 支付下单
       tags:
       - 微信支付
   /api/v1/phone/bind:
@@ -1399,83 +1355,6 @@ paths:
       summary: 获取二维码
       tags:
       - 二维码
-  /api/v1/team:
-    post:
-      parameters:
-      - description: owner_id
-        in: body
-        name: owner_id
-        schema:
-          type: integer
-      - description: 游戏
-        in: body
-        name: game_type
-        schema:
-          type: integer
-      - description: 游戏大区
-        in: body
-        name: big_zone
-        schema:
-          type: integer
-      - description: 起始段位
-        in: body
-        name: cur_level
-        schema:
-          type: integer
-      - description: 结束段位
-        in: body
-        name: target_level
-        schema:
-          type: integer
-      - description: 使用车队卡的数量
-        in: body
-        name: team_card_num
-        schema:
-          type: integer
-      - description: 代练发布最多2人，用户发布只能1人
-        in: body
-        name: need_num
-        schema:
-          type: integer
-      - description: 代练发布可以设置是否需要密码
-        in: body
-        name: need_pwd
-        schema:
-          type: integer
-      - description: 密码
-        in: body
-        name: pwd
-        schema:
-          type: string
-      - description: contact
-        in: body
-        name: contact
-        schema:
-          type: string
-      - description: 微信
-        in: body
-        name: qq
-        schema:
-          type: string
-      - description: description
-        in: body
-        name: description
-        schema:
-          type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: 下单
-      tags:
-      - 车队
   /api/v1/team/cancelurgent:
     post:
       parameters:
@@ -1501,63 +1380,6 @@ paths:
           schema:
             $ref: '#/definitions/app.Response'
       summary: 取消加急 退款
-      tags:
-      - 车队
-  /api/v1/team/join:
-    post:
-      parameters:
-      - description: user_id
-        in: body
-        name: user_id
-        schema:
-          type: integer
-      - description: team_id
-        in: body
-        name: team_id
-        schema:
-          type: integer
-      - description: 起始段位
-        in: body
-        name: cur_level
-        schema:
-          type: integer
-      - description: 结束段位
-        in: body
-        name: target_level
-        schema:
-          type: integer
-      - description: contact
-        in: body
-        name: contact
-        schema:
-          type: string
-      - description: 微信
-        in: body
-        name: qq
-        schema:
-          type: string
-      - description: description
-        in: body
-        name: description
-        schema:
-          type: string
-      - description: 使用车队卡的数量
-        in: body
-        name: team_card_num
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: 加入车队
       tags:
       - 车队
   /api/v1/team/joincheck:
@@ -1630,33 +1452,6 @@ paths:
       summary: 加急
       tags:
       - 车队
-  /api/v1/teampay:
-    post:
-      parameters:
-      - description: user_id
-        in: body
-        name: user_id
-        schema:
-          type: integer
-      - description: team_id
-        in: body
-        name: order_id
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/app.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/app.Response'
-      summary: 微信下单 获取发起微信支付所需的数据
-      tags:
-      - 微信支付
   /api/v1/totalordertimes:
     get:
       parameters:
