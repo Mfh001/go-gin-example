@@ -95,8 +95,9 @@ func InitRouter() *gin.Engine {
 		apiV1.POST("/order/cancel", v1.CancelOrder)
 		apiV1.POST("/order/canceltake", v1.CancelTakeOrder)
 		//pay
+		apiV1.POST("/pay/deposit", v1.DepositWxPay)
 		apiV1.POST("/pay/order", v1.AddPayOrder)
-		apiV1.POST("/pay", v1.Pay)
+		//apiV1.POST("/pay", v1.Pay)
 
 		apiV1.POST("/order/take", v1.TakeOrder)
 

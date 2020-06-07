@@ -1895,7 +1895,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/pay": {
+        "/api/v1/pay/deposit": {
             "post": {
                 "produces": [
                     "application/json"
@@ -1903,19 +1903,11 @@ var doc = `{
                 "tags": [
                     "微信支付"
                 ],
-                "summary": "余额充值 获取发起微信支付所需的数据",
+                "summary": "代练交平台押金",
                 "parameters": [
                     {
                         "description": "user_id",
                         "name": "user_id",
-                        "in": "body",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "order_id",
-                        "name": "order_id",
                         "in": "body",
                         "schema": {
                             "type": "integer"

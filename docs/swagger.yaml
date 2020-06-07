@@ -1188,17 +1188,12 @@ paths:
       summary: Get 领取累计订单奖励
       tags:
       - 用户
-  /api/v1/pay:
+  /api/v1/pay/deposit:
     post:
       parameters:
       - description: user_id
         in: body
         name: user_id
-        schema:
-          type: integer
-      - description: order_id
-        in: body
-        name: order_id
         schema:
           type: integer
       produces:
@@ -1212,7 +1207,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/app.Response'
-      summary: 余额充值 获取发起微信支付所需的数据
+      summary: 代练交平台押金
       tags:
       - 微信支付
   /api/v1/pay/order:
