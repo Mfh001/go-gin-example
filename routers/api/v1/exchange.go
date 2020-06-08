@@ -20,14 +20,16 @@ import (
 // @Produce  json
 // @Param user_id body int false "user_id"
 // @Param money body string false "money"
+// @Param pwd body string false "密码"
 // @Success 200 {object} app.Response
 // @Failure 500 {object} app.Response
 // @Router /api/v1/exchange [post]
 // @Tags 提现
 func AddExchange(c *gin.Context) {
 	var (
-		appG = app.Gin{C: c}
-		form models.Exchange
+		appG  = app.Gin{C: c}
+		form  models.Exchange
+		pword = c.PostForm("pwd")
 	)
 	httpCode, errCode := app.BindAndValid(c, &form)
 	if errCode != e.SUCCESS {
@@ -40,6 +42,11 @@ func AddExchange(c *gin.Context) {
 	}
 	if !bank_service.ExistBank(form.UserId) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
+		return
+	}
+	pwd := bank_service.GetBankParamString(form.UserId, "password")
+	if pwd != pword {
+		appG.Response(http.StatusBadRequest, e.PWD_ERROR, nil)
 		return
 	}
 	if auth_service.GetUserParam(form.UserId, "type") != var_const.UserTypeInstead {

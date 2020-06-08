@@ -38,170 +38,170 @@ levels:
   - name: 青铜3
     idx: 0
     stars: 4
-    price: 1
-    addprice: 1
+    price: 100
+    addprice: 0
   - name: 青铜2
     idx: 1
     stars: 4
-    price: 1
-    addprice: 1
+    price: 100
+    addprice: 0
   - name: 青铜1
     idx: 2
     stars: 4
-    price: 1
-    addprice: 1
+    price: 100
+    addprice: 0
   - name: 白银3
     idx: 3
     stars: 4
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 白银2
     idx: 4
     stars: 4
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 白银1
     idx: 5
     stars: 4
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 黄金4
     idx: 6
     stars: 5
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 黄金3
     idx: 7
     stars: 5
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 黄金2
     idx: 8
     stars: 5
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 黄金1
     idx: 9
     stars: 5
-    price: 1
-    addprice: 1
+    price: 200
+    addprice: 0
   - name: 铂金4
     idx: 10
     stars: 5
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 100
   - name: 铂金3
     idx: 11
     stars: 5
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 100
   - name: 铂金2
     idx: 12
     stars: 5
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 100
   - name: 铂金1
     idx: 13
     stars: 5
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 100
   - name: 钻石5
     idx: 14
     stars: 6
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 200
   - name: 钻石4
     idx: 15
     stars: 6
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 200
   - name: 钻石3
     idx: 16
     stars: 6
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 200
   - name: 钻石2
     idx: 17
     stars: 6
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 200
   - name: 钻石1
     idx: 18
     stars: 6
-    price: 1
-    addprice: 1
+    price: 300
+    addprice: 200
   - name: 星耀5
     idx: 19
     stars: 6
-    price: 1
-    addprice: 1
+    price: 500
+    addprice: 200
   - name: 星耀4
     idx: 20
     stars: 6
-    price: 1
-    addprice: 1
+    price: 500
+    addprice: 200
   - name: 星耀3
     idx: 21
     stars: 6
-    price: 1
-    addprice: 1
+    price: 500
+    addprice: 200
   - name: 星耀2
     idx: 22
     stars: 6
-    price: 1
-    addprice: 1
+    price: 500
+    addprice: 200
   - name: 星耀1
     idx: 23
     stars: 6
-    price: 1
-    addprice: 1
+    price: 500
+    addprice: 200
   - name: 最强王者1-10
     idx: 24
     stars: 10
-    price: 1
-    addprice: 1
+    price: 800
+    addprice: 400
   - name: 最强王者11-20
     idx: 25
     stars: 10
-    price: 1
-    addprice: 1
+    price: 1000
+    addprice: 500
   - name: 最强王者21-30
     idx: 26
     stars: 10
-    price: 1
-    addprice: 1
+    price: 1200
+    addprice: 600
   - name: 最强王者31-40
     idx: 27
     stars: 10
-    price: 1
-    addprice: 1
+    price: 1500
+    addprice: 800
   - name: 最强王者41-50
     idx: 28
     stars: 10
-    price: 1
-    addprice: 1
+    price: 2000
+    addprice: 2000
   - name: 最强王者51-60
     idx: 29
     stars: 10
-    price: 1
-    addprice: 1
+    price: 3000
+    addprice: 4000
   - name: 最强王者61-70
     idx: 30
     stars: 10
-    price: 1
-    addprice: 1
+    price: 4000
+    addprice: 8000
   - name: 最强王者71-80
     idx: 31
     stars: 10
-    price: 1
-    addprice: 1
+    price: 5000
+    addprice: 15000
   - name: 最强王者81-90
     idx: 32
     stars: 10
-    price: 1
-    addprice: 1
+    price: 7000
+    addprice: 30000
   - name: 最强王者91-100
     idx: 33
     stars: 10
-    price: 1
-    addprice: 1
+    price: 10000
+    addprice: 50000
