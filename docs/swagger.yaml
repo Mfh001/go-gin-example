@@ -450,6 +450,11 @@ paths:
         name: money
         schema:
           type: string
+      - description: 密码
+        in: body
+        name: pwd
+        schema:
+          type: string
       produces:
       - application/json
       responses:

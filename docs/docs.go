@@ -722,6 +722,14 @@ var doc = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "description": "密码",
+                        "name": "pwd",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
