@@ -49,7 +49,7 @@ const (
 	TakerFiveOrderGiveAgentMoney = 1800  //代练首次完成5单 给8块
 
 	AccessTokenExpireTime = 1.8 * 60 * 60
-	Deposit               = 10 //保证金80元
+	Deposit               = 10 //保证金0.1元
 
 	OrderTotalTimesStatus100   = 1     //100已领取
 	OrderTotalTimesStatus500   = 2     //500已领取
