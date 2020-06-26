@@ -211,8 +211,12 @@ func DepositWxPay(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if !auth_service.ExistUserInfo(userId) || auth_service.IsUserTypeInstead(userId) {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	if !auth_service.ExistUserInfo(userId) {
+		appG.Response(http.StatusBadRequest, e.USER_NO_EXSIT, nil)
+		return
+	}
+	if auth_service.IsUserTypeInstead(userId) {
+		appG.Response(http.StatusBadRequest, e.ALREADY_INSTEAD, nil)
 		return
 	}
 	if auth_service.GetUserParam(userId, "deposit") > 0 {

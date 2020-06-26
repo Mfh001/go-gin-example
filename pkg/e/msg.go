@@ -37,6 +37,8 @@ var MsgFlags = map[int]string{
 	ERROR_UPLOAD_CHECK_IMAGE_FORMAT: "校验图片错误，图片格式或大小有问题",
 	MONEY_NO_ENOUGH:                 "余额不足，请充值",
 	PWD_ERROR:                       "密码错误",
+	ALREADY_INSTEAD:                 "您已经成为了代练",
+	USER_NO_EXSIT:                   "用户不存在",
 }
 
 // GetMsg get error information based on Code
