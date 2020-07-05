@@ -213,7 +213,7 @@ func GetAllOrders(c *gin.Context) {
 // @Produce  json
 // @Param index body int false "index"
 // @Param count body int false "count"
-// @Param instead_type body int false "排位赛/巅峰赛"
+// @Param instead_type body int false "排位赛/巅峰赛/低价/高价"
 // @Param zoom body int false "区服"
 // @Param min_runes body int false "最低铭文等级"
 // @Param max_runes body int false "最高铭文等级"
@@ -241,6 +241,12 @@ func GetAllOrdersB(c *gin.Context) {
 	}
 	if insteadType == 1 || insteadType == 0 {
 		where = fmt.Sprintf(where+"and instead_type =%d ", insteadType)
+	}
+	if insteadType == 2 {
+		where = fmt.Sprintf(where+"and channel_type =%d ", 0)
+	}
+	if insteadType == 3 {
+		where = fmt.Sprintf(where+"and channel_type =%d ", 1)
 	}
 	logging.Info("where:" + where + ";index:" + c.Query("index") + ";count:" + c.Query("count"))
 	order_service.GetNeedTakeOrderList(&list, where, index, count)

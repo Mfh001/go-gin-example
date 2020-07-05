@@ -101,7 +101,7 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) int {
 			}
 		}
 		//
-		if form.Price >= price {
+		if form.Price >= price*80/100 {
 			form.ChannelType = var_const.ChannelTypePlatform
 		}
 		form.StarNum = starNum
