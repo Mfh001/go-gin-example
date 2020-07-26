@@ -131,6 +131,10 @@ func TakeOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
+	phone := auth_service.GetUserParamString(uId, "phone")
+	if phone != "" {
+		util.SendTakeOrderSMSNotify(phone, order_service.GetOrderParamString(orderId, "title"))
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }
@@ -295,6 +299,11 @@ func FinishOrder(c *gin.Context) {
 		return
 	}
 	logging.Info("FinishOrder: end")
+	uId := order_service.GetOrderParam(orderId, "user_id")
+	phone := auth_service.GetUserParamString(uId, "phone")
+	if phone != "" {
+		util.SendTakeOrderSMSNotify(phone, order_service.GetOrderParamString(orderId, "title"))
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, nil)
 	return
 }

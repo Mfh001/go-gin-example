@@ -40,6 +40,44 @@ func SendSMSCode(phone string, code string) {
 	//fmt.Printf("response is %#v\n", response)
 }
 
+func SendTakeOrderSMSNotify(phone string, name string) {
+	client, _ := dysmsapi.NewClientWithAccessKey("cn-hangzhou", "LTAIuRQqDhPUYhiU", "g1pNUm72YERpIC0XQDuy8O6uCDJtpt")
+
+	request := dysmsapi.CreateSendSmsRequest()
+	request.Scheme = "https"
+
+	request.PhoneNumbers = phone
+	request.SignName = "上分通"
+	request.TemplateCode = "SMS_197871278"
+	request.TemplateParam = "{\"name\":\"" + name + "\"}"
+	_, _ = client.SendSms(request)
+	//TODO log
+	//response, err2 := client.SendSms(request)
+	//if err2 != nil {
+	//fmt.Print(err2.Error())
+	//}
+	//fmt.Printf("response is %#v\n", response)
+}
+
+func SendFinishOrderSMSNotify(phone string, name string) {
+	client, _ := dysmsapi.NewClientWithAccessKey("cn-hangzhou", "LTAIuRQqDhPUYhiU", "g1pNUm72YERpIC0XQDuy8O6uCDJtpt")
+
+	request := dysmsapi.CreateSendSmsRequest()
+	request.Scheme = "https"
+
+	request.PhoneNumbers = phone
+	request.SignName = "上分通"
+	request.TemplateCode = "SMS_197871296"
+	request.TemplateParam = "{\"name\":\"" + name + "\"}"
+	_, _ = client.SendSms(request)
+	//TODO log
+	//response, err2 := client.SendSms(request)
+	//if err2 != nil {
+	//fmt.Print(err2.Error())
+	//}
+	//fmt.Printf("response is %#v\n", response)
+}
+
 //判断该时间戳是否属于今天
 func IsToday(tick int) bool {
 	currentTime := time.Now()
