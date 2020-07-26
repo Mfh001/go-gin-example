@@ -40,7 +40,7 @@ func SendSMSCode(phone string, code string) {
 	//fmt.Printf("response is %#v\n", response)
 }
 
-func SendTakeOrderSMSNotify(phone string, name string) {
+func SendTakeOrderSMSNotify(phone string) {
 	client, _ := dysmsapi.NewClientWithAccessKey("cn-hangzhou", "LTAIuRQqDhPUYhiU", "g1pNUm72YERpIC0XQDuy8O6uCDJtpt")
 
 	request := dysmsapi.CreateSendSmsRequest()
@@ -48,8 +48,7 @@ func SendTakeOrderSMSNotify(phone string, name string) {
 
 	request.PhoneNumbers = phone
 	request.SignName = "上分通"
-	request.TemplateCode = "SMS_197871278"
-	request.TemplateParam = "{\"name\":\"" + name + "\"}"
+	request.TemplateCode = "SMS_197891299"
 	_, _ = client.SendSms(request)
 	//TODO log
 	//response, err2 := client.SendSms(request)
@@ -59,7 +58,7 @@ func SendTakeOrderSMSNotify(phone string, name string) {
 	//fmt.Printf("response is %#v\n", response)
 }
 
-func SendFinishOrderSMSNotify(phone string, name string) {
+func SendFinishOrderSMSNotify(phone string) {
 	client, _ := dysmsapi.NewClientWithAccessKey("cn-hangzhou", "LTAIuRQqDhPUYhiU", "g1pNUm72YERpIC0XQDuy8O6uCDJtpt")
 
 	request := dysmsapi.CreateSendSmsRequest()
@@ -67,8 +66,7 @@ func SendFinishOrderSMSNotify(phone string, name string) {
 
 	request.PhoneNumbers = phone
 	request.SignName = "上分通"
-	request.TemplateCode = "SMS_197871296"
-	request.TemplateParam = "{\"name\":\"" + name + "\"}"
+	request.TemplateCode = "SMS_197871367"
 	_, _ = client.SendSms(request)
 	//TODO log
 	//response, err2 := client.SendSms(request)
