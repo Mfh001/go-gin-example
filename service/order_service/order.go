@@ -114,8 +114,9 @@ func CreateOrder(form *models.Order, teamId int, teamCardNum int) int {
 	} else {
 		form.MarginArb = var_const.MarginArbPriceB
 	}
-	form.Margin = form.MarginArb + form.MarginEff + form.MarginSafe
-	if !auth_service.RemoveUserBalance(form.UserId, form.Price, "发布订单") {
+	form.Margin = form.MarginArb + form.MarginSafe
+
+	if !auth_service.RemoveUserBalance(form.UserId, form.Price+form.MarginEff, "发布订单") {
 		return 1
 	}
 	orderId, err := IncrOrderId()

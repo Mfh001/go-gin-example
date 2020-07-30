@@ -131,7 +131,7 @@ func TakeOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
 		return
 	}
-	phone := auth_service.GetUserParamString(uId, "phone")
+	phone := order_service.GetOrderParamString(orderId, "contact")
 	if phone != "" {
 		util.SendTakeOrderSMSNotify(phone)
 	}
@@ -299,8 +299,7 @@ func FinishOrder(c *gin.Context) {
 		return
 	}
 	logging.Info("FinishOrder: end")
-	uId := order_service.GetOrderParam(orderId, "user_id")
-	phone := auth_service.GetUserParamString(uId, "phone")
+	phone := order_service.GetOrderParamString(orderId, "contact")
 	if phone != "" {
 		util.SendFinishOrderSMSNotify(phone)
 	}
@@ -318,9 +317,10 @@ func FinishOrder(c *gin.Context) {
 // @Tags 订单
 func ConfirmOrder(c *gin.Context) {
 	var (
-		appG    = app.Gin{C: c}
-		userId  = com.StrTo(c.PostForm("user_id")).MustInt()
-		orderId = com.StrTo(c.PostForm("order_id")).MustInt()
+		appG          = app.Gin{C: c}
+		userId        = com.StrTo(c.PostForm("user_id")).MustInt()
+		orderId       = com.StrTo(c.PostForm("order_id")).MustInt()
+		useChickenLeg = com.StrTo(c.PostForm("chicken")).MustInt()
 	)
 	if userId == 0 || !auth_service.ExistUserInfo(userId) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
@@ -386,6 +386,12 @@ func ConfirmOrder(c *gin.Context) {
 			add = add * (1000 - 80) / 1000
 		}
 		//add = add * (100 - var_const.OrderRate) / 100
+	}
+	leg := order_service.GetOrderParam(orderId, "margin_eff")
+	if useChickenLeg == 0 {
+		auth_service.AddUserBalance(userId, leg, "useChickenLeg back")
+	} else {
+		auth_service.AddUserBalance(takerId, leg, "useChickenLeg")
 	}
 	if !auth_service.AddUserBalance(takerId, add, "ConfirmOrder") {
 		appG.Response(http.StatusBadRequest, e.ERROR, nil)
