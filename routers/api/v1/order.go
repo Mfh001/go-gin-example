@@ -204,7 +204,7 @@ func GetAllOrders(c *gin.Context) {
 	if zoom >= 0 {
 		where = fmt.Sprintf(where+"and game_zone >=%d and game_zone <%d ", zoom*1000, (zoom+1)*1000)
 	}
-	if insteadType == 1 || insteadType == 0 {
+	if insteadType == 1 || insteadType == 0 || insteadType == 2 || insteadType == 3 {
 		where = fmt.Sprintf(where+"and instead_type =%d ", insteadType)
 	}
 

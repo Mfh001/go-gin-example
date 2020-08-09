@@ -27,12 +27,14 @@ serverzones:
     num: 50
 
 insteadtypes:
-  - name: 排位赛
+  - name: 普通订单
     idx: 0
-  - name: 巅峰赛
+  - name: 指定英雄
     idx: 1
-  - name: 赏金/战力/自定义标题等
+  - name: 加急订单
     idx: 2
+  - name: 高价订单
+    idx: 3
 
 levels:
   - name: 青铜3

@@ -78,37 +78,37 @@ func GenerateOrderNo() string {
 }
 
 func CreateOrder(form *models.Order, teamId int, teamCardNum int) int {
-	if form.InsteadType == 0 {
-		//等级idx*1000 + star
-		price := 0
-		//realPrice := 0
-		starNum := 0
-		for i := 0; i < len(setting.PlatFormLevelAll); i++ {
-			if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
-				starNum++
-				//if c <= teamCardNum {
-				//	realPrice += var_const.TeamCardPrice
-				//} else {
-				//	realPrice += setting.PlatFormLevelAll[i].Price
-				//}
-				//if form.RunesLevel < var_const.RunesAddPriceLevel {
-				//	realPrice += setting.PlatFormLevelAll[i].AddPrice
-				//}
-				price += setting.PlatFormLevelAll[i].Price
-				if form.RunesLevel < var_const.RunesAddPriceLevel {
-					price += setting.PlatFormLevelAll[i].AddPrice
-				}
-			}
-		}
-		//
-		if form.Price >= price*80/100 {
-			form.ChannelType = var_const.ChannelTypePlatform
-		}
-		form.StarNum = starNum
-		if starNum > 0 {
-			form.StarPerPrice = form.Price / starNum
-		}
-	}
+	//if form.InsteadType == 0 {
+	//	//等级idx*1000 + star
+	//	price := 0
+	//	//realPrice := 0
+	//	starNum := 0
+	//	for i := 0; i < len(setting.PlatFormLevelAll); i++ {
+	//		if setting.PlatFormLevelAll[i].Idx > form.CurLevel && setting.PlatFormLevelAll[i].Idx <= form.TargetLevel {
+	//			starNum++
+	//			//if c <= teamCardNum {
+	//			//	realPrice += var_const.TeamCardPrice
+	//			//} else {
+	//			//	realPrice += setting.PlatFormLevelAll[i].Price
+	//			//}
+	//			//if form.RunesLevel < var_const.RunesAddPriceLevel {
+	//			//	realPrice += setting.PlatFormLevelAll[i].AddPrice
+	//			//}
+	//			price += setting.PlatFormLevelAll[i].Price
+	//			if form.RunesLevel < var_const.RunesAddPriceLevel {
+	//				price += setting.PlatFormLevelAll[i].AddPrice
+	//			}
+	//		}
+	//	}
+	//	//
+	//	if form.Price >= price*80/100 {
+	//		form.ChannelType = var_const.ChannelTypePlatform
+	//	}
+	//	form.StarNum = starNum
+	//	if starNum > 0 {
+	//		form.StarPerPrice = form.Price / starNum
+	//	}
+	//}
 	if form.Price < var_const.MarginArbPrice {
 		form.MarginArb = var_const.MarginArbPriceA
 	} else {
