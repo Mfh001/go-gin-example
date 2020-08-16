@@ -60,10 +60,10 @@ func AddOrder(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
-	if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
-		return
-	}
+	//if form.CurLevel >= form.TargetLevel || form.TargetLevel <= 0 {
+	//	appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+	//	return
+	//}
 	if ok := order_service.CreateOrder(&form, 0, 0); ok > 0 {
 		if ok == 1 {
 			appG.Response(http.StatusBadRequest, e.MONEY_NO_ENOUGH, nil)

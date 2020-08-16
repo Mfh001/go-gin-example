@@ -25,8 +25,8 @@ type Order struct {
 	GameZone      int    `json:"game_zone" form:"game_zone" gorm:"type:int(8);not null" valid:"Range(0, 4000)"`
 	RunesLevel    int    `json:"runes_level" form:"runes_level" gorm:"type:int(4);not null" valid:"Range(0, 200)"`
 	HeroNum       int    `json:"hero_num" form:"hero_num" gorm:"type:int(4);not null;default:0" valid:"Range(0, 1000)"`
-	CurLevel      int    `json:"cur_level" form:"cur_level" gorm:"type:int(8);not null" valid:"Range(0, 1000000)"`
-	TargetLevel   int    `json:"target_level" form:"target_level" gorm:"type:int(8);not null" valid:"Required;Range(1, 1000000)"`
+	CurLevel      int    `json:"cur_level" form:"cur_level" gorm:"type:int(8);not null"`
+	TargetLevel   int    `json:"target_level" form:"target_level" gorm:"type:int(8);not null"`
 	GameAcc       string `json:"game_acc" form:"game_acc" gorm:"type:varchar(60);not null;default:''"`
 	GamePwd       string `json:"game_pwd" form:"game_pwd" gorm:"type:varchar(60);not null;default:''"`
 	GameRole      string `json:"game_role" form:"game_role" gorm:"type:varchar(50);not null;default:''"`
