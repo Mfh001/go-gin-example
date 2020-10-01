@@ -17,7 +17,7 @@ type User struct {
 	Gender         int    `json:"gender" gorm:"type:int(2);not null;default:1"`
 	Type           int    `json:"type" gorm:"type:int(2);not null;default:1"`
 	CanPublish     int    `json:"can_publish" gorm:"type:int(2);not null;default:0"`
-	City           string `json:"city" gorm:"type:varchar(8);not null;default:''"`
+	City           string `json:"city" gorm:"type:varchar(32);not null;default:''"`
 	Province       string `json:"province" gorm:"type:varchar(8);not null;default:''"`
 	RegTime        int    `json:"reg_time" gorm:"type:int(12);not null;default:0"`
 	CheckPass      int    `json:"check_pass" gorm:"type:int(2);not null;default:0"`
